@@ -1,0 +1,172 @@
+---
+title: "MAE5763 - Modelos Lineares Generalizados - Resolução da Lista 1"
+author: "Guilherme Marthe - 8661962"
+date: "9/21/2020"
+output:
+  pdf_document:
+    df_print: kable
+fontsize: 11pt
+geometry: margin=1.5cm
+---
+
+```{r setup,  include=FALSE}
+knitr::opts_chunk$set(fig.align = 'center')
+
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(kableExtra)
+  library(janitor)
+  library(gt)
+  library(gtsummary)
+  library(robustbase)
+})
+
+```
+
+
+## Exercício 1
+
+*em progresso*
+
+## Exercício 2
+
+*em progresso*
+
+## Exercício 3
+
+*em progresso*
+
+## Exercício 4
+
+*em progresso*
+
+## Exercício 5
+
+*em progresso*
+
+## Exercício 6
+
+
+A seguir iremos analisar a base **fuel2001.txt**. Conforme o enunciado, são descritas as seguintes variáveis referentes aos 50 estados norte-americanos mais o Distrito de Columbia no ano de 2001: 
+
+i) UF, unidade da federação
+ii) Drivers, número de motoristas licenciados
+iii) FuelC, total de gasolina vendida (em mil galões)
+iv) Income, renda per capita em 2000 (em mil USD)
+v) Miles, total de milhas em estradas federais
+vi) MPC, milhas per capita percorridas
+vii) Pop, população >= 16 anos
+viii) Tax, taxa da gasolina (em cents por galão)
+
+
+Abaixo mostro as 6 primeiras linhas da base.
+
+&nbsp;
+
+```{r echo=FALSE}
+fuel2001 = read.table('fuel2001.txt', header=TRUE)
+
+fuel2001 %>% head(6) %>% 
+  kbl(booktabs = T) %>% 
+  kable_styling(full_width = T)
+```
+
+&nbsp;
+
+Conforme sugerido, realizaremos as transformações Fuel = 1000*FuelC/Pop e Dlic = 1000*Drivers/Pop para possibilitar a comparação entre estados com diferentes populações. Em seguida criamos a variável lMiles = log(Miles).
+
+
+```{r include=FALSE}
+mdata <- 
+fuel2001 %>% 
+  mutate(Fuel = 1000*FuelC/Pop, 
+         Dlic = 1000*Drivers/Pop, 
+         lmiles = log(Miles)) %>% 
+  select(Fuel, Dlic, lmiles, Income, Tax) %>% 
+  janitor::clean_names()
+
+```
+
+Com essas transformações, partimos para uma análise descritiva da base, antes de partirmos para a modelagem. 
+
+
+### Análise univariada
+
+Primeiramente, a partir de algumas estatísticas descritivas de cada uma das variáveis estudadas que mostro abaixo, podemos postular algumas carcterísticas das variáveis:
+
+- a variável *fuel* mostra uma leve assimetria á esquerda uma vez que sua média é menor que a mediana
+- a variável *income* mostra uma assimetria à direita uma vez que sua média é maior que a mediana
+
+
+```{r echo=FALSE, warning=FALSE}
+mdata %>% 
+  summarise_all(.funs = list('média' = mean, 
+                             'desvio padrão' = sd,
+                             'quartil 1' = ~quantile(., probs = 0.25),
+                             'mediana' = median, 
+                             'quartil 3' = ~quantile(., probs = 0.75)
+                             )
+                ) %>% 
+  gather(var, measure) %>% 
+  separate(var, into=c('variável', 'estat'), sep = '_') %>% 
+  spread(estat, measure) %>% 
+  select(`variável`, `média`, `desvio padrão`, `quartil 1`, `mediana`, `quartil 3` ) %>% 
+  janitor::adorn_rounding(., digits=0) %>% as.data.frame() %>% 
+  kbl(booktabs = T, format = 'latex') %>% 
+  kable_styling(full_width = T)
+```
+&nbsp;
+
+Neste exercício, a variável *fuel* é a variável resposta. Por isso à inspecionaremos primeiro. o gráfico abaixo mostra a densidade estimada dela. Podemos ver que ela possui uma tendência gaussiana, apesar de possuir caudas ligeiramente pesadas.
+
+```{r fig.height=3.7, fig.width=7}
+plot(density(mdata$fuel), xlab="Fuel", ylab="Densidade", main="Densidade estimada de Fuel")
+```
+
+&nbsp;
+
+Abaixo mostramos os boxplots comum (criado através das estatísticas usuais como mediana e quartis) e robusto para a variável *fuel*. No boxplot comum estão 3 pontos que poderiam ser considerados extremos á esquerda, sendo mais baixo que o esperado para essa variável, e a extremo à direita. Com o boxplot robusto os pontos extremos à esquerda não são tão evidenciados, porém à direita um ponto novo aparece. 
+
+```{r fig.height=6, fig.width=10}
+
+par(mfrow=c(2, 1))
+boxplot(mdata$fuel, horizontal = T, main='Fuel - boxplot comum')
+adjbox(mdata$fuel, horizontal = T, main='Fuel - boxplot robusto')
+```
+
+Por completude, mostro as densidades empiricas das variáveis explicativas do estudo. Como sob a construção de modelos elas são consideradas fixas, suas distribuições não são importantes para o ajuste de modelos de regressão linear múltipla.
+
+
+```{r}
+par(mfrow=c(2,2))
+plot(density(mdata$dlic), xlab="motoristas/pop", ylab="Densidade", main='Motoristas/pop')
+plot(density(mdata$lmiles), xlab="milhas (log)", ylab="Densidade", main='Milhas de estradas')
+plot(density(mdata$income), xlab="Renda (1000 usd)", ylab="Densidade", main='Renda per capita')
+plot(density(mdata$tax), xlab="imposto (centavos/galão) ", ylab="Densidade", 
+     main='Imposto na Gasolina')
+```
+
+### Análise bivariada
+
+
+```{r}
+
+panel.cor <- function(x, y, ...)
+{
+par(usr = c(0, 1, 0, 1))
+txt <- as.character(format(cor(x, y), digits=2))
+text(0.5, 0.5, txt, cex = 1.57)
+}
+
+pairs(mdata, pch=16,cex=0.6, lower.panel = panel.cor)
+```
+
+
+
+
+
+
+## Exercício 7
+
+*em progresso*
+
