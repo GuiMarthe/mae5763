@@ -1,0 +1,694 @@
+---
+title: "MAE5763 - Modelos Lineares Generalizados - Resolução da prova 2"
+author: "Guilherme Marthe - 8661962"
+date: "3/12/2020"
+output:
+  bookdown::pdf_document2:
+    df_print: kable
+    toc: false
+header-includes:
+    - \usepackage{caption}
+    - \usepackage{amsmath}
+    - \usepackage{bbm}
+    - \allowdisplaybreaks
+fontsize: 11pt
+geometry: margin=1.5cm
+---
+
+\captionsetup[table]{labelformat=empty}
+\counterwithin*{equation}{section}
+\newcommand{\R}{{\boldsymbol R}}
+
+```{r setup, echo=F}
+knitr::opts_chunk$set(fig.align = "center", echo = FALSE, fig.width = 5, fig.height = 3.57)
+suppressPackageStartupMessages({
+  library(Hmisc)
+  library(knitr) 
+  library(kableExtra)
+  library(gamlss)
+  library(pscl)
+  library(ggthemes)
+  library(tidyverse) 
+  library(robustbase)
+  library(cowplot)
+  library(janitor)
+  library(texreg)
+  library(patchwork)
+  library(GGally)
+  library(aplore3)
+  library(broom)
+  library(gt)
+  library(gtsummary)
+  library(gee)
+  library(geepack)
+})
+theme_set(cowplot::theme_minimal_grid(font_size = 11))
+```
+
+# Exercício 1
+
+
+A variável $Y_i$, $i=1,...,n$, apresentada no enunciado tem a seguinte função de massa de probabilidades:
+
+$$
+f(y_i, \psi_i) = {m_i\choose y_i} \left( \frac{\psi_i}{1 + \psi_i} \right)^{y_i}  \left( \frac{1}{1 + \psi_i} \right)^{(m_i - y_i)} 
+$$
+
+Vamos testar a hipótese 
+
+$$
+H_0: \psi_1 = \psi_2 = ... = \psi_n 
+$$
+
+contra 
+
+$$
+H_1: \psi_i \ne \psi_l \;\;\ \text{com} \;\;\ i\ne l \;\; \text{e} \;\;\ i,l = 1,...,n
+$$
+
+Através de um teste de razão de verossimilhanças. 
+
+O logaritmo da função de verossimilhança de $Y_1, ..., Y_n$ é:
+
+\begin{align*}
+  L(y_i, \psi_i) 
+  &= \sum^{n}_{i=1}{y_i \log \left( \frac{\psi_i}{1 + \psi_i}\right)  + (m_i - y_i) \log \left( \frac{1}{1 + \psi_i}\right) + \log{m_i\choose y_i}} \\
+  &= \sum^{n}_{i=1}{y_i \left( \log(\psi_i) - \log(1 + \psi_i) \right)  - (m_i - y_i) \log \left({1 + \psi_i}\right) + \log{m_i\choose y_i}} \\
+  &= \sum^{n}_{i=1}{y_i\log(\psi_i) - y_i\log(1 + \psi_i)   + y_i \log \left({1 + \psi_i}\right) - m_i\log\left({1 + \psi_i}\right) + \log{m_i\choose y_i}} \\
+  &= \sum^{n}_{i=1}{y_i\log(\psi_i) - m_i\log\left({1 + \psi_i}\right) + log{m_i\choose y_i}} \\
+  &= \sum^{n}_{i=1}{y_i\log(\psi_i)} - \sum^{n}_{i=1}{m_i \log\left({1 + \psi_i}\right)} + \sum^{n}_{i=1}{\log{m_i\choose y_i}} \\
+\end{align*}
+
+Sob $H_0$, podemos definir que $\psi_1 = \psi_2 = ... = \psi_n = \psi^0$, ou seja, os $\psi_i$ têm um valor fixo chamado $\psi^0$. Dessa forma temos
+
+\begin{align*}
+  L(y_i, \psi^0) 
+  &= \sum^{n}_{i=1}{y_i\log(\psi^0)} - \sum^{n}_{i=1}{m_i\log\left({1 + \psi^0}\right)} + \sum^{n}_{i=1}{\log{m_i\choose y_i}} \\
+  &= \log(\psi^0)\sum^{n}_{i=1}{y_i} - \log\left({1 + \psi^0}\right)\sum^{n}_{i=1}{m_i} + \sum^{n}_{i=1}{\log{m_i\choose y_i}} \\
+  &= \log(\psi^0)n \bar y - \log\left({1 + \psi^0}\right) n \bar m + \sum^{n}_{i=1}{\log{m_i\choose y_i}} \\
+\end{align*}
+
+E sob a hipótese alternativa, não temos muito o que simplificar, uma vez que os $\psi_i$ não são fixos. Então
+
+
+$$
+L(y_i, \psi_i) = \sum^{n}_{i=1}{y_i\log(\psi_i)} - \sum^{n}_{i=1}{m_i\log\left({1 + \psi_i}\right)} + \sum^{n}_{i=1}{\log{m_i\choose y_i}}
+$$
+
+
+A estatística do teste de razão de verossimilhança é:
+
+$$
+\xi_{RV}= 2[L(y_i; \psi_i) - L(y_i; \psi^0)]
+$$
+
+
+Assim, desenvolvendo a estatística temos:
+
+\begin{align*}
+\xi_{RV} 
+&= \sum^{n}_{i=1}{y_i\log(\psi_i)} - \sum^{n}_{i=1}{m_i\log\left({1 + \psi_i}\right)} + \sum^{n}_{i=1}{log{m_i\choose y_i}} - 
+\left(\log(\psi^0)n \bar y - \log\left({1 + \psi^0}\right) n \bar m + \sum^{n}_{i=1}{log{m_i\choose y_i}}  \right) \\
+&= \sum^{n}_{i=1}{y_i\log(\psi_i)} - \sum^{n}_{i=1}{m_i\log\left({1 + \psi_i}\right)} + \sum^{n}_{i=1}{log{m_i\choose y_i}} - 
+ \log(\psi^0)n \bar y + \log\left({1 + \psi^0}\right) n \bar m - \sum^{n}_{i=1}{log{m_i\choose y_i}}  \\
+&= \sum^{n}_{i=1}{y_i\log(\psi_i)} - \sum^{n}_{i=1}{m_i\log\left({1 + \psi_i}\right)} -  \log(\psi^0)n \bar y + \log\left({1 + \psi^0}\right) n \bar m   \\
+&= \sum^{n}_{i=1}{y_i\log(\psi_i)}- \log(\psi^0)n \bar y - \sum^{n}_{i=1}{m_i\log\left({1 + \psi_i}\right)}  + \log\left({1 + \psi^0}\right) n \bar m \\
+&= \sum^{n}_{i=1}{y_i\log(\psi_i)}- \sum^{n}_{i=1}{y_i}\log(\psi^0) - \sum^{n}_{i=1}{m_i\log\left({1 + \psi_i}\right)}  + \sum^{n}_{i=1}{m_i\log\left({1 + \psi^0}\right)} \\
+&= \sum^{n}_{i=1}{y_i\log(\psi_i)}- {y_i}\log(\psi^0) - \sum^{n}_{i=1}{m_i\log\left({1 + \psi_i}\right)}  + {m_i\log\left({1 + \psi^0}\right)}  \\
+&= \sum^{n}_{i=1}{y_i  \log \left(\frac{\psi_i}{\psi^0} \right)} - \sum^{n}_{i=1}{m_i\log \left(\frac{1 + \psi_i}{{1 + \psi^0}} \right)} 
+\end{align*}
+
+
+## Distribuição do teste de razão de verossimilhanças
+
+
+Podemos pensar a hipótese $H_0: \psi_1 = \psi_2 = ... = \psi_n$ como os pares $\psi_1 = \psi_2$ e $\psi_2 = \psi_3$ , ..., $\psi_{n-1} = \psi_{n}$.
+Essa formulação pode ser escrita como $H_0: C\beta$, com $\beta = (\psi_1 , \psi_2 , ... , \psi_n)^T$ e 
+
+$$
+C = \begin{bmatrix}
+  1 & -1 & 0 & \dots & 0 & 0 \\
+  0 & 1 & -1 & \dots & 0 & 0 \\
+  \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
+  0 & 0 & 0 & \dots & 1 & -1
+\end{bmatrix}_{(k-1 \times p)}
+$$
+
+Assim, como a matriz é construída com $k-1$ linhas, a distribuição assintótica da estatística do teste estudado é $\xi_{RV} \rightarrow \chi^2_{k-1}$.
+
+## Obtendo $\hat \psi_i$ e $\hat \psi^0$
+
+Obtemos as estimativas de $\psi_i$ através de sua função escore, que é a derivada do logaritmo da função de verossimilhança, e igualando à zero.
+
+$$
+L(y_i, \psi_i) = \sum^{n}_{i=1}{y_i\log(\psi_i)} - \sum^{n}_{i=1}{m_i\log\left({1 + \psi_i}\right)} + \sum^{n}_{i=1}{\log{m_i\choose y_i}}
+$$
+
+\begin{align*}
+  \frac{\partial L}{\partial \psi_i} 
+  &= \frac{\partial }{\partial \psi_i} \sum^{n}_{i=1}{y_i\log(\psi_i)} - \sum^{n}_{i=1}{m_i\log\left({1 + \psi_i}\right)} + \sum^{n}_{i=1}{\log{m_i\choose y_i}} \\
+  &= y_i \frac{1}{\psi_i} -m_i \frac{1}{1 + \psi_i} 
+\end{align*}
+
+Igualando a expressão anterior à zero temos chegamos na estimativa a seguir:
+
+\begin{align*}
+  y_i \frac{1}{\hat\psi_i} -m_i \frac{1}{1 + \hat\psi_i} &= 0 \\
+  y_i (1 + \hat\psi_i) &=m_i{\hat\psi_i}   \\
+  y_i + y_i\hat\psi_i - m_i{\hat\psi_i } &=  0   \\
+   \hat\psi_i(y_i - m_i) &=  -y_i   \\
+   \hat\psi_i( m_i - y_i) &=  y_i   \\
+   \hat\psi_i &=  \frac{y_i}{ m_i - y_i}   \\
+\end{align*}
+
+
+Um procedimento similar chega em $\psi^0$. 
+
+
+\begin{align*}
+  &L(y_i, \psi^0) 
+  = \log(\psi^0)\sum^{n}_{i=1}{y_i} - \log\left({1 + \psi^0}\right)\sum^{n}_{i=1}{m_i} + \sum^{n}_{i=1}{\log{m_i\choose y_i}} \\
+  &\frac{\partial L}{\partial \psi^0} = \frac{1}{\psi^0}\sum^{n}_{i=1}{y_i} - \frac{1}{1 + \psi^0}\sum^{n}_{i=1}{m_i}
+\end{align*}
+
+
+
+Igualando a expressão anterior à zero temos chegamos na estimativa a seguir:
+
+
+\begin{align*}
+\frac{1}{\hat\psi^0}\sum^{n}_{i=1}{y_i} - \frac{1}{1 + \hat \psi^0}\sum^{n}_{i=1}{m_i} &= 0 \\
+(1 + \hat \psi^0)\sum^{n}_{i=1}{y_i} - \hat \psi^0\sum^{n}_{i=1}{m_i} &= 0 \\
+\sum^{n}_{i=1}{y_i} + \hat \psi^0\sum^{n}_{i=1}{y_i} - \hat \psi^0\sum^{n}_{i=1}{m_i} &= 0 \\
+-\sum^{n}_{i=1}{y_i} - \hat \psi^0\sum^{n}_{i=1}{y_i} + \hat \psi^0\sum^{n}_{i=1}{m_i} &= 0 \\
+ \hat \psi^0(\sum^{n}_{i=1}{m_i} - \sum^{n}_{i=1}{y_i} ) &= \sum^{n}_{i=1}{y_i} \\
+ \hat \psi^0 &= \frac{\sum^{n}_{i=1}{y_i}}{\sum^{n}_{i=1}{m_i} - \sum^{n}_{i=1}{y_i} }
+\end{align*}
+
+Ou
+
+$$
+\hat \psi^0 = \frac{n \bar y}{n \bar m - n \bar y } =  \frac{\bar y}{\bar m - \bar y } 
+$$
+
+
+
+# Exercício 2
+ 
+ É apresentado no enunciado $Y_i | Xi \stackrel{ind}{\sim} NI(\mu, \phi_i)$ com o o seguinte componente sistemático:
+ 
+ $$
+ \log(\phi_i) = \lambda_i = \gamma_0 + \gamma_1 (x_i - t_0)_+
+ $$
+
+Onde $(x_i - t_0)_+ = 0$ se i $x_i \le t_0$ e $(x_i - t_0)_+ = x_i - t_0$ caso contrário. É pedido que calculemos $\text{Var}(\hat \gamma_0)$, $\text{Var}(\hat \gamma_1)$ e $\text{Cov}(\hat \gamma_0, \hat \gamma_1)$.
+
+Iremos calcular os componentes necessários de maneira genérica uma vez que a variável $Y_i$ pertence à família exponencial dupla.
+Vamos trabalhar com a verossimilhança restrita da variável $T_{i} = t_{i}$, onde, genericamente, $t_{i} = y_{i}\theta -b(\theta) + u(y_{i})$ e, especificamente para uma variável normal inversa $t_i = - \left(\frac{y_i}{2\mu^2}  - \frac{1}{\mu} + \frac{1}{2y_i} \right)$. 
+
+Assim, a derivação da função escore $U_{\gamma}$, $\gamma = (\gamma_0, \gamma_1)^T$ será com base na função de verossimilhança da variável transformada $T_{i}$.
+
+$$
+L(t_{i}; \phi_i, \mu) = \sum^{n}_{i=1} {\phi_it_{i} + \text{d}(\phi_i) + \text{u}(y_{i})}
+$$
+
+Para $k = 0, 1$:
+
+\begin{align}
+U_{\gamma_k} &= \frac{\partial L}{\partial \gamma_k} \nonumber \\
+&= \frac{\partial}{\partial \gamma_k}   \sum^{n}_{i=1}{\phi_it_{i} + \text{d}(\phi_i) + \text{u}(y_{i})} \nonumber \\
+&=  \sum^{n}_{i=1} \left[ \frac{d\phi_i}{d \lambda_i} \frac{\partial \lambda_i}{\partial \gamma_k} t_{i} +  \text{d}'(\phi_i)\frac{d\phi_i}{d \lambda_i} \frac{\partial \lambda_i}{\partial \gamma_k} \right] \\
+&=  \sum^{n}_{i=1} \left[ \frac{d\phi_i}{d \lambda_i} \frac{\partial \lambda_i}{\partial \gamma_k} ( t_{i} +  \text{d}'(\phi_i) )\right] 
+\end{align}
+
+Note que:
+
+$$
+\frac{d\phi_i}{d \lambda_i} = \left( \frac{d\lambda_i}{d \phi_i} \right)^{-1} = \left( \frac{d\log\phi_i}{d \phi_i} \right)^{-1} = \phi_i
+$$
+
+E 
+
+$$
+\frac{\partial \lambda_i}{\partial \gamma_k} = \frac{\partial}{\partial \gamma_k} \gamma_0 + \gamma_1 (x_i - t_0)_+
+$$
+
+Assim, $\frac{\partial \lambda_i}{\partial \gamma_k} = 1$ se $k=0$ e $\frac{\partial \lambda_i}{\partial \gamma_k} = (x_i - t_0)_+$ se $k=1$.
+
+As funções escore são então:
+
+$$
+U_{\gamma_0} =  \sum^{n}_{i=1} \left[ \phi_i ( t_{i} +  \text{d}'(\phi_i) )\right] 
+$$
+
+
+$$
+U_{\gamma_1} =  \sum^{n}_{i=1} \left[ \phi_i (x_i - t_0)_+ ( t_{i} +  \text{d}'(\phi_i) )\right] 
+$$
+
+Para obter a Hessiana e em seguida os componentes da informação de Fisher,vamos derivar as funções escore:
+
+\begin{align*}
+\frac{\partial U_{\gamma_0}}{\partial \gamma_0} 
+&= \frac{\partial U_{\gamma_0}}{\partial \gamma_0} \sum^{n}_{i=1} \left[ \phi_i ( t_{i} +  \text{d}'(\phi_i) )\right]  \\
+&= \sum^{n}_{i=1} \left[\frac{\partial \phi_i}{\partial \gamma_0}  ( t_{i} +  \text{d}'(\phi_i))  +  \phi_i \frac{\partial \text{d}'(\phi_i)}{\partial \gamma_0}\right] \\
+&= \sum^{n}_{i=1} \left[\frac{\partial \phi_i}{\partial \gamma_0}  ( t_{i} +  \text{d}'(\phi_i))  +  \phi_i \text{d}''(\phi_i)\frac{d\phi_i}{d \lambda_i}\frac{\partial \lambda_i}{\partial \gamma_0}\right] \\
+&= \sum^{n}_{i=1} \left[\frac{\partial \phi_i}{\partial \gamma_0}  ( t_{i} +  \text{d}'(\phi_i))  +  \phi_i^2 \text{d}''(\phi_1)\right]
+\end{align*}
+
+\begin{align*}
+\frac{\partial U_{\gamma_1}}{\partial \gamma_1} 
+&= \frac{\partial U_{\gamma_1}}{\partial \gamma_1} \sum^{n}_{i=1} \left[ (x_i - t_0)_+\phi_i ( t_{i} +  \text{d}'(\phi_i) )\right]  \\
+&= \sum^{n}_{i=1} \left[(x_i - t_0)_+\frac{\partial \phi_i}{\partial \gamma_1}  ( t_{i} +  \text{d}'(\phi_i))  +  (x_i - t_0)_+\phi_i \frac{\partial \text{d}'(\phi_i)}{\partial \gamma_1}\right] \\
+&= \sum^{n}_{i=1} \left[(x_i - t_0)_+\frac{\partial \phi_i}{\partial \gamma_1}  ( t_{i} +  \text{d}'(\phi_i))  +  (x_i - t_0)_+\phi_i \text{d}''(\phi_i)\frac{d\phi_i}{d \lambda_i}\frac{\partial \lambda_i}{\partial \gamma_1}\right] \\
+&= \sum^{n}_{i=1} \left[(x_i - t_0)_+\frac{\partial \phi_i}{\partial \gamma_1}  ( t_{i} +  \text{d}'(\phi_i))  +  \phi_i^2 \left[(x_i - t_0)_+\right]^2 \text{d}''(\phi_i)\right]
+\end{align*}
+
+\begin{align*}
+\frac{\partial U_{\gamma_1}}{\partial \gamma_0} 
+&= \frac{\partial U_{\gamma_1}}{\partial \gamma_0} \sum^{n}_{i=1} \left[ (x_i - t_0)_+\phi_i ( t_{i} +  \text{d}'(\phi_i) )\right]  \\
+&= \sum^{n}_{i=1} \left[(x_i - t_0)_+\frac{\partial \phi_i}{\partial \gamma_0}  ( t_{i} +  \text{d}'(\phi_i))  +  (x_i - t_0)_+\phi_i \frac{\partial \text{d}'(\phi_i)}{\partial \gamma_0}\right] \\
+&= \sum^{n}_{i=1} \left[(x_i - t_0)_+\frac{\partial \phi_i}{\partial \gamma_0}  ( t_{i} +  \text{d}'(\phi_i))  +  (x_i - t_0)_+\phi_i \text{d}''(\phi_i)\frac{d\phi_i}{d \lambda_i}\frac{\partial \lambda_i}{\partial \gamma_0}\right] \\
+&= \sum^{n}_{i=1} \left[(x_i - t_0)_+\frac{\partial \phi_i}{\partial \gamma_0}  ( t_{i} +  \text{d}'(\phi_i))  +  (x_i - t_0)_+\phi_i^2 \text{d}''(\phi_i)\right]
+\end{align*}
+
+O valor esperado do negativo da das componentes da Hessiana são dados por:
+
+\begin{align*}
+\text{K}{\gamma_0\gamma_0} = E \left[- \frac{\partial U_{\gamma_0}}{\partial \gamma_0} \right]  
+&= -\sum^{n}_{i=1} \left[ \phi_i^2 \text{d}''(\phi_i)\right] \\
+\text{K}{\gamma_1\gamma_1} = E \left[- \frac{\partial U_{\gamma_1}}{\partial \gamma_1} \right] 
+&= -\sum^{n}_{i=1} \left[\phi_i^2 \left[(x_i - t_0)_+\right]^2 \text{d}''(\phi_i)\right] \\
+\text{K}{\gamma_1\gamma_0}  = E \left[- \frac{\partial U_{\gamma_1}}{\partial \gamma_0} \right] 
+&= -\sum^{n}_{i=1} \left[(x_i - t_0)_+\phi_i^2 \text{d}''(\phi_i)\right] 
+\end{align*}
+
+Uma vez que $E(t_i) = - \text{d}'(\phi)$. Outro ponto importante é, como a variável em questão é uma variável Normal inversa, seu $\text{d''}(\phi_i) = -(2\phi_i^2)^{-1}$. Nomeando como sugerido  $z_i = (x_i - t_0)_+$ temos as seguinte expressões 
+
+\begin{align*}
+\text{K}_{\gamma_0\gamma_0}   
+&= \sum^{n}_{i=1} \frac{1}{2} = \frac{n}{2}\\
+\text{K}_{\gamma_1\gamma_1} 
+&= \frac{1}{2} \sum^{n}_{i=1} z_i^2 = \frac{1}{2} \sum^{n}_{i=r} z_i^2\\
+\text{K}_{\gamma_1\gamma_0} 
+&= \frac{1}{2}\sum^{n}_{i=1}  z_i = \frac{1}{2}\sum^{n}_{i=r}  z_i = \frac{1}{2}(n-r) \bar z_+ 
+\end{align*}
+
+Onde, por consequência da definição de $z_i = (x_i - t_0)_+$, o $r$ primeiros termos são nulos e  $\bar z_+$ representa a média amostral dos $n-r$ valores não nulos ( $x_i > t_0$). Então a matriz de Informação de Fisher é dada por:
+
+
+$$
+\text{K}_{\gamma \gamma} = \frac{1}{2}\begin{bmatrix}
+  n & (n-r) \bar z_+\\ (n-r) \bar z_+& \sum^{n}_{i=r}{z_i^2}  
+\end{bmatrix}
+$$
+
+As quantias $\text{Var}(\hat \gamma_0)$, $\text{Var}(\hat \gamma_1)$ e $\text{Cov}(\hat \gamma_0, \hat \gamma_1)$ são dados a partir do elemento correspondente em 
+$\text{K}_{\gamma \gamma}^{-1}$. O determinante de $\text{K}_{\gamma \gamma}$ é:
+
+$$
+\text{det}\text{K}_{\gamma \gamma} = n\sum^{n}_{i=r}  z_i^2 - (n-r)^2 \bar z_+^2
+$$
+
+E 
+
+$$
+\text{K}_{\gamma \gamma}^{-1} = \frac{2}{n\sum^{n}_{i=r}  z_i^2 - (n-r)^2 \bar z_+^2} \begin{bmatrix}
+  \sum^{n}_{i=r}{z_i^2} & -(n-r) \bar z_+\\ -(n-r) \bar z_+ & n  
+\end{bmatrix}
+$$
+
+Em conclusão:
+
+$$
+\text{Var}(\hat \gamma_0) = \frac{2\sum^{n}_{i=r}{z_i^2}}{ n\sum^{n}_{i=r}  z_i^2 - (n-r)^2 \bar z_+^2}
+$$
+
+$$
+\text{Var}(\hat \gamma_1) = \frac{2}{ \sum^{n}_{i=r}  z_i^2 - n^{-1}(n-r)^2 \bar z_+^2}
+$$
+
+$$
+\text{Cov}(\hat \gamma_0, \hat \gamma_1) = -\frac{(n-r) \bar z_+}{ n\sum^{n}_{i=r}  z_i^2 -(n-r)^2 \bar z_+^2}
+$$
+
+## Estatística do teste de Escore
+
+Em seguida vamos calcular a estatística de escore para testar $H_0: \gamma_1 = 0$ contra $H_1: \gamma_1 \ne 0$. Sua definição aplicada ao modelo estudado é
+
+$$
+\xi_{SR} = \left( U_{\gamma_1}^0 \right)^2{{\text{Var}}_0(\hat \gamma_1)}   
+$$
+
+Vamos primeiro trabalhar a função escore que achamos anteriormente para que fique em uma versão mais amigável:
+
+\begin{align*}
+U_{\gamma_1} 
+&=  \sum^{n}_{i=1} \left[ \phi_i (x_i - t_0)_+ ( t_{i} +  \text{d}'(\phi_i) )\right]  \\
+&=  \sum^{n}_{i=1} \left[ \phi_i z_i \left( t_{i} +  \frac{1}{2\phi_i} \right)\right]  \\
+&=  \sum^{n}_{i=1} \left[ \phi_i z_i \left(\frac{2\phi_it_{i} + 1}{2\phi_i} \right)\right]  \\
+&=  \sum^{n}_{i=1} \left[  z_i \left(\frac{2\phi_it_{i} + 1}{2} \right)\right]  \\
+&=  \sum^{n}_{i=1} \left[  z_i \left( \phi_it_{i} +  \frac{ 1}{2} \right)\right]  \\
+&=  \sum^{n}_{i=r} \left[  z_i \left( \phi_it_{i} +  \frac{ 1}{2} \right)\right]  \;\;\;\ \text{pela definição de } z_i\\ 
+&=  \sum^{n}_{i=r} \left[ \left( z_i\phi_it_{i} +  \frac{z_i}{2} \right)\right]   \\
+&=  \sum^{n}_{i=r}z_i\phi_it_{i} +  \sum^{n}_{i=r}\frac{z_i}{2}   \\
+&=    \frac{1}{2}(n-r) \bar z_+ + \sum^{n}_{i=r}z_i\phi_it_{i}   \\
+\end{align*}
+
+Sob $H_0$, $\phi_i \rightarrow \phi^0$ e :
+
+$$
+U_{\gamma_1}^0 = \frac{1}{2}(n-r) \bar z_+ + \phi^0\sum^{n}_{i=r}z_it_{i}
+$$
+
+Para a variância, note que nenhum termo depende do parâmetro testado:
+
+$$
+\text{Var}(\hat \gamma_1) = \text{Var}_0(\hat \gamma_1) = \frac{2}{ \sum^{n}_{i=r}  z_i^2 - n^{-1}(n-r)^2 \bar z_+^2}
+$$
+
+Concluíndo a montagem da estatística de escore:
+
+\begin{align*}
+\xi_{SR} 
+&= \left( U_{\gamma_1}^0 \right)^2{{\text{Var}}_0(\hat \gamma_1)}    \\
+  &= \frac{\left( (n-r) \bar z_+ + 2\phi^0\sum^{n}_{i=r}z_it_{i} \right)^2 }{ \sum^{n}_{i=r}  z_i^2 - n^{-1}(n-r)^2 \bar z_+^2}
+\end{align*}
+
+
+# Exercício 3
+
+A função de estimação parte da seguinte expressão:
+
+
+$$
+\boldsymbol{\Psi}(\boldsymbol\beta) = 
+\sum^{n}_{i=1}{E \left[ \frac{\partial \boldsymbol{u}_i}{\partial \boldsymbol{\beta}} \right]^T} \text{Var}( \boldsymbol{u}_i )^{-1} \boldsymbol{u}_i
+$$
+
+
+Nos foi fornecido que, para o caso de respostas marginais binomiais negativas, $\boldsymbol{u}_i = \boldsymbol{y_i}- \boldsymbol{\mu_i}$ onde $\boldsymbol{y_i}=(y_{i1}, \dots, y_{ir_i})^T$ e $\boldsymbol{\mu_i} = (\mu_{i1}, \dots ,\mu_{ir_i})^T$. Assim, temos
+
+\begin{align*}
+  E \left[ \frac{\partial \boldsymbol{u}_i}{\partial \boldsymbol{\beta}} \right]^T 
+  &= E \left[ \frac{\partial }{\partial \boldsymbol{\beta}} (\boldsymbol{y_i}- \boldsymbol{\mu_i} )\right]^T \\
+  &= E \left[ -\frac{\partial \boldsymbol{\mu_i} }{\partial \boldsymbol{\beta}} \right]^T \\
+  &= E \left[ -\frac{\partial \boldsymbol{\mu_i} }{\partial \boldsymbol{\eta_i}}\frac{\partial \boldsymbol{\eta_i} }{\partial \boldsymbol{\beta}} \right]^T \\
+  &= E \left[ - \boldsymbol{F_i} \boldsymbol{X_i} \right]^T \\
+  &=  \left( - \boldsymbol{F_i} \boldsymbol{X_i} \right)^T \\
+  &=   - \boldsymbol{X_i}^T\boldsymbol{F_i}   \\
+\end{align*}
+
+Onde $\boldsymbol{X_i}$ é a matriz de variáveis explicativas das observações no grupo $i$ e  $\boldsymbol{F_i} = \text{diag} \Big\{ \frac{d\mu_{i1}}{d\eta_{i1}}, \dots \frac{d\mu_{ir_i}}{d\eta_{ir_i}} \Big\}$, ou seja, uma ponderação com relação à função de ligação usada. Seguindo a construção:
+
+$$
+\text{Var}(\boldsymbol{u_i}) = \text{Var}(\boldsymbol{y_i}) = \boldsymbol{V_i}^{1/2}\boldsymbol{R}_i(\alpha)\boldsymbol{V_i}^{1/2}
+$$
+
+
+No caso de respostas marginais binomias negativas, a variância delas é $\text{Var}(Y_{ij}) = \mu_{ij} + \frac{\mu_{ij}}{\nu}$. Então, matriz de variâncias tem o seguinte formato:
+
+$$
+\boldsymbol{V_i} = \text{diag}\bigg\{\mu_{i1} + \frac{\mu_{i1}}{\nu}\,, ...,\, \mu_{ir_i} + \frac{\mu_{ir_i}}{\nu} \bigg\}
+$$
+
+Então, munidos dos dois fatore necessários, a função de estimação $\boldsymbol{\Psi}(\boldsymbol\beta)$ é
+
+\begin{align*}
+\boldsymbol{\Psi}(\boldsymbol\beta) &= 
+\sum^{n}_{i=1}{E \left[ \frac{\partial \boldsymbol{u}_i}{\partial \boldsymbol{\beta}} \right]^T} \text{Var}( \boldsymbol{u}_i )^{-1} \boldsymbol{u}_i \\
+&=  \sum^{n}_{i=1}- \boldsymbol{X_i}^T\boldsymbol{F_i} \left[ \boldsymbol{V_i}^{1/2}\boldsymbol{R}_i(\alpha)\boldsymbol{V_i}^{1/2} \right]^{-1} \left( \boldsymbol{y_i}- \boldsymbol{\mu_i} \right)
+\end{align*}
+
+As passagens à seguir mostram que a função de estimação apresentada é não visada:
+
+\begin{align*}
+  E \left[\boldsymbol{\Psi}(\boldsymbol\beta) \right]  &= 
+  E \left[\sum^{n}_{i=1}- \boldsymbol{X_i}^T\boldsymbol{F_i} \left[ \boldsymbol{V_i}^{1/2}\boldsymbol{R}_i(\alpha)\boldsymbol{V_i}^{1/2} \right]^{-1} \left( \boldsymbol{y_i}- \boldsymbol{\mu_i} \right)\right] \\
+  &= \sum^{n}_{i=1} E \left[- \boldsymbol{X_i}^T\boldsymbol{F_i} \left[ \boldsymbol{V_i}^{1/2}\boldsymbol{R}_i(\alpha)\boldsymbol{V_i}^{1/2} \right]^{-1} \left( \boldsymbol{y_i}- \boldsymbol{\mu_i} \right)\right] \\
+  &= \sum^{n}_{i=1} - \boldsymbol{X_i}^T\boldsymbol{F_i} \left[ \boldsymbol{V_i}^{1/2}\boldsymbol{R}_i(\alpha)\boldsymbol{V_i}^{1/2} \right]^{-1} E \left[\left( \boldsymbol{y_i}- \boldsymbol{\mu_i} \right)\right] \\
+  &= \sum^{n}_{i=1} - \boldsymbol{X_i}^T\boldsymbol{F_i} \left[ \boldsymbol{V_i}^{1/2}\boldsymbol{R}_i(\alpha)\boldsymbol{V_i}^{1/2} \right]^{-1} \left( E \left[\boldsymbol{y_i} \right] - \boldsymbol{\mu_i} \right) \\
+  &= \sum^{n}_{i=1} - \boldsymbol{X_i}^T\boldsymbol{F_i} \left[ \boldsymbol{V_i}^{1/2}\boldsymbol{R}_i(\alpha)\boldsymbol{V_i}^{1/2} \right]^{-1} \left( \boldsymbol{\mu_i} - \boldsymbol{\mu_i} \right) \\
+  &= \sum^{n}_{i=1} - \boldsymbol{X_i}^T\boldsymbol{F_i} \left[ \boldsymbol{V_i}^{1/2}\boldsymbol{R}_i(\alpha)\boldsymbol{V_i}^{1/2} \right]^{-1} \left(0 \right) \\ 
+  &= 0 
+\end{align*}
+
+## Processo iterativo para $\boldsymbol{\hat\beta}$
+
+No caso de funções de estimação, a estimativa é obtida a partir de suas raízes, fazendo $\boldsymbol{\Psi}(\boldsymbol{\hat\beta}) = 0$. Esta construção culmina assim no nome equações de estimação. O processo iterativo para se encontrar essas raízes é:
+
+$$
+\boldsymbol{\beta^{(m + 1)}} = \boldsymbol{\beta^{(m)}} - \left(E \left[\boldsymbol{\Psi}'(\boldsymbol{\beta^{(m)}}) \right]  \right)^{-1}\boldsymbol{\Psi}(\boldsymbol{\beta^{(m)}})
+$$
+
+Onde $m=1,2,\dots$. Durante esse procedimento estamos supondo $\alpha$, o parâmetro da matriz trabalho (correlação intragrupos) e $\nu$, parâmetro associado com a dispersão da variável resposta, fixos. Note que é preciso determinar $\boldsymbol{\beta^{(0)}}$ para que possa iniciar o processo iterativo. O próximo passo então é encontrar uma forma para a derivada da função de estimação que estamos estudando. Os passos a seguir apresentam isso:
+
+\begin{align*}
+\boldsymbol{\Psi}'(\boldsymbol{\beta^{(m)}}) 
+&= \frac{\partial}{ \partial \boldsymbol{\beta}} \sum^{n}_{i=1}- \boldsymbol{X_i}^T\boldsymbol{F_i} \left[ \boldsymbol{V_i}^{1/2}\boldsymbol{R}_i(\alpha)\boldsymbol{V_i}^{1/2} \right]^{-1} \left( \boldsymbol{y_i}- \boldsymbol{\mu_i} \right) \\
+&=  \sum^{n}_{i=1}- \boldsymbol{X_i}^T\boldsymbol{F_i} \left[ \boldsymbol{V_i}^{1/2}\boldsymbol{R}_i(\alpha)\boldsymbol{V_i}^{1/2} \right]^{-1} \frac{\partial}{ \partial \boldsymbol{\beta}} \left( \boldsymbol{y_i}- \boldsymbol{\mu_i} \right) \\
+&=  \sum^{n}_{i=1} \boldsymbol{X_i}^T\boldsymbol{F_i} \left[ \boldsymbol{V_i}^{1/2}\boldsymbol{R}_i(\alpha)\boldsymbol{V_i}^{1/2} \right]^{-1} \frac{\partial}{ \partial \boldsymbol{\beta}}  \boldsymbol{\mu_i}  \\
+&=  \sum^{n}_{i=1} \boldsymbol{X_i}^T\boldsymbol{F_i} \left[ \boldsymbol{V_i}^{1/2}\boldsymbol{R}_i(\alpha)\boldsymbol{V_i}^{1/2} \right]^{-1} \boldsymbol{F_i} \boldsymbol{X_i}
+\end{align*}
+
+Onde a última igualdade segue o mesmo raciocínio que usamos para montar a função de estimação $\boldsymbol{\Psi}(\boldsymbol\beta)$ no início do exercício. Assim, o próximo passo é montar o processo iterativo usando as matrizes conhecidas:
+
+
+\begin{align*}
+\boldsymbol{\beta^{(m + 1)}} &= \boldsymbol{\beta^{(m)}} - \left(E \left[\boldsymbol{\Psi}'(\boldsymbol{\beta^{(m)}}) \right]  \right)^{-1}\boldsymbol{\Psi}(\boldsymbol{\beta^{(m)}}) \\
+\boldsymbol{\beta^{(m + 1)}} &= \boldsymbol{\beta^{(m)}} - \left( \sum^{n}_{i=1} \boldsymbol{X_i}^T\boldsymbol{F_i} \left[ \boldsymbol{V_i}^{1/2}\boldsymbol{R}_i(\alpha)\boldsymbol{V_i}^{1/2} \right]^{-1} \boldsymbol{F_i} \boldsymbol{X_i} \right)^{-1} 
+\sum^{n}_{i=1}- \boldsymbol{X_i}^T\boldsymbol{F_i} \left[ \boldsymbol{V_i}^{1/2}\boldsymbol{R}_i(\alpha)\boldsymbol{V_i}^{1/2} \right]^{-1} \left( \boldsymbol{y_i}- \boldsymbol{\mu_i} \right)\\
+\boldsymbol{\beta^{(m + 1)}} &= \boldsymbol{\beta^{(m)}} + \left( \sum^{n}_{i=1} \boldsymbol{X_i}^T\boldsymbol{F_i} \left[ \boldsymbol{V_i}^{1/2}\boldsymbol{R}_i(\alpha)\boldsymbol{V_i}^{1/2} \right]^{-1} \boldsymbol{F_i} \boldsymbol{X_i} \right)^{-1} 
+\sum^{n}_{i=1} \boldsymbol{X_i}^T\boldsymbol{F_i} \left[ \boldsymbol{V_i}^{1/2}\boldsymbol{R}_i(\alpha)\boldsymbol{V_i}^{1/2} \right]^{-1}\boldsymbol{F_i}\boldsymbol{F_i}^{-1} \left( \boldsymbol{y_i}- \boldsymbol{\mu_i} \right)
+\end{align*}
+
+
+Onde a inserção pré multiplicada de $\boldsymbol{F_i}\boldsymbol{F_i}^{-1}$ está relacionada com a próxima passagem. Note que podemos multiplicar convenientemente $\boldsymbol{\beta^{(m)}}$ de tal forma que:
+
+$$
+\boldsymbol{\beta^{(m)}} = \left( \sum^{n}_{i=1} \boldsymbol{X_i}^T\boldsymbol{F_i} \left[ \boldsymbol{V_i}^{1/2}\boldsymbol{R}_i(\alpha)\boldsymbol{V_i}^{1/2} \right]^{-1} \boldsymbol{F_i} \boldsymbol{X_i} \right)^{-1} \sum^{n}_{i=1} \boldsymbol{X_i}^T\boldsymbol{F_i} \left[ \boldsymbol{V_i}^{1/2}\boldsymbol{R}_i(\alpha)\boldsymbol{V_i}^{1/2} \right]^{-1} \boldsymbol{F_i} \boldsymbol{X_i} \boldsymbol{\beta^{(m)}}
+$$
+
+E, "colocando em evidência" tudo menos o termo mais à direita $\boldsymbol{X_i} \boldsymbol{\beta^{(m)}}$, que nada mais é o preditor linear, chegamos à:
+
+\begin{align*}
+\boldsymbol{\beta^{(m + 1)}} &= \boldsymbol{\beta^{(m)}} + \left( \sum^{n}_{i=1} \boldsymbol{X_i}^T\boldsymbol{F_i} \left[ \boldsymbol{V_i}^{1/2}\boldsymbol{R}_i(\alpha)\boldsymbol{V_i}^{1/2} \right]^{-1} \boldsymbol{F_i} \boldsymbol{X_i} \right)^{-1} 
+\sum^{n}_{i=1} \boldsymbol{X_i}^T\boldsymbol{F_i} \left[ \boldsymbol{V_i}^{1/2}\boldsymbol{R}_i(\alpha)\boldsymbol{V_i}^{1/2} \right]^{-1}\boldsymbol{F_i}\boldsymbol{F_i}^{-1} \left( \boldsymbol{y_i}- \boldsymbol{\mu_i} \right) \\
+&=
+  \left( \sum^{n}_{i=1} \boldsymbol{X_i}^T\boldsymbol{F_i} \left[ \boldsymbol{V_i}^{1/2}\boldsymbol{R}_i(\alpha)\boldsymbol{V_i}^{1/2} \right]^{-1} \boldsymbol{F_i} \boldsymbol{X_i} \right)^{-1}\sum^{n}_{i=1} \boldsymbol{X_i}^T\boldsymbol{F_i} \left[ \boldsymbol{V_i}^{1/2}\boldsymbol{R}_i(\alpha)\boldsymbol{V_i}^{1/2} \right]^{-1}\boldsymbol{F_i} \left( \boldsymbol{X_i} \boldsymbol{\beta^{(m)}}  + \boldsymbol{F_i}^{-1}( \boldsymbol{y_i} - \boldsymbol{\mu_i} )  \right)
+\end{align*}
+
+Note que as matrizes $\boldsymbol{F_i}$, $\boldsymbol{V_i}$, $\boldsymbol{R_i}(\alpha)$ e o vetor $\boldsymbol{\mu_i}$ devem ser recalculados à cada passo $m$ do processo iterativo. Nomeando os seguintes fatores:
+
+$$
+\boldsymbol{W_i} = \boldsymbol{F_i} \left[ \boldsymbol{V_i}^{1/2}\boldsymbol{R}_i(\alpha)\boldsymbol{V_i}^{1/2} \right]^{-1} \boldsymbol{F_i}
+$$
+
+$$
+\boldsymbol{y_i^*} = \boldsymbol{X_i} \boldsymbol{\beta^{(m)}}  + \boldsymbol{F_i}^{-1}( \boldsymbol{y_i} - \boldsymbol{\mu_i})
+$$
+
+Temos assim a matriz de pesos $\boldsymbol{W_i}$ e a variável resposta modificada $\boldsymbol{y_i^*}$. O processo iterativo por fim é dado por:
+
+$$
+\boldsymbol{\beta^{(m + 1)}} = \left( \sum^{n}_{i=1} \boldsymbol{X_i}^T \boldsymbol{W_i}^{(m)} \boldsymbol{X_i} \right)^{-1}\sum^{n}_{i=1} \boldsymbol{X_i}^T \boldsymbol{W_i}^{(m)} \boldsymbol{y_i^{*(m)}}
+$$
+
+## Estimador robusto para $\text{Var}(\boldsymbol{\hat \beta})$
+
+
+Como a matriz trabalho de covariâncias intra grupos $R_i(\alpha)$ pode ser mal especificada, levando à estimadores inconsistentes das $\text{Var}(\boldsymbol{\hat \beta})$, seguinte estimador é considerado robusto à esse tipo de falha. Nomeando as seguintes matrizes:
+
+$$
+\boldsymbol{H_1}(\boldsymbol{\hat \beta}) = \sum^{n}_{i=1} \boldsymbol{X_i}^T\boldsymbol{ \hat F_i} \left[ \boldsymbol{ \hat V_i}^{1/2}\boldsymbol{R}_i(\hat \alpha)\boldsymbol{ \hat V_i}^{1/2} \right]^{-1} \boldsymbol{ \hat F_i} \boldsymbol{X_i}
+$$
+
+$$
+\boldsymbol{H_2}( \boldsymbol{\hat \beta}) = \sum^{n}_{i=1} \boldsymbol{X_i}^T\boldsymbol{ \hat F_i} \left[ \boldsymbol{ \hat V_i}^{1/2}\boldsymbol{R}_i(\hat\alpha)\boldsymbol{ \hat V_i}^{1/2} \right]^{-1}( \boldsymbol{y_i} - \boldsymbol{ \hat \mu_i}) ( \boldsymbol{y_i} - \boldsymbol{ \hat \mu_i})^T\left[ \boldsymbol{ \hat V_i}^{1/2}\boldsymbol{R}_i(\hat\alpha)\boldsymbol{ \hat V_i}^{1/2} \right]^{-1}\boldsymbol{ \hat F_i}\boldsymbol{X_i}
+$$
+
+
+Com essas duas matrizes, podemos ter o seguinte estimador para a $\text{Var}(\boldsymbol{\hat \beta})$:
+
+$$
+\text{Var}(\boldsymbol{\hat \beta}) = \left[ \boldsymbol{H_1}(\boldsymbol{\hat \beta}) \right]^{-1}\boldsymbol{H_2}(\boldsymbol{\hat \beta}) \left[ \boldsymbol{H_1}(\boldsymbol{\hat \beta}) \right]^{-1}
+$$
+
+## Estimando $\nu$
+
+
+A estimativa para o parâmetro $\nu$, que está relacionada à dispersão da distribuição marginal de uma variável binomial negativa, não é clara dado o procedimento apresentado. Uma primeira ideia seria utilizar um estimador por método de momentos. Outra seria concluir que é natural de se pensar que a estimativa para um parâmetro de dispersão esteja relacionado com algum tipo de resíduo. Talvez a abordagem de equações de estimação generalizadas por meio da quasi-verossimelhança possibilite a criação de um quasi-desvio que culmine na estimação do parâmetro $\nu$ da mesma forma que a estimativa de máxima verossimilhança do parâmetro de $\phi$ no caso dos MLG se dá por meio do desvio.
+
+Sobre em que etapa estimar o $\nu$ este pode acontecer durante o processo iterativo ou após. Para se entender melhor quando fazê-lo, considerações como complexidade computacional devem ser levadas em consideração. 
+
+
+
+# Exercício 4
+
+Supondo o modelo descrito no enunciado, vamos investigar o comportamento da medida de alavancagem $\hat h_{ii}$ de um ponto com relação à sua estimativa $\hat \mu_i$ e sua posição $x_i - \bar x$. A parte sistemática é dada por:
+
+$$
+\eta_i = \beta(x_i - \bar x)
+$$
+
+Supondo a ligação canônica, vamos estudar a medida de alavancagem para 4 distribuições: binomial, poisson, gamma e normal inversa. 
+A medida de alavancagem que usaremos é:
+
+$$
+\text{GL}_{ii} = \omega_ix_i^T (X^TWX)^{-1}x_i 
+$$
+
+Onde $W = \text{diag}\big\{ w_1, \dots, w_n\big\}$ e $w_i =  \left(  \frac{d mu_i}{s \eta_i} \right)^2 V_i^{-1}$ e $V_i^{-1}$ é a função de variância. A matriz $X$ modelo é:
+
+$$
+X = \begin{bmatrix}
+  x_1 - \bar x \\
+  \vdots \\
+  x_n - \bar x
+\end{bmatrix}
+$$
+
+
+Desta forma temos
+
+$$
+X^TW = \begin{bmatrix}
+  (x_1 - \bar x) \omega_1 & \dots   (x_n - \bar x) \omega_n
+\end{bmatrix}
+$$
+
+E
+
+\begin{align*}
+X^TW X &= \begin{bmatrix}
+  (x_1 - \bar x) \omega_1 & \dots   (x_n - \bar x) \omega_n
+\end{bmatrix} \begin{bmatrix}
+  x_1 - \bar x \\
+  \vdots \\
+  x_n - \bar x
+\end{bmatrix} \\
+&= \sum^{n}_{i=1}{\omega_i(x_i - \bar x)^2}
+\end{align*}
+
+E por fim a medida de alavanca
+
+$$
+h_{ii} = \text{GL}_{ii} = \frac{\omega_i(x_i - \bar x)^2}{\sum^{n}_{i=1}{\omega_i(x_i - \bar x)^2}}
+$$
+
+A suposição de ligação canônica faz com que $\omega_i = V_i = V(\mu_i)$, ou seja, a matriz diagonal de pesos resulta em apenas uma matriz diagonal com as funções de variância da distribuição estudada. Ou seja 
+
+$$
+h_{ii} = \frac{V(\mu_i)(x_i - \bar x)^2}{\sum^{n}_{i=1}{V(\mu_i)(x_i - \bar x)^2}}
+$$
+
+Sua estimativa no caso dos MLG consiste:
+
+$$
+\hat h_{ii} = \frac{V( \hat \mu_i)(x_i - \bar x)^2}{\sum^{n}_{i=1}{V( \hat\mu_i)(x_i - \bar x)^2}}
+$$
+
+
+Assim, vamos estudar os casos de cada uma das distribuições requisitadas. No entanto, a suposição crucial para entender a relação entre $\hat \mu_i$, $(x_i - \bar x)$ e $\hat h_{ii}$ é que a alteração via sua estimativa ou sua variável explicativa de um ponto não modifica o denominador de relevantemente. Isto é possível se a amostra for grande de tal forma que a alteração de um ponto $i$ não altera $\sum^{n}_{i=1}{V( \hat\mu_i)(x_i - \bar x)^2}$. 
+
+## Binomial
+
+A seguir temos a expressão de alavancagem para a distribuição binomial:
+
+$$
+\hat h_{ii} = \frac{\hat \mu_i (1 - \hat \mu_i)(x_i - \bar x)^2}{\sum^{n}_{i=1}{\hat \mu_i (1 - \hat \mu_i)(x_i - \bar x)^2}}
+$$
+
+E abaixo podemos ver a relação entre $\hat h_{ii}$ e alguns casos relevantes $\hat \mu_i$ ao longo de $x_i - \bar x$:
+
+```{r}
+tibble(mui = seq(-10, 15, .05)) %>% 
+  crossing(ximxbar = seq(-3, 3, .05)) %>% 
+  mutate(ximxbars = ximxbar^2) %>% 
+  mutate(poi = mui *ximxbars) %>% 
+  mutate(bin = mui*(1-mui) *ximxbars) %>% 
+  mutate(gamma = mui*mui *ximxbars) %>% 
+  mutate(ninv = mui*mui*mui*ximxbars) %>% 
+  gather(dist, hii, -mui, -ximxbar, -ximxbars) %>% 
+  mutate( mui_filter = case_when(
+    dist == 'poi' ~ mui > 0, 
+    dist == 'bin' ~ (mui > 0) & (mui < 1), 
+    T ~ mui > 0
+  )) %>% 
+  filter(mui_filter)  -> cases
+  
+
+cases %>%
+  filter(dist == 'bin') %>% 
+  filter(near(mui, .10) | near(mui, .5) | near(mui, .95)) %>% 
+  mutate(mui = round(mui, 2) %>% as.factor(.)) %>% 
+  ggplot(aes(ximxbar, hii, color = mui, group = mui)) +
+  geom_line() + 
+  labs(color = expression(hat(mu[i])), x = quote(x[i] - bar(x)), y = quote(hat(h[i][i])), title = 'Binomial')
+
+```
+
+Podemos ver que o caso de maior impacto no valor da alavancagem ocorre quando a estimativa de localização está próxima de 0.50. 
+
+
+## Poisson
+
+Abaixo temos a medida de alavancagem para a distribuição de poisson:
+
+$$
+\hat h_{ii} = \frac{\hat \mu_i(x_i - \bar x)^2}{\sum^{n}_{i=1}{\hat \mu_i (x_i - \bar x)^2}}
+$$
+
+O gráfico da relação entre as grandezas e a alavancagem é 
+
+```{r}
+cases %>%
+    filter(dist == 'poi') %>% 
+  filter(near(mui, 1) | near(mui, 3) | near(mui, 7) | near(mui, 15)) %>% 
+  mutate(mui = round(mui, 2) %>% as.factor(.)) %>% 
+  ggplot(aes(ximxbar, hii, color = mui, group = mui)) +
+  geom_line() + 
+  labs(color = expression(hat(mu[i])), x = quote(x[i] - bar(x)), y = quote(hat(h[i][i])), title = 'Poisson')
+
+```
+
+Podemos ver que quanto menor é a estimativa, menor será o impacto de grandes desvios da média. Todavia, diferentemente da distribuição binomial, aqui relação entre $\hat \mu_i$ e $\hat h_{ii}$ não é limitado.
+
+## Gamma e normal inversa
+
+
+Vamos comparar as distribuições Gamma e Normal Inversa simultâneamente, uma vez que ambas modelam dados assimétricos positivos. Abaixo mostro as estimativas de $h_{ii}$.
+
+Caso da distribuição gamma:
+
+$$
+\hat h_{ii} = \frac{\hat \mu_i^2(x_i - \bar x)^2}{\sum^{n}_{i=1}{\hat \mu_i^2 (x_i - \bar x)^2}}
+$$
+
+e para a distribuição normal inversa:
+
+$$
+\hat h_{ii} = \frac{\hat \mu_i^3(x_i - \bar x)^2}{\sum^{n}_{i=1}{\hat \mu_i^3 (x_i - \bar x)^2}}
+$$
+
+Em seguida mostro a relação entre as quantidades. Note que, devido aos expoentes presentes nas funções de variância, vamos restringir $\hat \mu_i$ à valores menores na intenção de facilitar a comparação entre ambas as distribuições.
+
+```{r}
+cases %>%
+    filter(dist %in% c('gamma', 'ninv')) %>% 
+  filter(near(mui, 1) | near(mui, 3)  ) %>% 
+  mutate(mui = round(mui, 2) %>% as.factor(.)) %>% 
+  ggplot(aes(ximxbar, hii, color = mui, group = paste(mui, dist), lty=dist)) +
+  geom_line() + 
+  labs(color = expression(hat(mu[i])), x = quote(x[i] - bar(x)), y = quote(hat(h[i][i])), title = 'Gamma e normal inversa', lty = '')
+```
+
+Assim, para valores menores de $\hat \mu_i$ as alavancagens são muito parecidas entre a normal inversa e gamma. Todavia, quanto maior é a estimativa, os desvios $x_i - \bar x$ acarretam em valores muito maiores de $\hat h_{ii}$ no caso da normal inversa. 
+
+
+
+
+
+
+
+

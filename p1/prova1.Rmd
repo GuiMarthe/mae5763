@@ -1,0 +1,760 @@
+---
+title: "MAE5763 - Modelos Lineares Generalizados - Resolução da Prova 1"
+author: "Guilherme Marthe - 8661962"
+date: "6/11/2020"
+output:
+  bookdown::pdf_document2:
+    df_print: kable
+    toc: false
+header-includes:
+    - \usepackage{caption}
+    - \usepackage{amsmath}
+    - \allowdisplaybreaks
+fontsize: 11pt
+geometry: margin=1.5cm
+---
+
+\captionsetup[table]{labelformat=empty}
+\counterwithin*{equation}{section}
+
+# Exercício 1
+
+## Matriz $X$ e $W$
+
+O modelo descrito no enunciado consiste tem $Y_{ij} \stackrel{ind}{\sim} FE(\mu_i, \phi)$ com $i = 1,2,3$ e $j= 1,...,m$.
+A parte sistemática é descrita como:
+
+$$
+g(\mu_1) = \alpha
+$$
+
+$$
+g(\mu_2) = \alpha - \Delta
+$$
+
+$$
+g(\mu_3) = \alpha + \Delta
+$$
+
+Desta forma, a matriz modelo de cada bloco $i = 1, 2, 3$ é dada por
+
+$$
+X_1 =  
+\begin{bmatrix}
+1 & 0 \\
+1 & 0 \\
+\vdots & \vdots \\
+1 & 0 \\
+\end{bmatrix}_{m \times 2}  
+\;\;\
+X_2 =  
+\begin{bmatrix}
+1 & -1 \\
+1 & -1 \\
+\vdots & \vdots \\
+1 & -1 \\
+\end{bmatrix}_{m \times 2}  
+\;\;\ 
+X_3 =  
+\begin{bmatrix}
+1 & 1 \\
+1 & 1 \\
+\vdots & \vdots \\
+1 & 1 \\
+\end{bmatrix}_{m \times 2}  
+$$
+
+E a matriz modelo é composta pelo subcomponentes $X_i$ de tal forma que:
+
+
+$$
+X = \begin{bmatrix}
+  X_1 \\
+  X_2 \\
+  X_2
+\end{bmatrix}_{3m \times 2}
+$$
+
+
+A matriz de pesos $W$ é composta, como de usual, por uma matriz diagonal onde elementos na diagonal principal são $w_i = \left(\frac{d \mu_i}{d \eta_i} \right)^2 V_i^{-1}$ com $\eta_i = g(\mu_i)$ e zero em todo resto. Os elementos $w_i$ se repetem $m$ vezes para cada $i=1,2,3$ resultando numa matriz quadrada $3m \times 3m$. Ou seja:
+
+$$
+W = diag \{ w_1,...,w_1,w_2, ...,w_2, w_3, ..., w_3 \}_{3m \times 3m}
+$$
+
+
+## Variância assintótica
+
+Para se obter a variância assintótica do estimador $\hat \Delta$ iremos utilizar o seguinte resultado de MLGs. Sendo $\theta = (\alpha, \Delta)^T$, temos que a matriz de informação de Fisher pode ser escrita em forma matricial como:
+
+
+$$
+K_{\theta \theta} = \phi X^TWX
+$$
+
+E a variância assintótica $Var(\hat \Delta) = K_{\Delta \Delta}^{-1}$. Seguimos com a computação de $K_{\theta \theta}$:
+
+\begin{align*}
+X^TW &= 
+  \begin{bmatrix} 
+1 & \dots & 1 & 1 & \dots & 1 & 1 & \dots & 1   \\
+0 & \dots & 0 & -1 & \dots &  -1  & 1 & \dots & 1  
+\end{bmatrix}_{2\times3m} 
+\cdot  diag \{ w_1,...,w_1,w_2, ...,w_2, w_3, ..., w_3 \}_{3m \times 3m} \\
+&= 
+\begin{bmatrix} 
+w_1 & \dots & w_1 & w_2 & \dots & w_2 & w_3 & \dots & w_3   \\
+0 & \dots & 0 & -w_2 & \dots & -w_2  & w_3 & \dots & w_3  
+\end{bmatrix}_{2\times3m} 
+\end{align*} 
+
+\begin{align*}
+X^TWX &= 
+\begin{bmatrix} 
+w_1 & \dots & w_1 & w_2 & \dots & w_2 & w_3 & \dots & w_3   \\
+0 & \dots & 0 & -w_2 & \dots & -w_2  & w_3 & \dots & w_3  
+\end{bmatrix}_{2\times3m} \cdot 
+\begin{bmatrix}
+  1 & 0 \\
+  \vdots & \vdots \\
+  1 &  0 \\
+  1 & -1 \\
+  \vdots & \vdots \\
+  1& -1 \\
+  1 & 1 \\
+  \vdots & \vdots \\
+  1&  1 \\
+\end{bmatrix}_{3m \times 2} \\
+&= \begin{bmatrix}
+  mw_1 + mw_2 + mw_3 && mw_3 - mw_2 \\
+  mw_3 - mw_2 && mw_2 + mw_3 
+\end{bmatrix} \\
+&= m \begin{bmatrix}
+  \sum^{3}_{i=1}{w_i} && w_3 - w_2 \\
+  w_3-w_2 && w_3 + w_2
+\end{bmatrix}
+\end{align*}
+
+
+Assim, a matriz de informação de Fisher fica com a seguinte forma:
+
+$$
+K_{\theta \theta} = \phi m 
+\begin{bmatrix}
+  \sum^{3}_{i=1}{w_i} && w_3 - w_2 \\
+  w_3-w_2 && w_3 + w_2
+\end{bmatrix}
+$$
+
+O determinante da matriz, nomeadamente $J$, na expressão anterior será necessário para os próximos cálculos:
+
+$$
+det(J) = \left[ \sum^{3}_{i=1}{w_i} \right](w_3 + w_2) - (w_3 - w_2)^2
+$$
+
+Assim temos o seguinte resultado:
+
+$$
+K_{\theta \theta}^{-1} =  \frac{1}{\phi m \left[ \sum^{3}_{i=1}{w_i} \right](w_3 + w_2) - (w_3 - w_2)^2} 
+\begin{bmatrix}
+  w_3 + w_2 && w_2 - w_3 \\
+  w_2-w_3 && \sum^{3}_{i=1}{w_i}
+\end{bmatrix}
+$$
+
+Assim a variância assintótica de $\hat \Delta$ é o elemento de interesse em $K_{\theta \theta}^{-1}$, ou seja:
+
+$$
+Var(\hat \Delta) = K_{\Delta \Delta}^{-1} = \frac{ \sum^{3}_{i=1}{w_i} }{\phi m \left[ \sum^{3}_{i=1}{w_i} \right](w_3 + w_2) - (w_3 - w_2)^2}
+$$
+
+## Função Escore $U_{\Delta}$
+
+Para o caso dos MLGs o vetor de funções escore dos parâmtros é:
+
+$$
+U_{\theta} = \phi X^T W^{1/2} V^{-1/2}(y - \mu)
+$$
+
+Onde $X$ é a matriz modelo, $W$ é a matriz de pesos, apresentadas anteriormente. $V$ é a matriz de funções variância. Porém, para a estatística de escore requisitada, só é necessário computar a função escore do parâmtro testado. Ou seja:
+
+$$
+U_{\Delta} = \phi X_{\Delta}^T W^{1/2} V^{-1/2}(y - \mu)
+$$
+
+Onde 
+
+$$
+X_{\Delta} = \begin{bmatrix}
+  0 \\
+  \vdots \\
+  0 \\
+  -1 \\
+  \vdots \\
+  -1 \\
+  1 \\
+  \vdots \\
+  1
+\end{bmatrix}_{3m \times 1}
+$$
+
+Iremos a seguir calcular cada um dos fatores para se chegar em $U_{\Delta}$.
+
+\begin{align*}
+X_{\Delta}^T W^{1/2} 
+& = \begin{bmatrix} 0 & \dots & 0 & -1 & \dots & -1 & 1 & \dots & 1 \end{bmatrix}_{1 \times 3m} \cdot 
+diag \{ \sqrt w_1,..., \sqrt w_1, \sqrt w_2, ..., \sqrt w_2, \sqrt w_3, ..., \sqrt w_3 \}_{3m \times 3m} \\
+&= \begin{bmatrix}
+  0 & ... &   0 &  -\sqrt w_2 &  ... & -\sqrt w_2 & \sqrt w_3 &  ... & \sqrt w_3
+\end{bmatrix}
+\end{align*}
+
+\begin{align*}
+X_{\Delta}^T W^{1/2} V^{-1/2}
+&= \begin{bmatrix}
+  0 & ... &   0 &  \frac{-\sqrt w_2}{\sqrt V_2} &  ... & \frac{-\sqrt w_2}{\sqrt V_2} & \frac{\sqrt w_3}{\sqrt V_3} &  ... & \frac{\sqrt w_3}{\sqrt V_3}
+\end{bmatrix}
+\end{align*}
+
+Por fim, temos
+
+\begin{align*}
+U_{\Delta} 
+&= \phi X_{\Delta}^T W^{1/2} V^{-1/2}(y - \mu) \\
+&= \phi \begin{bmatrix}
+  0 & ... &   0 &  \frac{-\sqrt w_2}{\sqrt V_2} &  ... & \frac{-\sqrt w_2}{\sqrt V_2} & \frac{\sqrt w_3}{\sqrt V_3} &  ... & \frac{\sqrt w_3}{\sqrt V_3}
+\end{bmatrix} \begin{bmatrix}
+  y_{11} -  \mu_1 \\
+  \vdots \\
+  y_{1m} -  \mu_1 \\
+  y_{21} -  \mu_2 \\
+  \vdots \\
+  y_{2m} -  \mu_2 \\
+  y_{31} -  \mu_3 \\
+  \vdots \\
+  y_{3m} -  \mu_3 \\
+\end{bmatrix} \\
+&=\phi \left[ - \frac{\sqrt w_2}{\sqrt V_2} \sum^{m}_{j=1}{(y_{2j} - \mu_2)} + \frac{\sqrt w_3}{\sqrt V_3} \sum^{m}_{j=1}{(y_{3j} - \mu_3)}\right] \\
+&= \phi \left[ - \frac{\sqrt w_2}{\sqrt V_2} {m(\bar y_{2} - \mu_2)} + \frac{\sqrt w_3}{\sqrt V_3} m{(\bar y_{3} - \mu_3)}\right] \\
+&= \phi m \left[\frac{\sqrt w_3}{\sqrt V_3} {(\bar y_{3} - \mu_3)}  - \frac{\sqrt w_2}{\sqrt V_2} {(\bar y_{2} - \mu_2)}\right]
+\end{align*}
+
+
+## Estatística de escore
+
+Com a função escore e a variância assintótica calculadas anteriormente, o próximo passo para calcular a estatístide escore consiste em identificar essas funções sob as suposições da hipótese nula. No nosso caso queremos testar $H_0: \Delta = 0$ contra $H_1: \Delta \ne 0$. Note que, sob $H_0$:
+
+\begin{align*}
+w_i &\stackrel{H_0}{\rightarrow} w \\
+V_i &\stackrel{H_0}{\rightarrow} V \\
+\mu_i = g^{-1}(\eta_i) &\stackrel{H_0}{\rightarrow} \mu = g^{-1}(\alpha_0) = \bar y
+\end{align*}
+
+Os componentes da estatística se escore sob $H_0$ são:
+
+\begin{align*}
+Var&(\hat \Delta) = \frac{ \sum^{3}_{i=1}{w_i} }{\phi m \left[ \sum^{3}_{i=1}{w_i} \right](w_3 + w_2) - (w_3 - w_2)^2} \\
+&\downarrow \\
+\\
+Var_0&(\hat \Delta) = \frac{3w}{\phi m 3w 2w - 0} = \frac{1}{2\phi m w}
+\end{align*}
+
+
+\begin{align*}
+U&_{\Delta} = \phi m \left[\frac{\sqrt w_3}{\sqrt V_3} {(\bar y_{3} - \mu_3)}  - \frac{\sqrt w_2}{\sqrt V_2} {(\bar y_{2} - \mu_2)}\right] \\
+&\downarrow \\
+\\
+U&_{\Delta}^0 = \phi m \left[\frac{\sqrt w}{\sqrt V} {(\bar y_{3} - \bar y)}  - \frac{\sqrt w}{\sqrt V} {(\bar y_{2} - \bar y)}\right] \\ \\
+& \,\,\,\,= \frac{\phi m \sqrt w}{\sqrt V}{(\bar y_{3} - \bar y_{2})}
+\end{align*}
+
+Assim a estatística de escore fica com a seguinte forma:
+
+\begin{align*}
+\xi_{SR} &= \left[{U_\Delta^0} \right]^2 \cdot \left[ \text{Var}_0(\hat \Delta) \right] \\ 
+&= \frac{\phi^2 m^2  w}{ V}{(\bar y_{3} - \bar y_{2})^2}\frac{1}{2\phi m w} \\
+&= \frac{\phi m}{2V}{(\bar y_{3} - \bar y_{2})^2}
+\end{align*}
+
+Como apenas um parâmetro é testado, nomeadamente $\Delta$, $\xi_{SR} {\rightarrow} \chi^2_{(1)}$ quando $n$ cresce e prevalesce a hipótese nula. 
+
+# Exercício 2
+
+O enunciado apresenta $Z_i \stackrel{ind}{\sim} \text{ZAP}(\mu_i, \pi_i)$, ou seja, uma poisson ajustada em zeros, com a seguinte função de probabilidades:
+
+$$
+f_Z(z_i; \mu_i, \pi_i) = 
+\begin{cases} 
+\;\;\;\; \;\; \pi_i & \text{se } z_i = 0 \\
+(1-\pi_i)\frac{f_Y(z_i; \mu_i)}{1 - f_Y(0; \mu_i)}  & \text{se } z_i >  0
+\end{cases}
+$$
+
+Onde $f_Y(z_i, \mu_i) = \frac{e^{-\mu_i} \mu_i^{z_i}}{z_i!}$, $z_i = 1, 2, 3, \dots$ e $i = 1, ..., n$. Pede-se então para encontrar a função desvio para uma estimativa dessa distribuição, assumindo que o modelo saturado é o mesmo de uma variável aleatória Poisson usual. A definição da função desvio parte de uma diferença de log-verossimilhanças do modelo saturado e do modelo ajustado:
+
+$$
+D^*(\boldsymbol{z}, \boldsymbol{\hat\mu}, \boldsymbol{\hat \pi}) = 
+2\{L(\boldsymbol{z}, \boldsymbol{\tilde\mu}, \boldsymbol{\tilde \pi})-
+L(\boldsymbol{z}, \boldsymbol{\hat\mu}, \boldsymbol{\hat \pi})\}
+$$
+
+
+Quando escrita em função dos parâmestros genéricos, sem indicação de se é sob o modelo saturado ou estimado, o log da função de verossimilhanças é escrito como uma soma, onde defino um compoenente da soma como $l_i$, ou seja
+
+$$
+L(\boldsymbol{z}, \boldsymbol{\mu}, \boldsymbol{\pi}) = \sum^{n}_{i=1}{log(f_Z(z_i, \mu_i, \pi_i))} = \sum^{n}_{i=1}{l_i}
+$$
+
+No caso da distribuição poisson ajustada em zero, o componente $l_i$ é escrito de duas maneiras distintas. 
+Se $z_i > 0$
+
+$$
+l_i = log(1-\pi_i) - \mu_i + z_i log\,\mu_i - log \, z_i! - log(1-e^{-\mu_i})
+$$
+
+E se $z_i = 0$
+
+$$
+l_i = log(\pi_i)
+$$
+
+
+## Modelo saturado
+
+Conforme fornecido pelo enunciado, o modelo saturado para o nosso caso é talque $\tilde \mu_i = z_i$. Porém precisamos pensar um pouco sobre o parâmetro $\pi_i$. 
+Como foi definido o modelo, podemos pensar na ocorrência de zeros como uma variável Bernoulli onde o sucesso corresponde em $z_i = 0$. Heuristicamente, podemos definir a situação em que a maximização da verossimilhança seria "ideal", ou "teto da igreja", para esta porção da distribuição ZAP desta forma. Então, o parâmetro saturado para $\pi_i$ é definido por nós como:
+
+$$
+\tilde \pi_i = \begin{cases} 
+0 & \text{se}\;\; z_i > 0  \\
+1 & \text{se}\;\; z_i = 0 
+\end{cases}
+$$
+
+
+## Componente do desvio
+
+
+Com a definição do modelo saturado podemos partir para o cálculo dos componente do desvio. Para o caso em que $z_i > 0$:
+
+$$
+d^*(z_i, \hat\mu_i, \hat\pi_i) 
+= 2 \left( \tilde l_i - \hat l_i \right) 
+$$
+
+Expandindo essa diferença temos:
+
+$$
+2 \left( log(1-\tilde\pi_i) - \tilde\mu_i + z_i log\,\tilde\mu_i - log \, z_i! - log(1-e^{-\tilde\mu_i}) -  \\ 
+\;\;log(1-\hat\pi_i) + \hat\mu_i - z_i log\,\hat\mu_i + log \, z_i! + log(1-e^{-\hat\mu_i})
+\right)
+$$
+
+E substituindo os parâmetros saturados:
+
+$$
+2 \left( log(1-0) - z_i + z_i log\,z_i - log \, z_i! - log(1-e^{-z_i}) -  \\ 
+\;\;log(1-\hat\pi_i) + \hat\mu_i - z_i log\,\hat\mu_i + log \, z_i! + log(1-e^{-\hat\mu_i})
+\right)
+$$
+
+Resultando em:
+
+$$
+d^*(z_i, \hat\mu_i, \hat\pi_i) = 2 \left[log\left( \frac{1}{1-\hat\pi_i}\right) + 
+(\hat\mu_i - z_i) + z_i log\left( \frac{z_i}{\hat\mu_i} \right) + log \left( \frac{1-e^{-z_i}}{1-e^{-\hat\mu_i}} \right)\right]
+$$
+
+O próximo caso de interesse é se $z_i = 0$. Partindo da mesma definição, porém com uma computação mais direta, temos:
+
+\begin{align*}
+d^*(z_i, \hat\mu_i, \hat\pi_i)  &= 2 \left( \tilde l_i - \hat l_i \right)  \\
+&= 2(log(\tilde \pi_i) - log(\hat\pi_i)) \\
+&= 2(log( 1) - log(\hat\pi_i)) \\ 
+&= -2log(\hat\pi_i)
+\end{align*}
+
+Em conclusão, o componente do desvio para a variável é:
+
+$$
+d^*(z_i, \hat\mu_i, \hat\pi_i) = \begin{cases}
+-2log(\hat\pi_i) & \text{se}\;\; z_i = 0 \\
+2 \left[log\left( \frac{1}{1-\hat\pi_i}\right) + 
+(\hat\mu_i - z_i) + z_i log\left( \frac{z_i}{\hat\mu_i} \right) + log \left( \frac{1-e^{-z_i}}{1-e^{-\hat\mu_i}} \right)\right] &  \text{se}\;\; z_i > 0 
+\end{cases}
+$$
+
+# Exercício 3
+
+Uma variável aleatória modelada por uma distribuição logarítimica $Y_i \stackrel{iid}{\sim} LG(\rho)$ tem a seguinte função de probabilidades:
+
+$$
+f(y_i; \rho) = \frac{\rho^{y_i}}{-y_i\log(1-\rho)}
+$$
+
+Com $y_i = 1,2,...$, $i = 1, ..., n$ e $0< \rho < 1$
+
+Vamos iniciar a resolução do problema mostrando que $Y_i$ pertencen à família exponencial, pois os resultados nos ajudarão a montar a estatística de razão de verossimilhanças. 
+
+## Família exponencial
+
+A forma da função de probabilidades pertencente à família exponencial é a seguinte:
+
+$$
+f_Y(y; \theta, \phi) = exp\{\phi[y\theta - b(\theta)] \: + \: c(y;\phi)\}
+$$
+
+Se manipularmos a função de probabilidades de $Y_i$ de tal forma que (omitindo o subscrito $i$)
+
+$$
+f(y; \rho) = \frac{\rho^{y}}{-y\log(1-\rho)} = \exp \left[ y\log\rho - \log(-\log(1-\rho)) - \log y \right]
+$$
+
+Podemos definir $\phi = 1$, $c(y;\phi) = - \log y$, o parâmetro canônico $\theta = \log \rho$ e 
+
+$$
+b(\theta) = \log(-\log(1-\rho)) = \log(-\log(1-e^\theta)) 
+$$
+
+O valor esperado de $Y_i$ pode ser obtido derivando $b(\theta)$
+
+\begin{align*}
+E(Y) &= \mu \\
+&= b'(\theta) \\ 
+&= \frac{d}{d \theta}  \log(-\log(1-e^\theta)) \\
+&= \frac{1}{-\log(1-e^\theta) } (-1) \frac{1}{1 - e^\theta}(-1) e^{\theta} \\
+&= \frac{-1}{\log(1-e^\theta)} \frac{e^\theta}{1 - e^\theta} \\
+&= \frac{-1}{\log(1-\rho)} \frac{\rho}{1 - \rho}
+\end{align*}
+
+No enunciado, é sugerida a seguinte parametrização
+
+$$
+\rho = \frac{e^\alpha}{1 + e^\alpha}
+$$
+
+Assim, o valor esperado $\mu$ em termos dessa parametrização é
+
+\begin{align*}
+\mu &=  \frac{-1}{\log(1-\rho)} \frac{\rho}{1 - \rho} \\
+&= \frac{a e^\alpha(1 + e^\alpha)^{-1}}{\log\left(1 - \frac{e^\alpha}{1 + e^\alpha}\right) \left(1 - \frac{e^\alpha}{1 + e^\alpha}\right)} \\
+&= \frac{-e^\alpha(1 + e^\alpha)^{-1}}{-\log(1 + e^\alpha)(1 + e^\alpha)^{-1}} \\
+&= \frac{e^\alpha}{\log(1 + e^\alpha)}
+\end{align*}
+
+## Variância assintótica
+
+O cálculo da variância assintótica de $\hat\alpha$ passa pela determinação do log da função de verossimilhança, em seguida pela função escore e por fim da informação de Fisher associada à esse parâmetro. Iniciaremos pela verossimilhança:
+
+$$
+LL(y; \rho) = \sum^{n}_{i=1}{y_i \log \rho - \log(-y_i\log(1-\rho))}
+$$
+
+Porém, é necessário deixar a verossimilhança em função de $\alpha$. Para tanto, é necessário mostrar algumas identidades da parametrização:
+
+\begin{align*}
+  \rho &= \frac{e^\alpha}{1 + e^\alpha} \leftrightarrow \\
+  \log \rho &= \log(e^\alpha) - \log(1 + e^\alpha) \leftrightarrow \\
+  \log \rho &= \alpha - \log(1 + e^\alpha)
+\end{align*}
+
+E 
+
+\begin{align*}
+  \rho &= \frac{e^\alpha}{1 + e^\alpha} \leftrightarrow \\
+  -\rho &= -\frac{e^\alpha}{1 + e^\alpha} \leftrightarrow \\
+  1 -\rho &= 1 -\frac{e^\alpha}{1 + e^\alpha} =  \frac{1}{1 + e^\alpha}\leftrightarrow \\
+  \log(1 -\rho) &=  \log(1) - \log{(1 + e^\alpha)}\leftrightarrow \\
+  \log(1 -\rho) &= - \log{(1 + e^\alpha)}
+\end{align*}
+
+Assim, a expressão de $LL(y_i; \rho)$ pode ser escrita em função de $\alpha$ tal que:
+
+\begin{align*}
+LL(y_i; \alpha) 
+&= \sum^{n}_{i=1}{y_i \left( \alpha - \log(1 + e^\alpha) \right) - \log(-y_i(-\log(1+e^\alpha)))} \\
+&= \sum^{n}_{i=1}{y_i \alpha - y_i \log(1 + e^\alpha) - \log(y_i\log(1+e^\alpha))} \\
+&= \sum^{n}_{i=1}{y_i \alpha - y_i \log(1 + e^\alpha) - \log(y_i) - \log(\log(1+e^\alpha))} \\
+\end{align*}
+
+Assim, a função escore é obtida ao derivar a expressão anterior:
+
+\begin{align*}
+U_\alpha  &= \frac{d LL}{d \alpha} \\
+&= \sum^{n}_{i=1}{ \left[ y_i - \frac{y_i e^\alpha}{1 + e^\alpha} - \frac{e^\alpha}{\log(1 + e^\alpha)(1 + e^\alpha)} \right]  } \\
+&= \sum^{n}_{i=1}y_i - \frac{e^\alpha}{1 + e^\alpha}\sum^{n}_{i=1}y_i - \frac{ne^\alpha}{\log(1 + e^\alpha)(1 + e^\alpha)} \\
+&= \left[ 1 - \frac{e^\alpha}{1 + e^\alpha} \right]\sum^{n}_{i=1}y_i - \frac{ne^\alpha}{\log(1 + e^\alpha)(1 + e^\alpha)} \\
+&= \frac{1}{1 + e^\alpha}\sum^{n}_{i=1}y_i - \frac{ne^\alpha}{\log(1 + e^\alpha)(1 + e^\alpha)} \\
+&= \frac{n}{1 + e^\alpha}\left[\bar y - \frac{e^\alpha}{\log(1 + e^\alpha)} \right] \\
+\end{align*}
+
+Em seguida, partimos para o cálculo da segunda derivada de $LL(y_i; \alpha)$:
+
+$$
+\frac{d^2 LL}{d \alpha^2} = \frac{d}{d \alpha} \Bigg\{ \frac{n}{1 + e^\alpha}\left[\bar y - \frac{e^\alpha}{\log(1 + e^\alpha)} \right]\Bigg\}
+$$
+
+Onde, ao aplicarmos a regra da derivada do produto de funções, resulta em:
+
+$$
+\frac{d^2 LL}{d \alpha^2} = -\frac{n}{(1 + e^\alpha)^2}\left[\bar y - \frac{e^\alpha}{\log(1 + e^\alpha)} \right] + \frac{n}{1 + e^\alpha}\frac{e^\alpha\log(1 + e^\alpha) - e^\alpha(1 + e^\alpha)^{-1}e^\alpha}{\log(1 + e^\alpha)^2}
+$$
+
+Com o negativo do valor esperado dessa expressão chegaremos na informação de Fisher para $\alpha$. 
+
+\begin{align*}
+K_{\alpha\alpha} &= E\left(- \frac{d^2 LL}{d \alpha^2}\right) \\
+&= -\frac{n}{(1 + e^\alpha)^2}\left[\mu - \frac{e^\alpha}{\log(1 + e^\alpha)} \right] + \frac{n}{1 + e^\alpha} \left[\frac{e^\alpha\log(1 + e^\alpha) - e^\alpha(1 + e^\alpha)^{-1}e^\alpha}{\log(1 + e^\alpha)^2} \right]
+\end{align*}
+
+Porém, note que $\mu$ em termos do parâmetro $\alpha$ foi calculado no etapa de prova da família exponencial. E sua expressão é:
+
+$$
+\mu = \frac{e^\alpha}{\log(1 + e^\alpha)}
+$$
+
+Por consequência a primeira parcela de $K_{\alpha\alpha}$ é anulada, sendo  
+
+$$
+K_{\alpha\alpha} = \frac{n}{1 + e^\alpha} \left[\frac{e^\alpha\log(1 + e^\alpha) - e^\alpha(1 + e^\alpha)^{-1}e^\alpha}{\log(1 + e^\alpha)^2} \right]
+$$
+
+No enunciado nos é fornecido a função $\tau(\alpha) = (1 + e^\alpha)\log(1 + e^\alpha)$. Manipulando expressão anterior, podemos evidenciar essa função e simplificar ainda mais a informação de Fisher:
+
+\begin{align*}
+K_{\alpha\alpha} &= \frac{n}{1 + e^\alpha} \left[\frac{e^\alpha\log(1 + e^\alpha) - e^\alpha(1 + e^\alpha)^{-1}e^\alpha}{\log(1 + e^\alpha)^2} \right]  \\
+&= \frac{ne^\alpha}{1 + e^\alpha} \left[\frac{\log(1 + e^\alpha) - (1 + e^\alpha)^{-1}e^\alpha}{\log(1 + e^\alpha)^2} \right] \\
+&= \frac{ne^\alpha}{(1 + e^\alpha)\log(1 + e^\alpha)^2} \left[\log(1 + e^\alpha) - (1 + e^\alpha)^{-1}e^\alpha \right] \\
+&= \frac{ne^\alpha(1 + e^\alpha)}{(1 + e^\alpha)^2\log(1 + e^\alpha)^2} \left[\log(1 + e^\alpha) - (1 + e^\alpha)^{-1}e^\alpha \right] \\
+&= \frac{ne^\alpha}{(1 + e^\alpha)^2\log(1 + e^\alpha)^2} \left[(1 + e^\alpha)\log(1 + e^\alpha) - (1 + e^\alpha)(1 + e^\alpha)^{-1}e^\alpha \right] \\
+&= \frac{ne^\alpha}{(1 + e^\alpha)^2\log(1 + e^\alpha)^2} \left[(1 + e^\alpha)\log(1 + e^\alpha) - e^\alpha \right] \\
+&= \frac{ne^\alpha}{\tau(\alpha)^2} \left[\tau(\alpha) - e^\alpha \right] \\
+\end{align*}
+
+Finalmente, variância assintótica de $\hat\alpha$ é obtida a partir da inversa da informação de Fisher $K_{\alpha\alpha}$, ou seja:
+
+$$
+\text{Var}(\hat \alpha) = K_{\alpha\alpha}^{-1} = \frac{\tau(\alpha)^2}{ne^\alpha\left[\tau(\alpha) - e^\alpha \right]}
+$$
+
+## Teste de razão de verossimilhanças
+
+Em seguida iremos buscar o teste de razão de verossimilhanças para testar $H_0: \alpha = 0$ contra $H_1: \alpha \ne 0$. O teste pode ser escrito para o nosso caso como:
+
+$$
+\xi_{RV}= 2[LL(y_i; \hat\alpha) - LL(y_i; 0)]
+$$
+
+Como já escrevemos anteriormente, o logarítimo da função verossimilhança para a distribuição logarítimica na parametrização que estamos estudando é
+
+$$
+LL(y_i; \alpha)  = \sum^{n}_{i=1}{y_i \alpha - y_i \log(1 + e^\alpha) - \log(y_i) - \log(\log(1+e^\alpha))}
+$$
+
+Assim, a estimativa sob $H_0$ é:
+
+\begin{align*}
+LL(y_i; 0) 
+&= \sum^{n}_{i=1}{y_i 0 - y_i \log(1 + 1) - \log(y_i) - \log(\log(1+1))} \\
+&= \sum^{n}_{i=1}{ -y_i \log(2) - \log(y_i) - \log(\log(2))} \\
+&= -\log(2) n \bar y  - n\log(\log(2)) - \sum^{n}_{i=1}\log(y_i) 
+\end{align*}
+
+E sob a estimativa
+
+\begin{align*}
+LL(y_i; \hat\alpha) 
+&= \sum^{n}_{i=1}{y_i \hat\alpha - y_i \log(1 + e^{\hat\alpha}) - \log(y_i) - \log(\log(1+e^{\hat\alpha}))} \\
+&= \hat\alpha \sum^{n}_{i=1}{y_i} -  \log(1 + e^{\hat\alpha})\sum^{n}_{i=1}{y_i}- n\log(\log(1+e^{\hat\alpha})) - \sum^{n}_{i=1}\log(y_i) \\
+&= \hat\alpha n \bar y - \log(1 + e^{\hat\alpha})n \bar y- n\log(\log(1+e^{\hat\alpha})) - \sum^{n}_{i=1}\log(y_i) 
+\end{align*}
+
+A estatística do teste de razão de verossimilhanças é:
+
+\begin{align*}
+\xi_{RV} &= 2[LL(y_i; \hat\alpha) - LL(y_i; 0)] \\
+&= \hat\alpha n \bar y -  \log(1 + e^{\hat\alpha})n \bar y- n\log(\log(1+e^{\hat\alpha})) - \sum^{n}_{i=1}\log(y_i) - \left(  -\log(2) n \bar y  - n\log(\log(2)) - \sum^{n}_{i=1}\log(y_i)\right) \\
+&= \hat\alpha n \bar y -  \log(1 + e^{\hat\alpha})n \bar y- n\log(\log(1+e^{\hat\alpha})) - \sum^{n}_{i=1}\log(y_i) +\log(2) n \bar y  + n\log(\log(2)) + \sum^{n}_{i=1}\log(y_i) \\
+&= \hat\alpha n \bar y -  \log(1 + e^{\hat\alpha})n \bar y- n\log(\log(1+e^{\hat\alpha})) +\log(2) n \bar y  + n\log(\log(2))  \\
+&= n\left(\hat\alpha  \bar y -  \log(1 + e^{\hat\alpha}) \bar y- \log(\log(1+e^{\hat\alpha})) +\log(2)  \bar y  + \log(\log(2))  \right)\\
+&= n\left[\bar y\left( \hat\alpha +\log(2) -  \log(1 + e^{\hat\alpha}) \right)   - \log(\log(1+e^{\hat\alpha}))   + \log(\log(2))  \right]\\
+&= n\left[\bar y\left( \hat\alpha +\log(2) -  \log(1 + e^{\hat\alpha}) \right)   - \log(\log(1+e^{\hat\alpha})\log(2))  \right]
+\end{align*}
+
+A estatística $\xi_{RV}$ segue, assintoticamente e sob $H_0$ uma distribuição qui-quadrado com um grau de liberdade, uma vez que só um parâmetro, $\alpha$, é testado.
+
+# Exercício 4
+
+Seja $Y_i \stackrel{iid}{\sim} ZTP(\lambda)$, ou seja uma variável Poisson truncada em zeros. Sua função de probabilidades é 
+
+$$
+f(y_i; \lambda ) = \frac{e^{-\lambda}\lambda^{y_i}}{y_i! (1-e^{-\lambda})}
+$$
+
+Onde $i = 1, ..., n$ e $y_i = 1, 2, ...$. Calcularemos primeiro o valor esperado de $Y_i$ e em seguida sua variância. 
+
+## Valor esperado
+
+Para o cálculo do valor esperado, iremos omitir o subscrito $i$, para manter uma manipulação mais limpa. 
+
+\begin{align*}
+E(Y) 
+&= \sum^{\infty}_{y=1}{yf(y; \lambda)} \\
+&= \sum^{\infty}_{y=1}{y\frac{e^{-\lambda}\lambda^{y}}{y!(1-e^\lambda)}} \\
+&= \frac{e^{-\lambda}}{(1-e^{-\lambda})}\sum^{\infty}_{y=1}{\frac{\lambda^{y}}{(y - 1)!}} \\
+&= \frac{\lambda e^{-\lambda}}{(1-e^{-\lambda})}\sum^{\infty}_{y=1}{\frac{\lambda^{y-1}}{(y - 1)!}} \\
+\end{align*}
+
+Fazendo a transformação de índices tal que $z= y - 1$ e notando que se $y=1 \rightarrow z=0$, temos uma expansão de taylor exponencial na série com relação à variável z. Com esse fato e um pouco mais de manipulação algébrica, chegamos na expressão buscada:
+
+\begin{align*}
+E(Y) 
+&= \frac{\lambda e^{-\lambda}}{(1-e^{-\lambda})}\sum^{\infty}_{y=1}{\frac{\lambda^{y-1}}{(y - 1)!}} \\
+&= \frac{\lambda e^{-\lambda}}{(1-e^{-\lambda})}\sum^{\infty}_{z=0}{\frac{\lambda^{z}}{(z)!}} \\
+&= \frac{\lambda e^{-\lambda}}{(1-e^{-\lambda})}e^\lambda \\
+&= \frac{\lambda}{(1-e^{-\lambda})} \\
+&= \frac{\lambda}{(1-e^{-\lambda})} \frac{e^\lambda}{e^\lambda}\\
+&= \frac{\lambda e^\lambda}{(e^\lambda - 1)} = \mu\\
+\end{align*}
+
+
+## Variância
+
+O cálculo variância será algebricamente similar ao do valor esperado. Porém utilizaremos adicionalmente a seguinte identidade: 
+
+$$
+E(Y) = E(Y^2) - \left[ E(Y) \right] ^ 2
+$$
+
+Iniciaremos pelo cálculo do segundo momento de $Y$:
+
+\begin{align*}
+E(Y^2) 
+&= \sum^{\infty}_{y=1}{y^2f(y; \lambda)} \\
+&= \sum^{\infty}_{y=1}{y^2\frac{e^{-\lambda}\lambda^{y}}{y!(1-e^\lambda)}} \\
+&= \frac{e^{-\lambda}}{(1-e^{-\lambda})}\sum^{\infty}_{y=1}{\frac{y\lambda^{y}}{(y - 1)!}} \\
+&= \frac{\lambda e^{-\lambda}}{(1-e^{-\lambda})}\sum^{\infty}_{y=1}{\frac{y\lambda^{y-1}}{(y - 1)!}} \\
+&=  \frac{\lambda e^{-\lambda}}{(1-e^{-\lambda})}\sum^{\infty}_{z=0}{\frac{(z+1)\lambda^{z}}{(z)!}}  \;\;\;\;\;\;\;  \text{(tomando} \;\;\ z = y -1 \text{)}\\
+&=  \frac{\lambda e^{-\lambda}}{(1-e^{-\lambda})} \left[ \sum^{\infty}_{z=0}{\frac{\lambda^{z}}{(z)!}} + \sum^{\infty}_{z=0}{\frac{z\lambda^{z}}{(z)!}}  \right] \\ 
+&=  \frac{\lambda e^{-\lambda}}{(1-e^{-\lambda})} \left[ e^\lambda + \sum^{\infty}_{z=1}{\frac{z\lambda^{z}}{(z)!}}  \right] \;\;\;\;\;\;\; \text{o primeiro termo da soma é nulo }  \\  
+&=  \frac{\lambda e^{-\lambda}}{(1-e^{-\lambda})} \left[ e^\lambda + \lambda \sum^{\infty}_{z=1}{\frac{\lambda^{z-1}}{(z-1)!}}  \right] \\  
+&=  \frac{\lambda e^{-\lambda}}{(1-e^{-\lambda})} \left[ e^\lambda + \lambda e^\lambda  \right] \\  
+\end{align*}
+
+Onde a última igualdade parte de um outra mudança de variável que culmina novamente numa expansão de Taylor exponencial ao redor de $\lambda$. Avançando com as manipulações para uma versão mais amigável do segundo momento, temos
+
+\begin{align*}
+E(Y^2) 
+&=  \frac{\lambda}{(1-e^{-\lambda})} \left[ 1 + \lambda \right] \\
+&= \mu[1+\lambda]
+\end{align*}
+
+Por fim
+
+\begin{align*}
+E(Y) 
+&= E(Y^2) - \left[ E(Y) \right] ^ 2 \\
+&= \mu[1+\lambda] + \mu^2 \\
+&= \mu \left[ 1 + \lambda -\mu \right]
+\end{align*}
+
+Que é a expressão no enunciado.
+
+## Função escore
+
+Para o cálculo da informação de Fisher do parâmetro $\lambda$ e da estatística de escore, é necessário partir do função escore do parâmetro.
+
+O logaritmo da verossimilhança para a amostra $i = 1, ..., n$ de $Y_i \stackrel{iid}{\sim} ZTP(\mu)$ é:
+
+\begin{align*}
+  LL(y_i; \lambda) 
+  &= \sum^{n}_{i=1}{\log \frac{e^{-\lambda}\lambda^{y_i}}{y_i!(1-e^\lambda)}} \\
+  &= \sum^{n}_{i=1} \log e^{-\lambda} + \log \lambda^{y_i} - \log y_i! - \log(1- e^{-\lambda}) \\
+  &= \sum^{n}_{i=1} -\lambda + y_i\log \lambda - \log y_i! - \log(1- e^{-\lambda}) \\
+  &=  -n\lambda + \log \lambda\sum^{n}_{i=1}y_i - \sum^{n}_{i=1}\log y_i! - n\log(1- e^{-\lambda})
+\end{align*}
+
+
+A função escore é obtida ao derivar o logaritmo da verossimilhança para com relação ao parâmetro de interesse (que no caso é apenas o $\lambda$):
+
+\begin{align*}
+U_\lambda  
+&= \frac{d LL}{d \lambda}  \\ 
+&= -n + \lambda^{-1}\sum^{n}_{i=1}y_i - n \frac{e^{-\lambda}}{1 - e^{-\lambda}} \\
+&= n \left(\bar y \lambda^{-1} - \frac{e^{-\lambda}}{1 - e^{-\lambda}} -1  \right) \\
+&= n \left( \bar y \lambda^{-1}  - \frac{1}{1 - e^{-\lambda}}\right) \\
+&= n \left( \bar y \lambda^{-1}  - \frac{e^{\lambda}}{e^{\lambda}-1}\right)
+\end{align*}
+
+## Informação de Fisher
+
+Para o cálculo da informação de Fisher é necessário primeiro obter a segunda derivada do logaritmo função de verossimilhança:
+
+\begin{align*}
+  \frac{d^2 LL}{d \lambda^2} &= \frac{d U_\lambda}{d \lambda} \\
+&=n \left( - \bar y \lambda^{-2} - \frac{d}{d \lambda} \frac{e^{\lambda}}{e^{\lambda}-1}\right)
+\end{align*}
+
+
+A derivada restante é calculada separadamente por razões de clareza no desenvolvimento
+
+\begin{align*}
+  \frac{d}{d \lambda} \frac{e^{\lambda}}{e^{\lambda}-1} = \frac{e^{\lambda}(e^{\lambda}-1) - e^{\lambda}e^{\lambda}}{(e^{\lambda}-1)^2}
+\end{align*}
+
+
+Resultando na segunda derivada
+
+$$
+\frac{d^2 LL}{d \lambda^2} = n \left( - \bar y \lambda^{-2} - \frac{e^{\lambda}(e^{\lambda}-1) - e^{\lambda}e^{\lambda}}{(e^{\lambda}-1)^2}\right)
+$$
+
+
+A informação de Fisher é resultando do valor esperado do negativo da segunda derivada da função de verossimilhança, ou seja:
+
+
+\begin{align*}
+K_{\lambda \lambda} 
+&= E \left( -\frac{d^2 LL}{d \lambda^2} \right) \\
+&= n \left(  \frac{\lambda^{-2}}{n} \sum^{n}_{i=1}{E(y_i)}  + \frac{e^{\lambda}(e^{\lambda}-1) - e^{\lambda}e^{\lambda}}{(e^{\lambda}-1)^2}\right)  \\
+&= n \left( \lambda^{-2} \mu  + \frac{e^{\lambda}(e^{\lambda}-1) - e^{2\lambda}}{(e^{\lambda}-1)^2}\right)  \\
+&= n \left( \frac{\lambda^{-2} \lambda e^\lambda }{e^\lambda -1 }  + \frac{e^{2\lambda} + e^\lambda - e^{2\lambda}}{(e^{\lambda}-1)^2}\right)  \\
+&= n \left( \frac{e^\lambda }{\lambda(e^\lambda -1)}  + \frac{e^\lambda}{(e^{\lambda}-1)^2}\right)  \\
+&= n \left( \frac{e^{\lambda}(e^{\lambda}-1)}{\lambda(e^\lambda -1)^2}  + \frac{\lambda e^\lambda}{\lambda(e^{\lambda}-1)^2}\right)  \\
+&= n \left( \frac{e^{2 \lambda} -e^\lambda - \lambda e^\lambda }{\lambda(e^\lambda -1)^2} \right)  \\
+&= n e^\lambda \left( \frac{e^\lambda -1 - \lambda }{\lambda(e^\lambda -1)^2} \right)  \\
+&=   \frac{ne^\lambda (e^\lambda -1 - \lambda )}{\lambda(e^\lambda -1)^2}  \\
+\end{align*}
+
+
+## Estatística de Escore
+
+O próximo e último passo é calcular a estatística escore para testar $H_0: \lambda = 1$ contra $H_1: \lambda \ne 1$. Primeiro vamos obter as funções de escore e a informação de Fisher sob $H_0$:
+
+$$
+U_\lambda = n \left( \bar y \lambda^{-1}  - \frac{e^{\lambda}}{e^{\lambda}-1}\right) \;\; \stackrel{H_0}{\rightarrow} \;\;
+U_\lambda^0 = n \left( \bar y - \frac{e}{e - 1} \right)
+$$
+
+
+$$
+K_{\lambda \lambda} = \frac{ne^\lambda (e^\lambda -1 - \lambda )}{\lambda(e^\lambda -1)^2} \;\; \stackrel{H_0}{\rightarrow} \;\; K_{\lambda \lambda}^0 = \frac{ne(e - 2)}{(e - 1)^2}
+$$
+
+Assim, a estatística de escore é 
+
+$$
+\xi_{SR} = \frac{ \left[U_\lambda^0 \right]^2}{K_{\lambda \lambda}^0} = \frac{n^2 \left(\bar y - \frac{e}{e -1}\right)^2 (e-1)^2}{n e(e - 2)}
+$$
+
+Ou
+
+$$
+\xi_{SR} = \frac{n \left(\bar y - \frac{e}{e -1}\right)^2 (e-1)^2}{e(e - 2)} 
+$$
+
+Por fim, como apenas um parâmetro é testado, a distribuição assintótica de $\xi_{SR}$ sob $H_0$ é uma qui-quadrado com 1 grau de liberdade. 
+
+
+
+

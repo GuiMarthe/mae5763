@@ -1,0 +1,1169 @@
+---
+title: "MAE5763 - Modelos Lineares Generalizados - Resolução da Lista 2"
+author: "Guilherme Marthe - 8661962"
+date: "3/11/2020"
+output:
+  bookdown::pdf_document2:
+    df_print: kable
+    toc: false
+header-includes:
+    - \usepackage{caption}
+    - \usepackage{amsmath}
+    - \allowdisplaybreaks
+fontsize: 11pt
+geometry: margin=1.5cm
+---
+
+\captionsetup[table]{labelformat=empty}
+\counterwithin*{equation}{section}
+
+
+# Exercício 1
+
+No enunciado é apresentado o seguinte modelo
+
+$$
+y_i = \alpha + \beta x_i + \epsilon_i
+$$
+
+Onde $\epsilon_i \stackrel{iid}{\sim} N(0, \sigma^2)$ e $\sigma^2$ é conhecido. É pedido mostrar as equivalências entre as estatisticas de Wald, Razão de verossimilhanças e Escore quando se testa $H_0: \beta = 0$ contra $H_1: \beta \ne 0$. Como sugerido, vamos deixar todas elas em função da estimativa $\hat \beta$.
+
+## Estatística de Wald
+
+Quando a estatística de Wald testa somente um parâmetro, como é o nosso caso, ela tem a seguinte forma
+
+$$
+\xi_W = \frac{ \left( \hat\beta - \beta^0 \right)^2}{\hat{\text{Var}}(\hat \beta)}
+$$
+
+
+Para a hipótese solicitada $\beta^0 = 0$. Abaixo calculamos a variância de $\hat \beta$ a partir da matriz modelo $X$. Seja $\theta = (\alpha, \beta)^T$  o vetor de parâmetros do modelo em questão. A matriz de variância e covariância de $\theta$ é calculada por: 
+
+\begin{align*}
+\text{Var}(\hat \theta) &= \sigma^2 \left( X^T X \right)^{-1}
+\end{align*}
+
+Onde a matriz modelo $X$ é
+
+$$
+X = \begin{bmatrix}
+  1 &  x_1 \\
+  \vdots & \vdots \\
+  1 & x_n
+\end{bmatrix}
+$$
+
+E 
+
+\begin{align*}
+X^TX &= 
+\begin{bmatrix}
+  1 & ... & 1 \\
+  x_1 & ... & x_n
+\end{bmatrix}
+\begin{bmatrix}
+  1 &  x_1 \\
+  \vdots & \vdots \\
+  1 & x_n
+\end{bmatrix} = 
+\begin{bmatrix}
+  n & \sum^{n}_{i=1}{x_i} \\
+  \sum^{n}_{i=1}{x_i} & \sum^{n}_{i=1}{x_i^2}
+\end{bmatrix} \\
+&=
+\begin{bmatrix}
+  n & n \bar x \\
+  n \bar x & \sum^{n}_{i=1}{x_i^2}
+\end{bmatrix} 
+\end{align*}
+
+Uma vez que $\bar x = \frac{1}{n} \sum^{n}_{i=1}{x_i}$. O inverso é de $X^TX$ é
+
+\begin{align*}
+  (X^TX)^{-1} &= \frac{1}{n S_{xx}} \begin{bmatrix}
+    \sum^{n}_{i=1}{x_i^2} & - n \bar x \\
+    - n \bar x & n
+  \end{bmatrix}
+\end{align*}
+
+Onde $S_{xx} = \sum^{n}_{i=1}{(x_i - \bar x)^2}$
+E $\text{Var}(\hat \theta) = \frac{\sigma^2}{n S_{xx}} \begin{bmatrix} \sum^{n}_{i=1}{x_i^2} & - n \bar x \\ - n \bar x & n \end{bmatrix}$ .
+Então, $\text{Var}(\hat \beta) = \frac{\sigma^2}{S_{xx}}$.
+
+Concluímos então que a estatistica de Wald é 
+
+$$
+\xi_W = \frac{ \left( \hat\beta \right)^2}{\hat{\text{Var}}(\hat \beta)} = \frac{\beta^2 S_{xx}}{\sigma^2} 
+$$
+
+Onde $\text{Var}(\hat \beta) = \hat{\text{Var}}(\hat \beta)$, uma vez que $\sigma^2$ é conhecido.
+
+##Estatística de razão de vessossimilhanças
+
+A estatística de razão de verrossimilhanças é calculada a partir do valor da função de verossimilhanças do modelo estimado sob $H_1$ e sob $H_0$. A expressão dessa estatística é 
+
+$$
+ \xi_{RV} = 2\{L(\hat \theta) - L(\theta^0)\}
+$$
+
+Todavia, o modelo linear que estamos avaliando é um caso de um MLG, sendo a distribuição normal a distribuição pertencente à família exponencial de interesse e a ligação canônica que é a identidade. Assim a estatistica do teste de razão de verossimilhanças pode ser escrita como uma diferença de desvios:
+
+$$
+\xi_{RV} = \phi \left[D(y; \mu^0) -  D(y; \hat \mu)\right]
+$$
+
+Onde, em termos dos parâmetros do modelo proposto
+
+\begin{align}
+\hat \mu_i &= \hat\alpha + \hat \beta x_i \nonumber \\
+&= \bar y - \hat \beta \bar x + \hat \beta x_i  \nonumber\\
+&= \bar y + \hat \beta (x_i - \bar x) (\#eq:muuu)
+\end{align}
+
+No caso normal, os desvios são:
+
+$$
+\xi_{RV} = \frac{1}{\sigma^2} \left( \sum^{n}_{i=1}{(y_i - \hat \mu^0_i)^2} - \sum^{n}_{i=1}{(y_i - \hat \mu_i)^2} \right)
+$$
+
+Vamos manipulá-lo para deixa-lo em função das estimativas de $\beta$:
+
+\begin{align*}
+\xi_{RV} &= \frac{1}{\sigma^2} \left( \sum^{n}_{i=1}{(y_i - \hat \mu^0_i)^2} - \sum^{n}_{i=1}{(y_i - \hat \mu_i)^2} \right) \\
+&= \frac{1}{\sigma^2} \left( \sum^{n}_{i=1}{y_i^2 - 2 \hat \mu^0_i y_i + (\mu^0_i)^2} - 
+y_i^2 - \hat\mu_i^2 + 2 \hat \mu_i y_i \right) \\
+&= \frac{1}{\sigma^2} \left(\sum^{n}_{i=1}(\mu^0_i)^2 - \hat\mu_i^2 - 2y_i (\hat \mu^0_i - \hat\mu_i )  \right) \\
+&= \frac{1}{\sigma^2} \left(\sum^{n}_{i=1}((\hat \mu^0_i + \hat\mu_i )(\hat \mu^0_i - \hat\mu_i ) - 2y_i (\hat \mu^0_i - \hat\mu_i )  \right) \\
+&= \frac{1}{\sigma^2} \left(\sum^{n}_{i=1}((\hat \mu^0_i + \hat\mu_i ) - 2y_i)(\hat \mu^0_i - \hat\mu_i )  \right) \\
+\end{align*}
+
+Agora vamos substituir os parâmetros da média usando \@ref(eq:muuu) e o fato de que $\hat \mu^0_i \stackrel{H_0}{=} \hat \alpha^0  \stackrel{H_0}{=}\bar y$:
+
+\begin{align*}
+\xi_{RV} 
+&= \frac{1}{\sigma^2} \left(\sum^{n}_{i=1}((\hat \mu^0_i + \hat\mu_i ) - 2y_i)(\hat \mu^0_i - \hat\mu_i )  \right) \\
+&= \frac{1}{\sigma^2} \left(\sum^{n}_{i=1}(2 \bar y + \hat \beta(x_i - \bar x)  - 2y_i)(- \hat \beta(x_i - \bar x) )  \right) \\
+&= \frac{1}{\sigma^2} \left(\sum^{n}_{i=1}( \hat \beta(x_i - \bar x)  - 2(y_i - \bar y))(- \hat \beta(x_i - \bar x) )  \right) \\
+&= \frac{1}{\sigma^2} \left(\sum^{n}_{i=1} 2\hat \beta(x_i - \bar x)(y_i - \bar y)  - \hat \beta^2(x_i - \bar x)^2  \right) \\
+&= \frac{1}{\sigma^2} 2\hat \beta\sum^{n}_{i=1}(x_i - \bar x)(y_i - \bar y)  - \hat \beta^2\sum^{n}_{i=1}(x_i - \bar x)^2   \\
+&= \frac{1}{\sigma^2} \left[2\hat \beta\sum^{n}_{i=1}(x_i - \bar x)(y_i - \bar y)  - \hat \beta^2\sum^{n}_{i=1}(x_i - \bar x)^2 \right] \\
+&= \frac{1}{\sigma^2} \left[2\hat \beta S_{xy}  - \hat \beta^2S_{xx} \right] \\
+&= \frac{1}{\sigma^2} \left[2\hat \beta S_{xy} \frac{S_{xx}}{S_{xx}}  - \hat \beta^2S_{xx} \right] \\
+&= \frac{1}{\sigma^2} \left[2\hat \beta^2 S_{xx}   - \hat \beta^2S_{xx} \right] \\
+&= \frac{\hat \beta^2 S_{xx}}{\sigma^2} \left[2 - 1 \right] \\
+&= \frac{\hat \beta^2 S_{xx}}{\sigma^2} = \xi_W
+\end{align*}
+
+Então, de fato as estatísticas de Wald e de Razão de verossimilhanças são iguais.
+ 
+
+## Estatística de Escore
+
+
+A estatística de escore não depende de se calcular os valores na função de verossimilhança, apenas sob a função escore, que é a derivada da função de verossimilhança. Para o caso de teste uniparamétrico a estatística tem a seguinte forma:
+
+$$
+\xi_{SR} = \left[ \hat U_{\beta}(\beta^0) \right]^2 \cdot \hat{\text{Var}}_0(\hat \beta)
+$$
+
+As funções escore para os parâmetros do modelo $\theta = (\alpha, \beta)^T$ podem ser obtidas por meio de forma matricial $U_{\theta} = \left[ U_{\alpha}, U_{\beta} \right]^T = \sigma^{-2}X^T(y - \mu)$. Apresentação do desenvolvimento dessas expressões a seguir:
+
+\begin{align*}
+U_{\theta} &= \sigma^{-2} \begin{bmatrix}
+  1 & ... & 1 \\
+  x_1 & ... & x_n
+\end{bmatrix}
+\begin{bmatrix}
+  y_1 - \mu_1 \\
+  \vdots \\
+  y_n - \mu_n \\
+\end{bmatrix} \\
+&= \sigma^{-2} \begin{bmatrix}
+ \sum^{n}_{i=1}{y_i - \mu_i}  \\
+ \sum^{n}_{i=1}{ x_i(y_i - \mu_i)}  \\
+\end{bmatrix}
+\end{align*}
+
+Como explicado, só precisamos usar $U_{\beta} = \sigma^{-2}\sum^{n}_{i=1}{ x_i(y_i-\mu_i)}$. É importante notar o seguinte fato:
+
+\begin{align*}
+S_{xy} 
+&=  \sum^{n}_{i=1}(x_i - \bar x)(y_i - \bar y )\\
+&= \sum^{n}_{i=1} x_iy_i - x_i\bar y -y_i\bar x + \bar x\bar y \\
+&= \sum^{n}_{i=1} x_iy_i - x_i\bar y - \sum^{n}_{i=1}y_i\bar x - \bar x\bar y \\
+&= \sum^{n}_{i=1} x_iy_i - x_i\bar y + \bar x\sum^{n}_{i=1}y_i - \bar y \\
+&= \sum^{n}_{i=1} x_iy_i - x_i\bar y + 0 \\
+&= \sum^{n}_{i=1} x_i(y_i -\bar y)  \\
+\end{align*}
+
+Uma vez que a soma dos desvios das observações com relação à media é zero. Assim, sob $H_0$, $\hat \mu_i \stackrel{H_0}{=} \alpha^0 \stackrel{H_0}{=} \bar y$ e então:
+
+\begin{align*}
+\hat U_{\beta}(\beta^0) 
+&= \sigma^{-2}\sum^{n}_{i=1}{ x_i(y_i-\mu_i)} \\
+&= \sigma^{-2}\sum^{n}_{i=1}{ x_i(y_i-\hat \mu)}\\
+&= \sigma^{-2}S_{xy}
+\end{align*}
+
+A variância assintótica de $\beta$ é a mesma que já apresentamos, e não há alterações nela, uma vez que não depende de parâmetros do modelo e $\sigma^2$ é conhecido. Assim $\hat{\text{Var}}(\hat \beta) = \frac{\sigma^2}{S_{xx}}$. Assim a estatística de escore é dada por
+
+\begin{align*}
+\xi_{SR} 
+&= \left[ \hat U_{\beta}(\beta^0) \right]^2 \cdot \hat{\text{Var}}_0(\hat \beta) \\
+&= \sigma^{-4}S_{xy}^2\frac{\sigma^2}{S_{xx}} \\
+&= \sigma^{-4}S_{xy}^2\frac{\sigma^2 S_{xx}}{S_{xx}S_{xx}} \\
+&= \sigma^{-2}\hat \beta^2S_{xx} \\
+&= \frac{\hat \beta^2S_{xx}}{\sigma^{2}} = \xi_{W} = \xi_{RV}
+\end{align*}
+
+Mostrando a equivalência requisitada.
+
+# Exercício 2
+
+O modelo apresentado pelo enunciado é o seguinte:
+
+
+\begin{equation*} 
+Y_{ij}|x_{j} \stackrel{\text{ind}}{\sim} \text{FE}(\mu_{ij}, \phi)
+\end{equation*} 
+
+Com a parte sistemática dada por
+
+\begin{equation*}
+g(\mu_{ij}) = \eta_{ij} = \alpha_i + \beta x_j 
+\end{equation*}
+
+Com $i=1,2$ e $j=1,\dots,r$. Note que esse modelo equivale à um modelo de retas paralelas com a mesma inclinação $\beta$. 
+Pede-se para encontrar a estatística do teste de escore para testar $H_0: \beta = 0$ contra $H_1: \beta \ne 0$. Ou seja, iremos testar se as retas paralelas correspondentes aos grupos $i=1$ e $i=2$ são horizontais ou têm uma inclinação não nula.
+
+A matriz modelo deste modelo é a seguinte. Note que as primeiras $r$ linhas correspondem ao modelo quando $i=1$ e as últimas $r$ linhas quando $i=2$.
+
+\begin{equation*}
+X = 
+\begin{bmatrix}
+1 & 0 & x_1\\
+\vdots & \vdots & \vdots \\
+1 & 0 & x_r\\
+0 & 1 & x_1 \\
+\vdots & \vdots & \vdots\\
+0 & 1 & x_r \\
+\end{bmatrix}_{2r \times 3}
+\end{equation*}
+
+Definamos os seguinte vetores para desenvolvermos a estatística de score:
+
+\begin{equation*}
+\theta = \begin{bmatrix}
+\beta \\
+\alpha_1 \\
+\alpha_2 \\
+\phi
+\end{bmatrix},
+\;\;
+\theta^0 = \begin{bmatrix}
+0 \\
+\alpha_1^0\\
+\alpha_2^0 \\
+\phi_0
+\end{bmatrix}
+\end{equation*}
+
+Onde $\theta$ corresponde ao vetor de parâmetros do modelo completo e $\theta^0$ é o vetor de parâmetros proposto em $H_0$. Assim, estatística de escore é a seguinte:
+
+$$
+\xi_{SR} = \left[\hat U_{\beta}^0(\theta^0)\right]^T \hat{\text{Var}}_0(\hat \beta) \; \hat U_{\beta}^0(\theta^0)
+$$
+
+$\hat U_{\beta}^0(\theta^0)$ é a função score associada ao parâmetro $\beta$ do modelo proposto, calculada com as estimativas do modelo sob $H_0$. $\hat{ \text{Var}}_0(\hat \beta)$ é a variância assintótica de $\hat \beta$ estimada sob $H_0$.
+
+## Variância assintótica de $\hat\beta$
+
+Iniciando pelo componente $\text{Var}(\hat \beta)$. No caso dos MLGs em que se testam os parâmetros em modelos encaixados, como no nosso caso, podemos decompor a variância assintótica de $\hat \beta$ da sequinte maneira:
+
+$$
+\text{Var}(\hat \beta) = \phi^{-1}(R^TWR)^{-1}
+$$
+
+Com $R = X_1 - X_2C$ e $C = (X_2^TWX_2)X_2^TWX_1$. $X_1$ e $X_2$ são partições da matriz modelo $X$. Concretamente, elas têm a seguinte forma:
+
+\begin{equation*}
+X_1 = 
+\begin{bmatrix}
+x_1\\
+ \vdots \\
+ x_r\\
+ x_1 \\
+ \vdots\\
+ x_r \\
+\end{bmatrix}_{2r \times 1}
+X_2 = 
+\begin{bmatrix}
+1 & 0 \\
+\vdots & \vdots  \\
+1 & 0 \\
+0 & 1 \\
+\vdots & \vdots \\
+0 & 1 \\
+\end{bmatrix}_{2r \times 2}
+\end{equation*}
+
+
+Note que C equivale ao vetor de parâmetros provindas da regressão de $X_2$ em relação às colunas de $X_1$. O cálculo de $C$ é desenvolvido à seguir:
+
+\begin{align*}
+X_2^TW &= \begin{bmatrix}
+  1 & \dots & 1 & 0 & \dots & 0 \\
+  0 & \dots & 0 & 1 & \dots & 1
+\end{bmatrix} \cdot 
+\text{diag} \left\{\omega_{11}, \cdots,\omega_{1r}, \omega_{21}, \cdots, \omega_{2r} \right\} \\
+&= \begin{bmatrix}
+  \omega_{11} & \cdots & \omega_{1r} & 0 & \dots & 0 \\
+  0 & \dots & 0 & \omega_{21} & \cdots & \omega_{2r}
+\end{bmatrix} \\
+X_2^TWX_2 
+&= \begin{bmatrix}
+  \omega_{11} & \dots & \omega_{1r} & 0 & \dots & 0 \\
+  0 & \dots & 0 & \omega_{21} & \dots & \omega_{2r}
+\end{bmatrix} \cdot \begin{bmatrix}
+1 & 0 \\
+\vdots & \vdots\\
+1 & 0 \\
+0 & 1 \\
+\vdots & \vdots \\
+0 & 1 \\
+\end{bmatrix} \\
+&= \begin{bmatrix}
+  \sum_{j=1}^{r} w_{1j} & 0 \\
+  0 & \sum_{j=1}^{r} w_{2j}
+\end{bmatrix}
+\end{align*} 
+
+E invertendo a matriz do resultado anterior
+
+
+\begin{align*}
+(X_2^TWX_2)^{-1} = 
+\begin{bmatrix}
+  \frac{1}{\sum_{j=1}^{r} w_{1j}} & 0 \\
+  0 & \frac{1}{\sum_{j=1}^{r} w_{2j}}
+\end{bmatrix}
+\end{align*}
+
+
+O segundo componente de $C$
+
+\begin{equation*}
+X_2^TWX_2 
+= \begin{bmatrix}
+  \omega_{11} & \dots & \omega_{1r} & 0 & \dots & 0 \\
+  0 & \dots & 0 & \omega_{21} & \dots & \omega_{2r}
+\end{bmatrix} \cdot 
+\begin{bmatrix}
+x_1\\
+ \vdots \\
+ x_r\\
+ x_1 \\
+ \vdots\\
+ x_r \\
+\end{bmatrix} = 
+\begin{bmatrix}
+  \sum_{j=1}^{r} x_jw_{1j} \\
+  \sum_{j=1}^{r} x_jw_{2j}
+\end{bmatrix}
+\end{equation*}
+
+Por fim
+
+\begin{align*}
+C &= 
+\begin{bmatrix}
+  \frac{1}{\sum_{j=1}^{r} w_{1j}} & 0 \\
+  0 & \frac{1}{\sum_{j=1}^{r} w_{2j}}
+\end{bmatrix} \cdot
+\begin{bmatrix}
+  \sum_{j=1}^{r} x_jw_{1j} \\
+  \sum_{j=1}^{r} x_jw_{2j}
+\end{bmatrix} 
+= 
+\begin{bmatrix}
+  \frac{\sum_{j=1}^{r} x_jw_{1j}}{\sum_{j=1}^{r} w_{1j}}  \\
+  \frac{\sum_{j=1}^{r} x_jw_{2j}}{\sum_{j=1}^{r} w_{2j}}
+\end{bmatrix}  \\ \\ 
+  R &= X_1 - X_2C \\
+  &=
+\begin{bmatrix}
+x_1\\
+ \vdots \\
+ x_r\\
+ x_1 \\
+ \vdots\\
+ x_r \\
+\end{bmatrix} - 
+\begin{bmatrix}
+1 & 0 \\
+\vdots & \vdots  \\
+1 & 0 \\
+0 & 1 \\
+\vdots & \vdots \\
+0 & 1 \\
+\end{bmatrix} 
+\cdot 
+\begin{bmatrix}
+  \frac{\sum_{j=1}^{r} x_jw_{1j}}{\sum_{j=1}^{r} w_{1j}}  \\
+  \frac{\sum_{j=1}^{r} x_jw_{2j}}{\sum_{j=1}^{r} w_{2j}}
+\end{bmatrix} \\
+&=
+\begin{bmatrix}
+x_1 - \frac{\sum_{j=1}^{r} x_jw_{1j}}{\sum_{j=1}^{r} w_{1j}}\\
+ \vdots \\
+ x_r - \frac{\sum_{j=1}^{r} x_jw_{1j}}{\sum_{j=1}^{r} w_{1j}}\\
+ x_1 - \frac{\sum_{j=1}^{r} x_jw_{2j}}{\sum_{j=1}^{r} w_{2j}}\\
+ \vdots\\
+ x_r - \frac{\sum_{j=1}^{r} x_jw_{2j}}{\sum_{j=1}^{r} w_{2j}}\\
+\end{bmatrix} 
+\end{align*}
+
+Para o cálculo da variância assintótica $\text{Var}(\hat \beta)$ sob $H_0$, $\text{Var}_0(\hat \beta)$, escrevemos os componentes respeitando as restrições testadas, $\text{Var}_0(\hat \beta) = \phi_0^{-1}(R_0^TW_0R_0)^{-1}$. Nessas condições, a parte sistemática, os pesos, e os elementos de $R$ podem ser escritos como:
+
+\begin{align*}
+\eta_{ij} = \alpha_{i} + \beta x_j &\stackrel{H_0: \beta = 0} \rightarrow \eta_{i} = \alpha_{i}^0 \\ \\
+\omega_{ij} &\stackrel{H_0: \beta = 0} \rightarrow \omega^0_i \\ \\
+R = \left( x_j - \frac{\sum_{j=1}^{r} x_jw_{2j}}{\sum_{j=1}^{r} w_{2j}} \right)_{2r \times1} &\stackrel{H_0: \beta = 0} \rightarrow
+R_0 = \left( x_j - \bar x \right)_{2r \times1} \\ \\
+W = \text{diag} \left\{\omega_{11}, \cdots,\omega_{1r}, \omega_{21}, \cdots, \omega_{2r} \right\} &\stackrel{H_0: \beta = 0} \rightarrow 
+W_0 = \text{diag} \left\{\omega_{1}^0, \cdots,\omega_{1}^0, \omega_{2}^0, \cdots, \omega_{2}^0 \right\}
+\end{align*}
+
+E a variância assintótica é desenvolvida a partir dos seguintes componentes:
+
+\begin{align*}
+R_0^TW_0 
+&= \begin{bmatrix} x_1 - \bar x  & \dots & x_r - \bar x & x_1 - \bar x  & \dots & x_r - \bar x \end{bmatrix} \cdot
+\text{diag} \left\{\omega_{1}^0, \cdots,\omega_{1}^0, \omega_{2}^0, \cdots, \omega_{2}^0 \right\} \\
+&= \begin{bmatrix} \omega_1^0(x_1 - \bar x)  & \dots & \omega_1^0(x_r - \bar x) & \omega_2^0(x_1 - \bar x)  & \dots & \omega_2^0(x_r - \bar x) \end{bmatrix} \\
+R_0^TW_0R_0 &= \begin{bmatrix} \omega_1^0(x_1 - \bar x)  & \dots & \omega_1^0(x_r - \bar x) & \omega_2^0(x_1 - \bar x)  & \dots & \omega_2^0(x_r - \bar x) \end{bmatrix} \cdot 
+\begin{bmatrix}
+   x_1 - \bar x \\
+   \vdots \\
+   x_r - \bar x \\
+   x_1 - \bar x \\
+   \vdots \\
+   x_r - \bar x \\
+\end{bmatrix} \\
+&= \omega_1^0(x_1 - \bar x)^2  + \dots + \omega_1^0(x_r - \bar x)^2 + \omega_2^0(x_1 - \bar x)^2  + \dots + \omega_2^0(x_r - \bar x)^2 \\
+&= \omega_1^0\sum_{j=1}^r(x_j - \bar x)^2 + \omega_2^0\sum_{j=1}^r(x_j - \bar x)^2 \\
+&= (\omega_1^0 + \omega_2^0)\sum_{j=1}^r(x_j - \bar x)^2
+\end{align*}
+
+Resultando nas seguintes expressões. A segunda mostra as estimativas necessárias para se estimar a variância assintótica de $\hat \beta$:
+
+\begin{align*}
+\text{Var}_0(\hat \beta) &= \phi_0^{-1}(R_0^TW_0R_0)^{-1}  = \left(\phi_0(\omega_1^0 + \omega_2^0)\sum_{j=1}^r(x_j - \bar x)^2\right)^{-1} \\
+\hat{\text{Var}_0}(\hat \beta) &= \left(\hat\phi_0(\hat \omega_1^0 + \hat \omega_2^0)\sum_{j=1}^r(x_j - \bar x)^2\right)^{-1} 
+\end{align*}
+
+
+## Função score $U_{\beta}$
+
+A função score é definida como $U_{\beta}(\theta) = \phi X_1^TW^{1/2}V^{-1/2}(\bf{y} - \bf{\mu})$. Porém podemos reescrevê-la em função do resíduo de Pearson $r_p = \phi^{1/2}V^{-1/2}(\bf{y} - \bf{\mu})$ e $U_{\beta}(\theta) = \phi^{1/2} X_1^TW^{1/2}r_p$
+
+Iniciaremos o cálculo por $X_1^TW^{1/2}$:
+
+
+\begin{align*}
+X_1^TW^{1/2} &= 
+\begin{bmatrix}
+  x_1 & \dots & x_r & x_1 & \dots & x_r
+\end{bmatrix} 
+\cdot
+\text{diag} \left\{\sqrt\omega_{11}, \cdots,\sqrt\omega_{1r}, \sqrt\omega_{21}, \cdots, \sqrt\omega_{2r} \right\} \\
+&= 
+\begin{bmatrix}
+  x_1\sqrt\omega_{11} & \dots & x_r\sqrt\omega_{1r} & x_1\sqrt\omega_{21} & \dots & x_r\sqrt\omega_{2r}
+\end{bmatrix} 
+\end{align*}
+
+Utilizando o resíduo de Pearson por obsevação, ficamos com:
+
+\begin{align*}
+X_1^TW^{1/2}r_p &= 
+\begin{bmatrix}
+  x_1\sqrt\omega_{11} & \dots & x_r\sqrt\omega_{1r} & x_1\sqrt\omega_{21} & \dots & x_r\sqrt\omega_{2r} 
+\end{bmatrix} 
+\cdot
+\begin{bmatrix}
+  r_{11} \\
+  \vdots \\
+  r_{1r} \\
+  r_{21} \\
+  \vdots \\
+  r_{2r} \\
+\end{bmatrix} \\
+&= \sum_{j=1}^{r}x_j\sqrt\omega_{1j}r_{1j} + \sum_{j=1}^{r}x_j\sqrt\omega_{2j}r_{2j}
+\end{align*}
+
+Onde $r_{ij} = \frac{\phi^{1/2}(y_{ij} - \mu_{ij})}{\sqrt{V_{ij}}}$. Assim o elemento da soma de cada um dos grupos, quando o resíduo é desmembrado:
+
+\begin{align}
+x_j\sqrt\omega_{ij}r_{ij} 
+&= \frac{x_j\sqrt\omega_{ij}\phi^{1/2}(y_{ij} - \mu_{ij})}{\sqrt{V_{ij}}} (\#eq:componentedasoma)
+\end{align}
+
+Nesse estágio do desenvolvimento da estatística de escore, precisamos assumir que a ligação utilizada no modelo de retas paralelas proposto é canônica. A razão disso é a seguinte: como os pesos são definidos como $\omega_{ij} = \left(\frac{d\mu_{ij}}{d \eta_{ij}} \right)^2 V_i^{-1}$. Se a ligação for canônica $\eta_{ij} = \theta_{ij}$, ou seja o componente linear sistemático coincide com o parâmetro canônico da família exponencial. Assim $\omega_{ij} = \left(\frac{d\mu_{ij}}{d \theta_{ij}} \right)^2 V_i^{-1}$ e, pela propriedade da família exponencial, $\frac{d\mu_{ij}}{d \theta_{ij}} = V_{ij}$. Por fim, os pesos sob a ligação canônica são expressos pela seguinte forma amigável $\omega_{ij} =V_{ij}^2 V_{ij}^{-1}= V_{ij}$. 
+
+Com isso, os pesos/variâncias dos componentes da soma na função escore de $U_{\beta}$ descritos em \@ref(eq:componentedasoma) se cancelam quando a ligação do modelo é canônica:
+
+\begin{align}
+x_j\sqrt\omega_{ij}r_{ij} 
+&= \frac{x_j\sqrt\omega_{ij}\phi^{1/2}(y_{ij} - \mu_{ij})}{\sqrt{V_{ij}}}  \\
+&= \frac{x_j\sqrt\omega_{ij}\phi^{1/2}(y_{ij} - \mu_{ij})}{\sqrt{\omega_{ij}}} \\
+&= \phi^{1/2}x_j(y_{ij} - \mu_{ij})
+\end{align}
+
+E a função escore possui então a seguinte forma:
+
+\begin{align*}
+  U_{\beta}(\theta) &= \phi^{1/2}\left[\sum_{j=1}^{r}\phi^{1/2}x_j(y_{1j} - \mu_{1j}) + \sum_{j=1}^{r}\phi^{1/2}x_j(y_{2j} - \mu_{2j}) \right] \\
+  &= \phi\left[\sum_{j=1}^{r}x_j(y_{1j} - \mu_{1j}) + \sum_{j=1}^{r}x_j(y_{2j} - \mu_{2j}) \right]
+\end{align*}
+
+O próximo passo é entender como os componentes de $U_{\beta}(\theta)$ deveriam ser escritos sob $H_0$, ou seja, qual  forma de $U_{\beta}(\theta^0)$. Como já expomos anteriormente, no cálculo da variância assintótica de $\hat \beta$:
+
+$$
+\eta_{ij} = \alpha_{i} + \beta x_j \stackrel{H_0: \beta = 0} \rightarrow \eta_{i} = \alpha_{i}^0
+$$
+
+
+Adicionalmente, ainda sob  $H_0$ temos
+
+$$
+\mu_{ij} = g^{-1}(\eta_{ij}) \stackrel{H_0: \beta = 0} \rightarrow \mu_{i}^0 = g^{-1}(\alpha_{i}^0) = \bar y_i
+$$
+
+Portanto, o vetor de parâmetros $\theta$ sob a hipótese nula é:
+
+\begin{equation*}
+\theta = \begin{bmatrix}
+\beta \\
+\alpha_1 \\
+\alpha_2 \\
+\phi
+\end{bmatrix} \stackrel{H_0: \beta = 0} \rightarrow
+\;\;
+\theta^0 = \begin{bmatrix}
+0 \\
+\bar y_1\\
+\bar y_2 \\
+\phi_0
+\end{bmatrix}
+\end{equation*}
+
+Culminando na seguinte função escore estimada:
+
+\begin{align*}
+  U_{\beta}(\theta) 
+  &= \phi\left[\sum_{j=1}^{r}x_j(y_{1j} - \mu_{1j}) + \sum_{j=1}^{r}x_j(y_{2j} - \mu_{2j}) \right] \nonumber\\
+  \downarrow \nonumber\\
+  \hat U_{\beta}(\theta^0) 
+  &= \hat \phi_0 \left[\sum_{j=1}^{r}x_j(y_{1j} - \bar y_1) + \sum_{j=1}^{r}x_j(y_{2j} - \bar y_2) \right] 
+\end{align*}
+
+## Estatística escore
+
+Como estamos testando apenas um parâmetro, a estatística de escore resultante é a seguinte
+
+\begin{align*}
+\xi_{SR} &= \left[\hat U_{\beta}^0(\theta^0)\right]^T \hat{\text{Var}}_0(\hat \beta) \; \hat U_{\beta}^0(\theta^0) \\
+&= \left[\hat U_{\beta}^0(\theta^0)\right]^2 \hat{\text{Var}}_0(\hat \beta)
+\end{align*}
+
+Juntando os componentes calculados nas seções anteriores, nomeadamente, a função escore e a variância assintótica, ambas para o parâmetro $\beta$ e estimadas sob a hipótese nula. Vamos reproduzir ambas a seguir:
+
+\begin{align*}
+    \hat U_{\beta}(\theta^0) 
+  &= \hat \phi_0 \left[\sum_{j=1}^{r}x_j(y_{1j} - \bar y_1) + \sum_{j=1}^{r}x_j(y_{2j} - \bar y_2) \right] \\
+\hat{\text{Var}_0}(\hat \beta) &= \left(\hat\phi_0(\hat \omega_1^0 + \hat \omega_2^0)\sum_{j=1}^r(x_j - \bar x)^2\right)^{-1} 
+\end{align*}
+
+Finalmente, a expressão da algébrica estatística de escore é:
+
+\begin{align*}
+\xi_{SR} &= 
+\frac{
+\left(\hat \phi_0 \left[\sum_{j=1}^{r}x_j(y_{1j} - \bar y_1) + \sum_{j=1}^{r}x_j(y_{2j} - \bar y_2) \right]  \right)^2
+}{
+\hat\phi_0(\hat \omega_1^0 + \hat \omega_2^0)\sum_{j=1}^r(x_j - \bar x)^2
+}
+\\
+&=
+\frac{
+\hat \phi_0 \left[\sum_{j=1}^{r}x_j(y_{1j} - \bar y_1) + \sum_{j=1}^{r}x_j(y_{2j} - \bar y_2) \right]  ^2
+}{
+(\hat \omega_1^0 + \hat \omega_2^0)\sum_{j=1}^r(x_j - \bar x)^2
+}
+\end{align*}
+
+Que de fato é a forma apresentada no enunciado. Note que, por usarmos a ligação canônica nos para se alcançar os resultados, a notação $\omega_i^0$ pode ser substituída por $V_i^0$, uma vez que eles são iguais sob essas condições. 
+
+# Exercício 3 
+
+A função densidade de uma variável $Y_i \stackrel{\text{iid}}{\sim} \text{NI}(\mu,\phi)$ tem a seguinte forma:
+
+\begin{equation*}
+  \frac{\phi^{1/2}}{\sqrt{2\pi y^3}}\text{exp}\left[- \frac{\phi(y -\mu)^2}{2\mu^2y}\right]
+\end{equation*}
+
+O enunciado pede que apresentemos a estatística da razão de verossimilhanças para testar a hipótese $H_0: \phi = 1$ contra $H_1: \phi \ne 1$. Assumo que o parâmetro $\mu$ é desconhecido, e por isso será necessário estimá-lo por máxima verossimilhança. O teste de razão de verossimilhança é dado pela seguinte expressão:
+
+\begin{equation*}
+\xi_{RV} = 2(L(y_i;\hat \mu, \hat \phi) - L(y_i;\hat \mu, 1))
+\end{equation*}
+
+
+Para tanto,   utilizaremos a forma da função de densidade que além de provar que $Y_i$ pertence à família exponencial, também facilita um pouco as computações:
+
+\begin{equation*}
+\text{exp} \left[ \phi \left( - \frac{y}{2\mu^2} + \frac{1}{\mu} \right) - \frac{1}{2} \left[ \text{log}(2\pi y^3/\phi) + \frac{\phi}{y}\right]  \right]
+\end{equation*}
+
+
+As computações a seguir a função de verosimilhança que usa função de densidade apresentada. Já partindo do seu logarítimo, temos
+
+\begin{align*}
+  L(y_i; \mu,  \phi) &= 
+  \sum^{n}_{i=1}{
+   \left[ \phi \left( - \frac{y_i}{2\mu^2} + \frac{1}{\mu} \right) - \frac{1}{2} \left[ \text{log}(2\pi y_i^3/\phi) + \frac{\phi}{y_i}\right]  \right]
+  } \\
+&=
+  \sum^{n}_{i=1}{
+   \left[ \phi \left(  \frac{2\mu - y_i}{2\mu^2} \right) - \frac{1}{2} \left[ \text{log}(2\pi y_i^3/\phi) + \frac{\phi}{y_i}\right]  \right]
+  } \\
+&=
+ \frac{\phi}{2\mu^2} \left( 2n\mu - \sum^{n}_{i=1}{y_i} \right) - \frac{1}{2} \sum^{n}_{i=1}{\text{log}(2\pi y_i^3)}   + \frac{n\text{log}(\phi)}{2} - \frac{\phi}{2} \sum^{n}_{i=1}{}\frac{1}{y_i}  
+\end{align*}
+
+Derivando com relação ao parâmetro $\mu$, obtemos a função score do parâmetro
+
+\begin{align*}
+  \frac{\partial L }{\partial \mu} &= \frac{\phi}{2} \frac{-2}{\mu^3} \left(  2n\mu - \sum^{n}_{i=1}{y_i} \right) + \frac{2n\phi}{2\mu^2} \\
+&= - \frac{\phi}{\mu^3} \left(  2n\mu - \sum^{n}_{i=1}{y_i} \right) + \frac{n\phi}{\mu^2}
+\end{align*}
+
+Igualando a zero a expressão anterior, chegamos na estimativa de máxima verossimilhança para $\mu$:
+
+\begin{align*}
+  &\frac{\partial L }{\partial \mu} = 0 &\Leftrightarrow \\ 
+  -&\frac{\phi}{\mu^3} \left(  2n\mu - \sum^{n}_{i=1}{y_i} \right) + \frac{n\phi}{\mu^2} = 0 &\Leftrightarrow\\
+  -&\frac{\left(  2n\mu - \sum^{n}_{i=1}{y_i} \right)}{\mu^3}  + \frac{n\mu}{\mu^2\mu} = 0 &\Leftrightarrow \\
+  -& 2n\mu + \sum^{n}_{i=1}{y_i}   + n\mu = 0 &\Leftrightarrow \\
+  & \sum^{n}_{i=1}{y_i} - n\mu = 0 &\Leftrightarrow \\
+  &  \hat \mu = \frac{1}{n}\sum^{n}_{i=1}{y_i} = \bar y \\
+\end{align*}
+
+O próximo passo é calcular uma expressão para a função de verossimilhança quando as estimativas estão sob o modelo proposto (em $H_0$ e $H_1$). Calcularemos primeiro $L(y_i;\hat \mu, \hat \phi)$:
+
+
+\begin{align}
+\begin{split}
+L(y_i;\hat \mu, \hat \phi) &= 
+  \sum^{n}_{i=1}{
+   \left[ \hat \phi \left( - \frac{y_i}{2\hat \mu^2} + \frac{1}{\hat \mu} \right) - \frac{1}{2} \left[ \text{log}(2\pi y_i^3/ \hat\phi) + \frac{ \hat \phi}{y_i}\right]  \right]
+  }   (\#eq:l) \\
+\end{split}
+\end{align}
+
+Antes de reduzirmos a expressão de $L(y_i;\hat \mu, \hat \phi)$, iremos reescrever o fator que multiplica o primeiro $\phi$ de maneira conveniente. Note que omitimos o subscrito $i$ e a notação que indica estimativas para mantermos clareza nas manipulações:
+
+\begin{align*}
+- \frac{y}{2\mu^2} + \frac{1}{\mu} &= \frac{-y + 2\mu}{2\mu^2} \frac{(-y)}{(-y)} \\
+&= -\frac{y^2 -2\mu y + \mu^2 - \mu^2}{2\mu^2 y} \\
+&= (-1) \left[ \frac{(y - \mu)^2}{2\mu^2y} -  \frac{\mu^2}{2\mu^2y}  \right] \\
+&= -\frac{(y - \mu)^2}{2\mu^2y} + \frac{1}{2y}
+\end{align*}
+
+Desta maneira podemos escrever \@ref(eq:l) da seguinte forma:
+
+\begin{align*}
+L(y_i;\hat \mu, \hat \phi) &= 
+  \sum^{n}_{i=1}{
+   \left[ \hat \phi \left(-\frac{(y_i - \hat\mu)^2}{2\hat\mu^2y_i} + \frac{1}{2y_i} \right) - \frac{1}{2} \left[ \text{log}(2\pi y_i^3/\hat\phi) + \frac{\hat \phi}{y_i}\right]  \right]
+  } \\
+\end{align*}
+
+Desenvolvendo os somatórios temos:
+
+\begin{align}
+\begin{split}
+L(y_i;\hat \mu, \hat \phi) &= 
+  \sum^{n}_{i=1}{
+   \left[ \hat \phi \left(-\frac{(y_i - \hat\mu)^2}{2\hat\mu^2y_i} + \frac{1}{2y_i} \right) - \frac{1}{2} \left[ \text{log}(2\pi y_i^3/\hat\phi) + \frac{\hat \phi}{y_i}\right]  \right]
+  } \\
+&= - \frac{ \hat \phi}{2} \sum^{n}_{i=1}{\frac{(y_i - \hat\mu)^2}{\hat\mu^2y_i}} + \frac{\hat \phi}{2} \sum \frac{1}{y_i} - \frac{1}{2} \sum^{n}_{i=1}{\text{log}(2\pi y_i^3)} + \frac{n\text{log}(\hat \phi)}{2} - \frac{\hat\phi}{2} \sum^{n}_{i=1}{}\frac{1}{y_i} \\
+&= \frac{n\text{log}(\hat\phi)}{2} - \frac{ \hat \phi}{2} \sum^{n}_{i=1}{\frac{(y_i - \hat\mu)^2}{\hat\mu^2y_i}} - \frac{1}{2} \sum^{n}_{i=1}{\text{log}(2\pi y_i^3)} (\#eq:almost)
+\end{split}
+\end{align}
+
+Note que, para o caso de uma variável aleatória distribuída por uma Normal Inversa, a função desvio é dada por
+
+\begin{equation*}
+D(\boldsymbol{y}, \boldsymbol{\hat\mu} ) = \sum^{n}_{i=1}{\frac{(y_i - \hat\mu)^2}{\hat\mu^2y_i}}
+\end{equation*}
+
+
+
+Assim, podemos reescrever \@ref(eq:almost) 
+
+\begin{align*}
+L(y_i;\hat \mu, \hat \phi) &=  
+\frac{n\text{log}(\hat\phi)}{2} - \frac{ \hat \phi}{2} \sum^{n}_{i=1}{\frac{(y_i - \hat\mu)^2}{\hat\mu^2y_i}} - \frac{1}{2} \sum^{n}_{i=1}{\text{log}(2\pi y_i^3)} \\
+&=
+\frac{n\text{log}(\hat\phi)}{2} - \frac{ \hat \phi}{2} D(\boldsymbol{y}, \boldsymbol{\hat\mu} ) - \frac{1}{2} \sum^{n}_{i=1}{\text{log}(2\pi y_i^3)} \\
+\end{align*}
+
+
+Assim, podemos partir para o cálculo de $\xi_{RV}$ a partir de sua definição e substituindo os casos particulares de $H_0$ e $H_1$:
+
+\begin{align}
+\begin{split}
+\xi_{RV} &= 2(L(y_i;\hat \mu, \hat \phi) - L(y_i;\hat \mu, 1)) \\
+&= 2\left[ 
+\frac{n\text{log}(\hat\phi)}{2} - \frac{ \hat \phi}{2} D(\boldsymbol{y}, \boldsymbol{\hat\mu} ) - \frac{1}{2} \sum^{n}_{i=1}{\text{log}(2\pi y_i^3)}  -
+\left( \frac{n\text{log}(1)}{2} - \frac{1}{2} D(\boldsymbol{y}, \boldsymbol{\hat\mu} ) - \frac{1}{2} \sum^{n}_{i=1}{\text{log}(2\pi y_i^3)} \right)
+ \right] \\
+ &=n\text{log}(\hat\phi) - \hat \phi D(\boldsymbol{y}, \boldsymbol{\hat\mu} )  +  D(\boldsymbol{y}, \boldsymbol{\hat\mu} ) (\#eq:finale)
+\end{split}
+\end{align}
+
+Porém, nos é fornecido no enunciado que $\hat \phi = \frac{n}{D(\boldsymbol{y}, \boldsymbol{\hat\mu} )}$, levando ao fato que $D(\boldsymbol{y}, \boldsymbol{\hat\mu} ) = n \hat \phi^{-1}$. Munidos disso, podemos desenvolver \@ref(eq:finale) ainda mais:
+
+\begin{align*}
+\xi_{RV} &= n\text{log}(\hat\phi) - \hat \phi D(\boldsymbol{y}, \boldsymbol{\hat\mu} )  +  D(\boldsymbol{y}, \boldsymbol{\hat\mu} ) \\
+&= n\text{log}(\hat\phi) - \hat \phi \hat \phi^{-1} n  + n \hat \phi^{-1}  \\
+&= n\text{log}(\hat\phi) + n(\hat \phi^{-1} - 1)
+\end{align*}
+
+Que é o resultado requisitado pelo enunciado.
+
+\pagebreak
+# Exercício  4
+
+O modelo proposto no enunciado consiste em $Y_{ij} \stackrel{ind}{\sim} Poisson(\mu_{ij})$ para $i,j=1,2$. O componente sistmático do modelo é
+
+$$
+\text{log}(\mu_{ij}) = \alpha + \beta_i + \gamma_j + \delta_{ij}
+$$
+
+Onde, para permitir a identificabilidade do modelo, temos $\beta_1 = \gamma_1 = 0$ e $\delta_{11} = \delta_{12} = \delta_{21} = 0$ e $\delta_{22} = \delta$. Onde $\beta_1$ e $\beta_2$ correspondem aos efeitos do fator A e $\gamma_1$ e $\gamma_2$ correspondem aos efeitos do fator B. 
+
+## Modelo Multinomial
+
+
+Com relação aos fatores A e B, e seus respectivos níveis, $A_1$ e $A_2$ (correspondentes à $i=1,2$) e  $B_1$ e $B_2$ (correspondentes à $j=1,2$), podemos pensar no modelo proposto para $Y_{ij}$ como a tabela de contingência 2x2 a seguir. 
+
+```{r echo=FALSE}
+suppressPackageStartupMessages({
+  library(tidyverse) 
+  library(knitr) 
+  library(kableExtra)
+})
+
+tribble(
+~'', ~'', ~`$A_1$`, ~`$A_2$`,
+'B','$B_1$', '$Y_{11}$', '$Y_{21}$',      
+'B', '$B_2$', '$Y_{12}$', '$Y_{22}$'
+) %>% 
+  kable('latex', escape = F, align='c', booktabs=T) %>% 
+  kable_styling(latex_options = c('hold_position')) %>% 
+  add_header_above(c(' '=2, 'A'=2)) %>% 
+  collapse_rows(columns = 1, valign = 'middle')
+
+```
+
+
+E as partes sistemáticas associadas à cada uma dessas combinações de fatores, quando substituímos as restrições do impostas pela identificabilidade do modelo, ficam dadas por
+
+$$
+\text{log}(\mu_{11}) = \alpha
+$$
+
+$$
+\text{log}(\mu_{12}) = \alpha + \gamma_2
+$$
+
+$$
+\text{log}(\mu_{21}) = \alpha + \beta_2
+$$
+
+$$
+\text{log}(\mu_{22}) = \alpha + \beta_2 + \gamma_2 + \delta
+$$
+
+
+Com essa especificação do modelo Poisson em termos dos fatores A e B, se condicionarmos o problema em $n= \sum^{2}_{i=1} \sum^{2}_{j=1}{Y_{ij}}$, temos que
+
+$$
+\boldsymbol{Y} \sim \text{Multinomial}(n, \boldsymbol{\pi})
+$$
+
+Com $\boldsymbol{Y} = (Y_{11}, Y_{12}, Y_{21}, Y_{22})^T$ e $\boldsymbol{\pi} = (\pi_{11}, \pi_{12}, \pi_{21}, \pi_{22})$. 
+Onde $\pi_{ij}$ é, quando em função das médias de $Y_{ij}$, dado por
+
+
+$$
+\pi_{ij} = \frac{\mu_{ij}}{ \sum^{2}_{i=1} \sum^{2}_{j=1}{\mu_{ij}} } 
+$$
+
+E em seguida, mostramos a expressão de $\pi_{ij}$ em termos das partes sistemática que englobam os efeitos dos fatores A e B:
+
+
+\begin{equation}
+\pi_{ij} = \frac{e^{\alpha + \beta_i + \gamma_j + \delta_{ij}} }{ \sum^{2}_{i=1} \sum^{2}_{j=1}{e^{\alpha + \beta_i + \gamma_j + \delta_{ij}} } }  (\#eq:pij)
+\end{equation}
+
+
+
+
+## Independência probabilística entre os fatores
+
+
+Partindo da tabela de contingência apresentada na seção anterior e condicionados à $n= \sum^{2}_{i=1} \sum^{2}_{j=1}{Y_{ij}}$ podemos construir a seguinte tabela de contingência relativa entre os fatores A e B
+
+
+```{r echo=FALSE}
+tribble(
+~'', ~'', ~`$A_1$`, ~`$A_2$`, ~B,
+'B','$B_1$', '$\\pi_{11}$', '$\\pi_{21}$', '$\\pi_{+1}$',   
+'B', '$B_2$', '$\\pi_{12}$', '$\\pi_{22}$', '$\\pi_{+2}$',
+'Marginal', 'A', '$\\pi_{1+}$', '$\\pi_{2+}$', '1'
+) %>% 
+  kable('latex', escape = F, align='c', booktabs=T) %>% 
+  kable_styling(latex_options = c('hold_position')) %>% 
+  add_header_above(c(' '=2, 'A'=2, 'Marginal'=1)) %>% 
+  collapse_rows(columns = 1, valign = 'middle')
+```
+
+Adicionamos margens à tabela, que correspondem às distribuições marginais dos fatores. Além disso $\pi_{i+} = \sum^{2}_{j=1}{\pi_{ij}}$ e $\pi_{+j} = \sum^{2}_{1=1}{\pi_{ij}}$.
+
+Pede se para mostrar que a indepêndencia probabilistica entre os fatores A e B ocorre quando $\delta_{22}=\delta=0$. Mostrar a independência probabilística nesse contexto implica em mostrar que
+
+$$
+\pi_{ij} = \pi_{i+} \cdot \pi_{+j} \;\;\;\; \forall \,\,i,j = 1,2
+$$
+
+Ou, em outras palavras, equivale à mostrar com o produtos das distribuições maginais coincide com a probabilidade conjunta para todos as combinações de níveis entre A e B. Mostraremos cada um dos pares $i,j = 1, 2$, porém antes precisamos levar as expressões de $\pi_{ij}$, definidas em \@ref(eq:pij), para versões mais amigáveis. Primeiro vamos nos livrar do intercepto dos modelos poisson, uma vez que a equivalência entre os modelos multinomial e poisson só se da às variáveis dentro do modelo, e as equivalências entre interceptos não é relevante para o que queremos mostrar:
+ 
+\begin{align}
+\pi_{ij} &= \frac{e^{\alpha + \beta_i + \gamma_j + \delta_{ij}} }{ \sum^{2}_{i=1} \sum^{2}_{j=1}{e^{\alpha + \beta_i + \gamma_j + \delta_{ij}} } } \nonumber \\
+&= \frac{e^{\alpha}e^{ \beta_i + \gamma_j + \delta_{ij}} }{ e^{\alpha}\sum^{2}_{i=1} \sum^{2}_{j=1}{e^{\beta_i + \gamma_j + \delta_{ij}} } }  \nonumber \\ 
+&=  \frac{e^{ \beta_i + \gamma_j + \delta_{ij}} }{\sum^{2}_{i=1} \sum^{2}_{j=1}{e^{\beta_i + \gamma_j + \delta_{ij}} } } (\#eq:pijeasier)  
+\end{align} 
+
+Em seguida, manipulamos o denominador de \@ref(eq:pijeasier), uma vez que ele é comum à todos os $\pi_{ij}$
+
+\begin{align*}
+\sum^{2}_{i=1} \sum^{2}_{j=1}{e^{\beta_i + \gamma_j + \delta_{ij}} } = 1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2 + \delta}
+\end{align*}
+
+E então podemos chegar às espressões de cada $\pi_{ij}$:
+
+$$
+\pi_{11} = \frac{1}{1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2 + \delta}}
+$$
+
+$$
+\pi_{12} = \frac{e^{\beta_2}}{1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2 + \delta}}
+$$
+
+$$
+\pi_{21} = \frac{e^{\gamma_2}}{1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2 + \delta}}
+$$
+
+$$
+\pi_{22} = \frac{e^{\beta_2 + \gamma_2 + \delta}}{1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2 + \delta}}
+$$
+
+### $\pi_{11} = \pi_{1+} \cdot \pi_{+1}$
+
+\begin{align*}
+  \pi_{1+} \cdot \pi_{+1} &= (\pi_{11} + \pi_{12})\cdot(\pi_{11} + \pi_{21}) \\
+  &= \frac{(1 + e^{\gamma_2})(1 + e^{\beta_2})}{(1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2 + \delta})^2} \\
+  &=\frac{1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2}}{{(1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2 + \delta})^2}}
+\end{align*}
+
+Se $\delta=0$:
+
+\begin{align*}
+  \pi_{1+} \cdot \pi_{+1}  &=\frac{1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2}}{{(1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2})^2}} \\
+  &= \frac{1}{1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2}} \\
+  &= \pi_{11}
+\end{align*}
+
+
+### $\pi_{12} = \pi_{1+} \cdot \pi_{+2}$
+
+
+\begin{align*}
+  \pi_{1+} \cdot \pi_{+2} &= (\pi_{11} + \pi_{12})\cdot(\pi_{12} + \pi_{22}) \\
+  &= \frac{(1 + e^{\gamma_2})(e^{\gamma_2} + e^{\beta_2 + \gamma_2 + \delta})}{(1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2 + \delta})^2} \\
+  &=\frac{e^{\gamma_2} + e^{\beta_2 + \gamma_2 + \delta} + e^{\gamma_2}e^{\gamma_2} + e^{\gamma_2}e^{\beta_2 + \gamma_2 + \delta}}{{(1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2 + \delta})^2}} \\
+  &= \frac{e^{\gamma_2 } \left( 1 + e^{\gamma_2} +  e^{\beta_2 + \delta} + e^{\beta_2 + \gamma_2 + \delta} \right)}{{(1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2 + \delta})^2}}
+\end{align*}
+
+Tomando $\delta = 0$:
+
+\begin{align*}
+  \pi_{1+} \cdot \pi_{+2} 
+  &= \frac{e^{\gamma_2 } \left( 1 + e^{\gamma_2} +  e^{\beta_2 } + e^{\beta_2 + \gamma_2 } \right)}{{(1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2 })^2}} \\
+  &= \frac{e^{\gamma_2 }}{1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2 }} \\
+  &= \pi_{12}
+\end{align*}
+
+
+### $\pi_{21} = \pi_{2+} \cdot \pi_{+1}$
+
+
+\begin{align*}
+  \pi_{2+} \cdot \pi_{+1} &= (\pi_{21} + \pi_{22})\cdot(\pi_{11} + \pi_{21}) \\
+  &= \frac{(e^{\beta_2} + e^{\beta_2 + \gamma_2 + \delta})(1 + e^{\beta_2})}{(1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2 + \delta})^2} \\
+  &=\frac{e^{\beta_2} + e^{\beta_2}e^{\beta_2} + e^{\beta_2 + \gamma_2 + \delta} + e^{\beta_2}e^{\beta_2 + \gamma_2 + \delta}}{{(1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2 + \delta})^2}} \\
+  &= \frac{e^{\beta_2 } \left( 1 + e^{\gamma_2} +  e^{\gamma_2 + \delta} + e^{\beta_2 + \gamma_2 + \delta} \right)}{{(1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2 + \delta})^2}}
+\end{align*}
+
+Com $\delta=0$:
+
+
+\begin{align*}
+  \pi_{2+} \cdot \pi_{+1} 
+  &= \frac{e^{\beta_2 } \left( 1 + e^{\gamma_2} +  e^{\gamma_2 } + e^{\beta_2 + \gamma_2 } \right)}{{(1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2 })^2}} \\
+  &= \frac{e^{\beta_2 }}{1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2 }} \\
+  &= \pi_{21}
+\end{align*}
+
+
+
+### $\pi_{22} = \pi_{2+} \cdot \pi_{+2}$
+
+
+\begin{align*}
+  \pi_{2+} \cdot \pi_{+2} &= (\pi_{21} + \pi_{22})\cdot(\pi_{12} + \pi_{22}) \\
+  &= \frac{(e^{\beta_2} + e^{\beta_2 + \gamma_2 + \delta})(e^{\gamma_2} + e^{\beta_2 + \gamma_2 + \delta})}{(1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2 + \delta})^2} \\
+  &=\frac{e^{\beta_2}e^{\gamma_2} + e^{\beta_2}e^{\beta_2 + \gamma_2 + \delta} + e^{\gamma_2}e^{\beta_2 + \gamma_2 + \delta} + e^{\beta_2}e^{\beta_2 + \gamma_2 + \delta} + e^{2(\beta_2 + \gamma_2 + \delta)}}{{(1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2 + \delta})^2}} \\
+  &= \frac{e^{\beta_2 + \gamma_2 + \delta} \left( e^{-\delta} + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2 + \delta} \right)}{{(1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2 + \delta})^2}}
+\end{align*}
+
+Impondo $\delta = 0$:
+
+
+\begin{align*}
+  \pi_{2+} \cdot \pi_{+2} 
+  &= \frac{e^{\beta_2 + \gamma_2} \left( 1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2 } \right)}{{(1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2 })^2}} \\
+  &= \frac{e^{\beta_2 + \gamma_2}}{1 + e^{\beta_2} + e^{\gamma_2} + e^{\beta_2 + \gamma_2 }} \\
+  &= \pi_{22}
+\end{align*}
+
+
+Provando assim que se $\delta = 0$,  $\pi_{ij} = \pi_{i+} \cdot \pi_{+j} \;\;\;\; \forall \,\,i,j = 1,2$ e os fatores A e B são probablisticamente independentes.
+
+\pagebreak
+
+# Exercício 5
+
+
+O modelo descrito pelo enunciado consiste em $Y_{ij}|z_i \stackrel{ind}{\sim} \text{FE}(\mu, \phi_i)$ com $i=1,2$ e $j=1,..., m$. A parte sistemática é:
+
+$$
+\text{log}(\phi_1) = \lambda_1 = \alpha - \beta
+$$
+
+
+$$
+\text{log}(\phi_2) = \lambda_2 = \alpha + \beta
+$$
+
+
+## Função Escore $U_{\beta}$
+
+Desejamos encontrar uma forma algébrica fechada para a estatística se escore que testa as hipóteses $H_0:\beta = 0$ contra $H_1: \beta \ne 0$. A estatística de score para o nosso conjunto de hipóteses tem a seguinte forma:
+
+$$
+\xi_{SR} = \left( \hat U_{\beta}(\hat\beta^0) \right)^2{\hat{\text{Var}}_0(\hat \beta)}   
+$$
+
+
+Iremos calcular cada um desses componentes de maneira genérica e em seguida avaliá-los sob as restrições das hipóteses testadas.
+Como se trata de hipóteses com relação ao parâmetro de precisão de uma variável pertencente à família exponencial, vamos trabalha com a verossimilhança restrita da variável $T_{ij} = t_{ij}$, onde $t_{ij} = y_{ij}\theta -b(\theta) + u(y_{ij})$, onde as estimativas do parâmetro de localização $\theta$ e suas funções partirão de um modelo apenas com intercepto. 
+
+Assim, a derivação da função escore $U_{\beta}$ será com base na função de verossimilhança da variável transformada $T_{ij}$.
+
+$$
+L(t_{ij}; \phi_i) = \sum^{2}_{i=1} \sum^{m}_{j=1}{\phi_it_{ij} + \text{d}(\phi_i) + \text{u}(y_{ij})}
+$$
+
+
+\begin{align}
+U_{\beta} &= \frac{\partial L}{\partial \beta} \nonumber \\
+&= \frac{\partial}{\partial \beta}   \sum^{2}_{i=1} \sum^{m}_{j=1}{\phi_it_{ij} + \text{d}(\phi_i) + \text{u}(y_{ij})} \nonumber \\
+&= \sum^{2}_{i=1} \sum^{m}_{j=1} \frac{\partial}{\partial \beta} \left[ \phi_it_{ij} + d(\phi_i) + u(y_{ij}) \right] \nonumber \\
+&= \sum^{2}_{i=1} \sum^{m}_{j=1} \left[ \frac{d\phi_i}{d \lambda_i} \frac{\partial \lambda_i}{\partial \beta} t_{ij} +  \text{d}'(\phi_i)\frac{d\phi_i}{d \lambda_i} \frac{\partial \lambda_i}{\partial \beta} \right] (\#eq:llmlgd)
+\end{align}
+
+Onde das derivadas em \@ref(eq:llmlgd) são:
+
+$$
+\frac{d\phi_i}{d \lambda_i} = \left( \frac{d \lambda_i}{d\phi_i}\right)^{-1} =  \left( \frac{d}{d\phi_i} \text{log}(\phi_i)  \right)^{-1} = \left( \frac{1}{\phi_i}\right)^{-1} = \phi_i
+$$
+
+$$
+\lambda_1 = \alpha - \beta \;\;\; \rightarrow  \;\;\; \frac{\partial\lambda_1}{\partial \beta} = -1 \\
+\lambda_2 = \alpha + \beta \;\;\; \rightarrow  \;\;\; \frac{\partial\lambda_2}{\partial \beta} = \;\;\;1 
+$$
+
+Onde denotaremos que, simbolicamente, $\frac{\partial \lambda_i}{\partial \beta} = (-1)^i$, por conveniência. Então, a função escore do parâmetro $\beta$ é
+
+\begin{align*}
+U_{\beta} &= \sum^{2}_{i=1} \sum^{m}_{j=1} \left[ \frac{d\phi_i}{d \lambda_i} \frac{\partial \lambda_i}{\partial \beta} t_{ij} +  \text{d}'(\phi_i)\frac{d\phi_i}{d \lambda_i} \frac{\partial \lambda_i}{\partial \beta} \right] \\
+&= \sum^{2}_{i=1} \sum^{m}_{j=1} \left[ \phi_i(-1)^it_{ij} + \phi_i(-1)^i\text{d}'(\phi_i)   \right] \\
+&= \sum^{2}_{i=1} \sum^{m}_{j=1} \phi_i(-1)^i\left[t_{ij} + \text{d}'(\phi_i)   \right]
+\end{align*}
+
+## Variância assintótica de $\hat \beta$
+
+Em seguida, calculamos o componente da hessiana de L referente à $\beta$
+
+\begin{align}
+\frac{\partial^2L}{\partial \beta^2} &= 
+\sum^{2}_{i=1} \sum^{m}_{j=1} \frac{\partial}{\partial \beta} \phi_i(-1)^i\left[t_{ij} + \text{d}'(\phi_i)   \right] \nonumber\\
+&= \sum^{2}_{i=1} \sum^{m}_{j=1} (-1)^i \left[(-1)^i \phi_i \left[t_{ij} + \text{d}'(\phi_i)   \right]   \right] + \phi_i\text{d}''(\phi_i)\phi_i(-1)^i \nonumber\\
+&=\sum^{2}_{i=1} \sum^{m}_{j=1} (-1)^{2i} \left[ \phi_i^2 \text{d}''(\phi_i) +  \phi_i \left[t_{ij} + \text{d}'(\phi_i)   \right]  \right] \nonumber\\
+&=\sum^{2}_{i=1} \sum^{m}_{j=1} \left[ \phi_i^2 \text{d}''(\phi_i) +  \phi_i \left[t_{ij} + \text{d}'(\phi_i)   \right]  \right] (\#eq:hessiana)
+\end{align}
+
+Para se chegar ao componente da informação de Fisher de $\beta$, $\text{K}_{\beta\beta}$, calculamos o valor esperado do negativo de \@ref(eq:hessiana):
+
+\begin{align*}
+\text{K}_{\beta\beta} &= \text{E}\left(-\frac{\partial^2L}{\partial \beta^2} \right) \\
+&= -\sum^{2}_{i=1} \sum^{m}_{j=1}\phi_i^2\text{d}''(\phi_i)
+\end{align*}
+
+Em seguida, vamos desenvolver os somatórios de $\text{K}_{\beta\beta}$:
+
+\begin{align}
+\text{K}_{\beta\beta} &= -\sum^{2}_{i=1} \sum^{m}_{j=1}\phi_i^2\text{d}''(\phi_i) \nonumber\\
+&= -\sum^{2}_{i=1} m\phi_i^2\text{d}''(\phi_i) \nonumber\\
+&= - \left[m\phi_1^2\text{d}''(\phi_1) + m\phi_2^2\text{d}''(\phi_2)  \right] \nonumber\\
+&= - m\left[\phi_1^2\text{d}''(\phi_1) + \phi_2^2\text{d}''(\phi_2)  \right] (\#eq:kbbsum)
+\end{align}
+
+Para chegar ao fato de que $\text{Var}(\hat \beta) = \text{K}_{\beta\beta}^{-1}$ sem precisar calcular a matriz de informação de Fisher por completo, basta notar que a matriz modelo $Z$ que modela $\text{log}(\phi_i)$ é:
+
+$$
+Z = \begin{bmatrix}
+  1 & -1 \\
+  \vdots & \vdots \\
+  1 & -1 \\
+  1 & 1 \\
+  \vdots & \vdots \\
+  1 & 1 \\
+\end{bmatrix}
+$$
+
+E além disso $Z^TZ = 2m\cdot I$, ou seja uma matriz diagonal. Nesses casos a matriz de informação de Fisher também é diagonal. Assim para se obter variância assintótica do parâmetro de interesse basta obter o inverso do seu componente correspondente na matriz de Fisher, sem precisar calcular a matriz inteira e inverte-la em seguida. Nesse sentido, temos o seguinte resultado, partindo de \@ref(eq:kbbsum)
+
+
+\begin{align*}
+\text{Var}(\hat \beta ) &= \left[-\sum^{2}_{i=1} \sum^{m}_{j=1}\phi_i^2\text{d}''(\phi_i) \right]^{-1} \\
+&= \left[ - m\left(\phi_1^2\text{d}''(\phi_1) + \phi_2^2\text{d}''(\phi_2)  \right) \right]^{-1}
+\end{align*}
+
+
+## Estatística de escore
+
+Primeiro vamos desenvolver os somatórios da função escore da mesma maneira que fizemos em \@ref(eq:kbbsum):
+
+\begin{align*}
+U_{\beta} 
+&= \sum^{2}_{i=1} \sum^{m}_{j=1} \phi_i(-1)^i\left[t_{ij} + \text{d}'(\phi_i)   \right] \\
+&= \sum^{m}_{j=1} \phi_1(-1) t_{1j} - \phi_1\text{d}'(\phi_1) + \sum^{m}_{j=1}\phi_2t_{2j} + \phi_2\text{d}'(\phi_2) \\
+&= \sum^{m}_{j=1}\phi_2t_{2j} + \phi_2\text{d}'(\phi_2) - \sum^{m}_{j=1} \phi_1 t_{1j} + \phi_1\text{d}'(\phi_1) \\
+&= \phi_2 \sum^{m}_{j=1}{[t_{2j}]} + m\phi_2\text{d}'(\phi_2) - \phi_1 \sum^{m}_{j=1}{[t_{1j}]} - m\phi_1\text{d}'(\phi_1) \\
+&= \phi_2 m \bar {t_2}+ m\phi_2\text{d}'(\phi_2) - \phi_1 m \bar{t_1} - m\phi_1\text{d}'(\phi_1)
+\end{align*}
+
+Sob $H_0: \beta = 0$, temos que as estimativas ${\phi_1} = {\phi_2} = {\phi_0}$. Portanto, a função escore $U_{\beta}$ é escrita da seguinte forma
+
+\begin{align*}
+U_{\beta} &= \phi_2 m \bar {t_2}+ m\phi_2\text{d}'(\phi_2) - \phi_1 m \bar{t_1} - m\phi_1\text{d}'(\phi_1) \\
+&\stackrel{H_0}{=} \phi_0 m \bar{t_2}+ m\phi_0\text{d}'(\phi_0) - \phi_0 m \bar{t_1} - m\phi_1\text{d}'(\phi_0)  \\
+&\stackrel{H_0}{=} \phi_0 m \bar{t_2} -  \phi_0 m \bar{t_1} \\
+&\stackrel{H_0}{=} \phi_0 m \left(\bar{t_2} -  \bar{t_1} \right) \\
+\end{align*}
+
+E a variância assintótica, também sob a hipótese nula
+
+\begin{align*}
+  \text{Var}(\hat \beta )
+&= \left[ - m\left(\phi_1^2\text{d}''(\phi_1) + \phi_2^2\text{d}''(\phi_2)  \right) \right]^{-1} \\
+&\stackrel{H_0}{=} \left[ - m\left(\phi_0^2\text{d}''(\phi_0) + \phi_0^2\text{d}''(\phi_0)  \right) \right]^{-1} \\
+&\stackrel{H_0}{=} \left[ - m\phi_0^2\left(2\text{d}''(\phi_0)\right) \right]^{-1}
+\end{align*}
+
+Assim, munido dos fatos $U_{\beta}(\beta^0) =  \phi_0 m \left(\bar{t_2} -  \bar{t_1} \right)$ e $\text{Var}_0(\hat \beta) = \left[ - m\phi_0^2\left(2\text{d}''(\phi_0)\right) \right]^{-1}$, podemos montar a estatística de escore $\xi_{SR}$:
+
+
+\begin{align*}
+  \xi_{SR} &= \left[\hat{U_\beta}(\beta^0) \right]^2 \cdot \left[ \text{Var}_0(\hat \beta) \right] \\
+  &= \frac{\left[ \hat \phi_0 m \left(\hat{\bar{t_2}} -  \hat{\bar{t_1}} \right) \right]^2}{- m\hat\phi_0^2\left(2\text{d}''(\hat\phi_0)\right)} \\ 
+  &= - \frac{ \hat \phi_0^2 m^2 \left(\hat{\bar{t_2}} -  \hat{\bar{t_1}} \right) ^2}{ m\hat\phi_0^2\left(2\text{d}''(\hat\phi_0)\right)}  \\
+  &= - \frac{  m \left(\hat{\bar{t_2}} -  \hat{\bar{t_1}} \right) ^2}{2\text{d}''(\hat\phi_0)}  
+\end{align*}
+
+Onde $\hat{\bar{t_i}} = \frac{1}{m}\sum^{m}_{j=1}{\hat{t_{ij}}}$ e $\hat t_{ij} = y_{ij}\hat\theta -b(\hat\theta) + u(y_{ij})$ e $\hat \theta$ foi estimado anteriormente e tratado como fixo nos cálculos que culminam na variável $\hat t_{ij}$.
+
+Como $T_{ij}$ é membro da família exponencial, os mesmos resultados assintóticos se aplicam. Nesses moldes $\xi_{SR} \rightarrow \chi^2_{(1)}$, pois apenas um parâmetro é testado.
+
+## Caso normal
+
+Particularizando para o caso normal, os componentes presentes da estatística de escore são:
+
+
+\begin{equation*}
+\hat t_{ij} = y_{ij}\hat\mu - \frac{1}{2} \left( \hat\mu^2 + y_{ij}^2\right) (\#eq:desvio)
+\end{equation*}
+
+
+$$
+\text{d}''(\hat\phi_0) = \left(-2\hat\phi_0^2\right)^{-1}
+$$
+
+Partindo de \@ref(eq:desvio), podemos ver que os componentes de média $\hat{\bar{t_i}}$ estão diretamente relacionados com a função desvio
+
+\begin{align*}
+\hat{\bar{t_i}} &= \frac{1}{m} \sum^{m}_{j=1}{y_{ij}\hat\mu - \frac{1}{2} \left( \hat\mu^2 + y_{ij}^2\right)} \\
+&= \frac{1}{m} \sum^{m}_{j=1} \frac{2}{2}y_{ij}\hat\mu - \frac{\hat \mu^2}{2}- \frac{y_{ij}^2}{2} \\
+&= \frac{1}{m} \sum^{m}_{j=1} \frac{2y_{ij}\hat\mu - \mu^2 - y_{ij}^2}{2}  \\
+&= -\frac{1}{m} \sum^{m}_{j=1} \frac{ \mu^2 + y_{ij}^2 - 2y_{ij}\hat\mu}{2}  \\
+&= -\frac{1}{2m} \sum^{m}_{j=1} \mu^2 + y_{ij}^2 - 2y_{ij}\hat\mu  \\
+&= -\frac{1}{2m} \sum^{m}_{j=1} \left( y_{ij} - \hat\mu \right)^2\\
+&= -\frac{1}{2m} \text{D}(\boldsymbol{y_i}, \boldsymbol{\hat\mu})
+\end{align*}
+
+Assim, $\xi_{SR}$ pode ser escrita como uma diferença de desvios entre os grupo $i=1,2$ :
+
+\begin{align*}
+\xi_{SR} &= - \frac{  m \left(\hat{\bar{t_2}} -  \hat{\bar{t_1}} \right) ^2}{2\text{d}''(\hat\phi_0)} \\
+&= - \frac{m \left( \frac{1}{2m}\text{D}(\boldsymbol{y_1, \hat\mu}) - \frac{1}{2m}\text{D}(\boldsymbol{y_2, \hat\mu}) \right)  }{\left(-4\hat\phi_0^2\right)^{-1}} \\
+&= \frac{1}{2} \left( \text{D}(\boldsymbol{y_1, \hat\mu}) - \text{D}(\boldsymbol{y_2, \hat\mu}) \right) 4 \hat\phi_0^2 \\
+&= 2 \hat\phi_0^2 \left( \text{D}(\boldsymbol{y_1, \hat\mu}) - \text{D}(\boldsymbol{y_2, \hat\mu}) \right)
+\end{align*}
+
+
+Uma outra forma para possível $\xi_{SR}$ é notando que $\frac{1}{m} \text{D}(\boldsymbol{y_i}, \boldsymbol{\hat\mu}) = \left( \hat \phi_i \right)^{-1}$ e portanto:
+
+\begin{align*}
+\xi_{SR} &= - \frac{  m \left(\hat{\bar{t_2}} -  \hat{\bar{t_1}} \right) ^2}{2\text{d}''(\hat\phi_0)} \\
+&= -\frac{m}{2} \left( \frac{1}{2 \hat \phi_1} - \frac{1}{2 \hat \phi_2}\right) \cdot \left( -2 \hat\phi_0^2 \right) \\
+&= \frac{\hat\phi_0^2m}{2} \left( \frac{1}{ \hat \phi_1} - \frac{1}{ \hat \phi_2}\right)  \\
+\end{align*}
+
+
+

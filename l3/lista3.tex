@@ -1,0 +1,1031 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+  11pt,
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={MAE5763 - Modelos Lineares Generalizados - Resolução da Lista 3},
+  pdfauthor={Guilherme Marthe - 8661962},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs}
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{5}
+\usepackage{caption}
+\usepackage{amsmath}
+\usepackage{bbm}
+\allowdisplaybreaks
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{caption}
+
+\title{MAE5763 - Modelos Lineares Generalizados - Resolução da Lista 3}
+\author{Guilherme Marthe - 8661962}
+\date{3/12/2020}
+
+\begin{document}
+\maketitle
+
+\captionsetup[table]{labelformat=empty}
+\counterwithin*{equation}{section}
+
+\hypertarget{exercuxedcio-1}{%
+\section{Exercício 1}\label{exercuxedcio-1}}
+
+A base disponibilizada corresponde à uma análise para entender a associação entre o uso de 3 medicamentos diferentes ou mais no tratamento de doenças mentais. Essa variável é \texttt{polypharmacy} (=0 uso de no máximo 3 medicamentos diferentes; =1 uso de mais de 3 medicamentos diferentes). O estudo consiste em acompanhar 500 indivíduos ao longo de 7 anos observando o uso de medicamentos e as variáveis explicativas, que consistem em:
+
+\begin{itemize}
+\item
+  \begin{enumerate}
+  \def\labelenumi{(\roman{enumi})}
+  \tightlist
+  \item
+    \texttt{mhv4}: número de consultas ambulatoriais relacionadas à saúde mental (nenhum, `um a cinco', `seis a quatorze' e `maior do que quatorze')
+  \end{enumerate}
+\item
+  \begin{enumerate}
+  \def\labelenumi{(\roman{enumi})}
+  \setcounter{enumi}{1}
+  \tightlist
+  \item
+    \texttt{inptmhv3}: número de internações hospitalares relacionadas à saúde mental (`nenhuma', `uma' e `mais do que uma')
+  \end{enumerate}
+\item
+  \begin{enumerate}
+  \def\labelenumi{(\roman{enumi})}
+  \setcounter{enumi}{2}
+  \tightlist
+  \item
+    \texttt{gender}: gênero (`Feminino', `Masculino'),
+  \end{enumerate}
+\item
+  \begin{enumerate}
+  \def\labelenumi{(\roman{enumi})}
+  \setcounter{enumi}{3}
+  \tightlist
+  \item
+    \texttt{urban}: local de residência (`Urbana', `Rural'))
+  \end{enumerate}
+\item
+  \begin{enumerate}
+  \def\labelenumi{(\alph{enumi})}
+  \setcounter{enumi}{21}
+  \tightlist
+  \item
+    \texttt{comorbid}: existência de comorbidade (`Não', `Sim')
+  \end{enumerate}
+\item
+  \begin{enumerate}
+  \def\labelenumi{(\roman{enumi})}
+  \setcounter{enumi}{5}
+  \tightlist
+  \item
+    \texttt{age}: idade em anos
+  \end{enumerate}
+\end{itemize}
+
+Abaixo mostro as primeiras 10 linhas da base, que mostram as 7 observações do indivíduo com \texttt{id} = 1 e os dois primeiros anos para o segundo indivíduo.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{ccccccccc}
+\toprule
+polypharmacy & id & year & mhv4 & inptmhv3 & gender & urban & comorbid & age\\
+\midrule
+No & 1 & 2002 & 0 & 0 & Female & Urban & Yes & 4.67\\
+No & 1 & 2003 & 1-5 & 0 & Female & Urban & Yes & 5.67\\
+No & 1 & 2004 & 0 & 0 & Female & Urban & No & 6.00\\
+No & 1 & 2005 & 1-5 & 0 & Female & Urban & Yes & 7.08\\
+No & 1 & 2006 & 0 & 0 & Female & Urban & Yes & 8.00\\
+\addlinespace
+No & 1 & 2007 & 1-5 & 0 & Female & Urban & Yes & 9.92\\
+No & 1 & 2008 & 6-14 & 0 & Female & Urban & Yes & 10.67\\
+No & 2 & 2002 & 6-14 & 0 & Male & Urban & Yes & 7.58\\
+No & 2 & 2003 & 6-14 & 0 & Male & Urban & Yes & 8.08\\
+No & 2 & 2004 & > 14 & 0 & Male & Urban & No & 9.83\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\hypertarget{anuxe1lise-descritiva}{%
+\subsection{Análise descritiva}\label{anuxe1lise-descritiva}}
+
+Iniciaremos a análise descritiva analisando as tabelas de contingência da variável resposta, \texttt{polipharmacy} contra cada uma das variáveis categóricas. Um ponto importante antes de começarmos. Na inspeção da variável \texttt{urban}, que representa o local de residência dos indivíduos, foi notado que o indivíduo com id=490 não teve sua localização de residência marcada na base de dados no último ano do estudo. Notamos que em todos os anos do estudo anteriores seu local de moradia era urbano. Por isso decidimos inserir o dado faltante com essa mesma informação.
+
+\captionsetup[table]{labelformat=empty,skip=1pt}
+\begin{longtable}{lccc}
+\toprule
+& \multicolumn{2}{c}{\textbf{Usa 3 medicamentos ou mais}} & \\ 
+ \cmidrule(lr){2-3}
+\textbf{Variável} & \textbf{No}, N = 2,681\textsuperscript{1} & \textbf{Yes}, N = 819\textsuperscript{1} & \textbf{Total}, N=3500\textsuperscript{1} \\ 
+\midrule
+\multicolumn{1}{l}{ } \\ 
+\midrule
+comorbid &  &  &  \\ 
+Com comorbidade & 541 (15\%) & 80 (2.3\%) & 621 (18\%) \\ 
+Sem comorbidade & 2,140 (61\%) & 739 (21\%) & 2,879 (82\%) \\ 
+\midrule
+\multicolumn{1}{l}{  } \\ 
+\midrule
+urban &  &  &  \\ 
+Urban & 1,944 (56\%) & 585 (17\%) & 2,529 (72\%) \\ 
+Rural & 737 (21\%) & 233 (6.7\%) & 970 (28\%) \\ 
+(Não disponível) & 0 & 1 & 1 \\ 
+\midrule
+\multicolumn{1}{l}{   } \\ 
+\midrule
+gender &  &  &  \\ 
+Female & 660 (19\%) & 138 (3.9\%) & 798 (23\%) \\ 
+Male & 2,021 (58\%) & 681 (19\%) & 2,702 (77\%) \\ 
+\midrule
+\multicolumn{1}{l}{    } \\ 
+\midrule
+inptmhv3 &  &  &  \\ 
+0 & 2,610 (75\%) & 723 (21\%) & 3,333 (95\%) \\ 
+1 & 51 (1.5\%) & 70 (2.0\%) & 121 (3.5\%) \\ 
+> 1 & 20 (0.6\%) & 26 (0.7\%) & 46 (1.3\%) \\ 
+\midrule
+\multicolumn{1}{l}{     } \\ 
+\midrule
+mhv4 &  &  &  \\ 
+0 & 514 (15\%) & 44 (1.3\%) & 558 (16\%) \\ 
+1-5 & 797 (23\%) & 112 (3.2\%) & 909 (26\%) \\ 
+6-14 & 758 (22\%) & 244 (7.0\%) & 1,002 (29\%) \\ 
+> 14 & 612 (17\%) & 419 (12\%) & 1,031 (29\%) \\ 
+\bottomrule
+\end{longtable}
+\vspace{-5mm}
+\begin{minipage}{\linewidth}
+\textsuperscript{1}Estatísticas apresentadas: número de casos (\% sob o total). A soma das porcentagens sob uma mesma variável explicativa, excluindo a coluna total é 1 \\ 
+\end{minipage}
+
+A variável que representa a coexistência de doenças, \texttt{comorbid} está concentrada na não presença de comorbidades. Podemos ver que nesse caso, 25\% = 739/2879 (ou 21\% do total, 739/3500) dos indivíduos-ano fazem o uso de 3 ou mais medicamentos. A chance de polifarmácia parece indicar que aqueles sem comorbidades, 739/2140 = 0.35, tem mais chances de usar 3 ou mais medicamentos que os indivíduos com comorbidades, 80/541 = 0.15.
+
+Com relação ao local de residência (\texttt{urban}) existe uma prevalência de residências urbanas. As chances entre regiões urbanas e rurias de um indivíduo ser polifarmaco são parecdidas, 585/1944 = 0.3 (urbano), 233/737 = 0.32 (rural).
+
+Quando estratificamos por gênero, podemos detectar que dentre os indivíduos do sexo masculino há proporção de individuos que usam muitos medicamentos maior que nos indivíduos do sexo feminino. A amostra pode ser descrita como desbalanceada com relação ao gênero uma vez que 77\% dela é do sexo masculino.
+
+Ao analisarmos a variável \texttt{inptmhv3}, que representa o número de internações por doenças mentais, podemos notar a crecente proporção de polifarmácia, partindo de uma chance de 723/2610 = 0.28quando não existem internações para 70/51 = 1.37 quando temos o histórico de uma internação e 26/20 = 1.3 quando tem mais de uma internação.
+
+Por fim, a inspeção do número de consultas ambulatoriais relacionadas à saúde mental (variável \texttt{mhv4}) nos indica que \textasciitilde40\% da amostra está concentrada em indivíduos que realizaram 6 ou mais consultas. A chance de polifarmácia aumenta com o número de consultas aparentemente, uma vez que a chance quando não houveram consultas é 44/514 = 0.09 e quando os pacientes tiveram 14 consultas ou mais 419/612 = 0.68.
+
+A inspeção do boxpot a seguir nos mostra que os indivídos que usam 3 medicamentos ou mais no tratamentos de doenças mentais têm, em mediana, idades mais elevadas e um indivíduo que pode ser considerado atípico por sair dos limites do gráfico. No caso de indivíduos que usam menos de 3 medicamentos, além de serem mais jovens, temos uma concetração de idades baixas possívelment atípicas quando comparadas com o resto da distribuição.
+
+\begin{center}\includegraphics{lista3_files/figure-latex/unnamed-chunk-3-1} \end{center}
+
+\hypertarget{ajuste-de-modelos}{%
+\subsection{Ajuste de modelos}\label{ajuste-de-modelos}}
+
+\hypertarget{equauxe7uxe3o-de-estimauxe7uxe3o-generalizada-bernoulli}{%
+\subsubsection{Equação de estimação generalizada Bernoulli}\label{equauxe7uxe3o-de-estimauxe7uxe3o-generalizada-bernoulli}}
+
+\hypertarget{seleuxe7uxe3o-de-modelo}{%
+\paragraph{Seleção de modelo}\label{seleuxe7uxe3o-de-modelo}}
+
+O primeiro modelo que iremos estimar é uma equação de estimação generalizada com uma estrutura probabilística de Bernoulli e uma estrutura de correlação auto-regressivo de ordem 1. O pacote sugerido para a análise, o \textbf{gee} não possui comparação de modelos via testes de comparação de modelos encaixados. Por isso, para realizar a seleção de modelos vamos depender de comparações univariadas via testes de Wald, uma vez que o quadrado do Z-robusto segue uma distribuição chi quadrado com um grau de liberdade.
+
+Nessas comparações univariadas, quando a variável possui apenas dois fatores e fosse não significativa retiramos a variável. No caso da variável categórica ordinal, quando um dos fatores não era significativo ele foi juntado com um dos fatores abaixo ou acima dele de acordo com o contexto. A seguir está o código desse procedimento da seleção do modelo.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df <-}\StringTok{ }\NormalTok{df }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{urban =} \KeywordTok{if_else}\NormalTok{(id }\OperatorTok{==}\StringTok{ }\DecValTok{409} \OperatorTok{&}\StringTok{ }\NormalTok{year }\OperatorTok{==}\StringTok{ }\DecValTok{2008}\NormalTok{, }
+                         \KeywordTok{factor}\NormalTok{(}\StringTok{'Urban'}\NormalTok{, }\DataTypeTok{levels=}\KeywordTok{c}\NormalTok{(}\StringTok{'Urban'}\NormalTok{, }\StringTok{'Rural'}\NormalTok{)), }
+\NormalTok{                         urban)) }
+
+\NormalTok{df[}\StringTok{'resp'}\NormalTok{] =}\StringTok{  }\KeywordTok{if_else}\NormalTok{(df}\OperatorTok{$}\NormalTok{polypharmacy }\OperatorTok{==}\StringTok{ 'Yes'}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{0}\NormalTok{)}
+ 
+\NormalTok{fit1.poly =}\StringTok{ }\KeywordTok{gee}\NormalTok{(resp }\OperatorTok{~}\StringTok{ }\NormalTok{mhv4 }\OperatorTok{+}\StringTok{ }\NormalTok{inptmhv3 }\OperatorTok{+}\StringTok{ }\NormalTok{gender }\OperatorTok{+}\StringTok{ }\NormalTok{urban }\OperatorTok{+}\StringTok{ }\NormalTok{comorbid }\OperatorTok{+}\StringTok{ }\KeywordTok{log}\NormalTok{(age}\OperatorTok{/}\DecValTok{100}\NormalTok{), }
+                \DataTypeTok{id =}\NormalTok{ id, }\DataTypeTok{family =} \KeywordTok{binomial}\NormalTok{(}\DataTypeTok{link =} \StringTok{"logit"}\NormalTok{),}
+                \DataTypeTok{corstr =} \StringTok{"AR-M"}\NormalTok{, }\DataTypeTok{Mv =} \DecValTok{1}\NormalTok{, }\DataTypeTok{data=}\NormalTok{df)}
+
+\NormalTok{fit2.poly =}\StringTok{ }\KeywordTok{gee}\NormalTok{(resp }\OperatorTok{~}\StringTok{ }\NormalTok{mhv4 }\OperatorTok{+}\StringTok{ }\NormalTok{inptmhv3 }\OperatorTok{+}\StringTok{ }\NormalTok{gender }\OperatorTok{+}\StringTok{ }\NormalTok{urban }\OperatorTok{+}\StringTok{ }\KeywordTok{log}\NormalTok{(age}\OperatorTok{/}\DecValTok{100}\NormalTok{), }
+                \DataTypeTok{id =}\NormalTok{ id, }\DataTypeTok{family =} \KeywordTok{binomial}\NormalTok{(}\DataTypeTok{link =} \StringTok{"logit"}\NormalTok{),}
+                \DataTypeTok{corstr =} \StringTok{"AR-M"}\NormalTok{, }\DataTypeTok{Mv =} \DecValTok{1}\NormalTok{, }\DataTypeTok{data=}\NormalTok{df)}
+
+\NormalTok{fit3.poly =}\StringTok{ }\KeywordTok{gee}\NormalTok{(resp }\OperatorTok{~}\StringTok{ }\NormalTok{mhv4 }\OperatorTok{+}\StringTok{ }\NormalTok{inptmhv3 }\OperatorTok{+}\StringTok{ }\NormalTok{gender }\OperatorTok{+}\StringTok{ }\KeywordTok{log}\NormalTok{(age}\OperatorTok{/}\DecValTok{100}\NormalTok{), }
+                \DataTypeTok{id =}\NormalTok{ id, }\DataTypeTok{family =} \KeywordTok{binomial}\NormalTok{(}\DataTypeTok{link =} \StringTok{"logit"}\NormalTok{),}
+                \DataTypeTok{corstr =} \StringTok{"AR-M"}\NormalTok{, }\DataTypeTok{Mv =} \DecValTok{1}\NormalTok{, }\DataTypeTok{data=}\NormalTok{df)}
+
+\NormalTok{df1 <-}\StringTok{ }\NormalTok{df }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{inptmhv3 =} \KeywordTok{case_when}\NormalTok{(}
+\NormalTok{    inptmhv3 }\OperatorTok{==}\StringTok{ '1'} \OperatorTok{~}\StringTok{ '>=1'}\NormalTok{, }
+\NormalTok{    inptmhv3 }\OperatorTok{==}\StringTok{ '> 1'} \OperatorTok{~}\StringTok{ '>=1'}\NormalTok{,}
+\NormalTok{    T }\OperatorTok{~}\StringTok{ '0'}
+\NormalTok{  ) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{factor}\NormalTok{(., }\DataTypeTok{levels =} \KeywordTok{c}\NormalTok{(}\StringTok{'0'}\NormalTok{, }\StringTok{'>=1'}\NormalTok{)))}
+
+\NormalTok{fit4.poly =}\StringTok{ }\KeywordTok{gee}\NormalTok{(resp }\OperatorTok{~}\StringTok{ }\NormalTok{mhv4 }\OperatorTok{+}\StringTok{ }\NormalTok{inptmhv3 }\OperatorTok{+}\StringTok{ }\NormalTok{gender }\OperatorTok{+}\StringTok{ }\KeywordTok{log}\NormalTok{(age}\OperatorTok{/}\DecValTok{100}\NormalTok{),}
+                \DataTypeTok{id =}\NormalTok{ id, }\DataTypeTok{family =} \KeywordTok{binomial}\NormalTok{(}\DataTypeTok{link =} \StringTok{"logit"}\NormalTok{),}
+                \DataTypeTok{corstr =} \StringTok{"AR-M"}\NormalTok{, }\DataTypeTok{Mv =} \DecValTok{1}\NormalTok{, }\DataTypeTok{data=}\NormalTok{df1)}
+
+\NormalTok{df2 <-}\StringTok{ }\NormalTok{df1 }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{mhv4 =} \KeywordTok{case_when}\NormalTok{(}
+\NormalTok{    mhv4 }\OperatorTok{==}\StringTok{ '0'} \OperatorTok{~}\StringTok{ '0-5'}\NormalTok{, }
+\NormalTok{    mhv4 }\OperatorTok{==}\StringTok{ '1-5'} \OperatorTok{~}\StringTok{ '0-5'}\NormalTok{,}
+\NormalTok{    T }\OperatorTok{~}\StringTok{ }\KeywordTok{as.character}\NormalTok{(mhv4)}
+\NormalTok{  ) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{factor}\NormalTok{(., }\KeywordTok{c}\NormalTok{(}\StringTok{'0-5'}\NormalTok{, }\StringTok{'6-14'}\NormalTok{, }\StringTok{'> 14'}\NormalTok{)))}
+
+\NormalTok{fit5.poly =}\StringTok{ }\KeywordTok{gee}\NormalTok{(resp }\OperatorTok{~}\StringTok{ }\NormalTok{mhv4 }\OperatorTok{+}\StringTok{ }\NormalTok{inptmhv3 }\OperatorTok{+}\StringTok{ }\NormalTok{gender }\OperatorTok{+}\StringTok{ }\KeywordTok{log}\NormalTok{(age}\OperatorTok{/}\DecValTok{100}\NormalTok{), }
+                \DataTypeTok{id =}\NormalTok{ id, }\DataTypeTok{family =} \KeywordTok{binomial}\NormalTok{(}\DataTypeTok{link =} \StringTok{"logit"}\NormalTok{),}
+                \DataTypeTok{corstr =} \StringTok{"AR-M"}\NormalTok{, }\DataTypeTok{Mv =} \DecValTok{1}\NormalTok{, }\DataTypeTok{data=}\NormalTok{df2)}
+\end{Highlighting}
+\end{Shaded}
+
+Na tabela a seguir estão as estimativas dos coeficientes dos modelos, os valores-z robustos e a significância à 10\%. O modelo final após a seleção univariada apresenta apenas coeficientes significativos (excluindo o intercepto).
+
+\begin{table}
+
+\caption{(\#tab:unnamed-chunk-5)Seleção de modelos}
+\centering
+\fontsize{12}{14}\selectfont
+\begin{tabu} to \linewidth {>{}l>{\raggedright}X>{\raggedright}X>{\raggedright}X>{\raggedright}X>{\raggedright}X}
+\toprule
+Variável & fit1 & fit2 & fit3 & fit4 & fit5\\
+\midrule
+\textbf{(Intercept)} & 0.64 (1.25) & 0.61 (1.2) & 0.62 (1.24) & 0.62 (1.24) & 0.73 (1.51)\\
+\textbf{comorbidYes} & -0.13 (-1.23) & - & - & - & -\\
+\textbf{genderMale} & 0.45 (2.28)* & 0.46 (2.35)* & 0.46 (2.33)* & 0.45 (2.32)* & 0.46 (2.37)*\\
+\textbf{inptmhv3> 1} & 0.27 (0.86) & 0.28 (0.89) & 0.29 (0.89) & - & -\\
+\textbf{inptmhv3>=1} & - & - & - & 0.35 (1.83)* & 0.35 (1.82)*\\
+\addlinespace
+\textbf{inptmhv31} & 0.37 (1.68)* & 0.37 (1.7)* & 0.37 (1.7)* & - & -\\
+\textbf{log(age/100)} & 1.28 (5.96)* & 1.28 (6)* & 1.28 (6)* & 1.28 (6)* & 1.29 (6.02)*\\
+\textbf{mhv4> 14} & 0.89 (5.5)* & 0.89 (5.58)* & 0.9 (5.6)* & 0.89 (5.59)* & 0.78 (6.62)*\\
+\textbf{mhv41-5} & 0.13 (0.95) & 0.14 (1.03) & 0.15 (1.04) & 0.15 (1.04) & -\\
+\textbf{mhv46-14} & 0.57 (3.76)* & 0.59 (3.9)* & 0.59 (3.91)* & 0.59 (3.91)* & 0.47 (4.73)*\\
+\addlinespace
+\textbf{urbanRural} & 0.05 (0.31) & 0.05 (0.31) & - & - & -\\
+\textbf{escala} & 0.97 & 0.98 & 0.97 & 0.97 & 0.98\\
+\textbf{rho} & 0.58 & 0.58 & 0.58 & 0.58 & 0.58\\
+\bottomrule
+\multicolumn{6}{l}{\textsuperscript{} Cada entrada consiste em estimativa (valor z robusto)}\\
+\multicolumn{6}{l}{\textsuperscript{} *: indica significância à 10\% num teste de Wald com distribuição Chi-Quadrado}\\
+\end{tabu}
+\end{table}
+
+As estimativas dos parâmetros que já eram significativos não mudam de maneira brusca no modelo tentativo final. Os parêmetros de escala e de correlação não variam entre os ajustes.
+
+\hypertarget{diagnuxf3stico-de-modelo}{%
+\paragraph{Diagnóstico de modelo}\label{diagnuxf3stico-de-modelo}}
+
+Partindo do modelo ajustado na seção anterior, iremos primeiramente realizar uma análise de pontos de alavanca e pontos influentes. Com relação aos pontos de alavancas, podemos ver no gráfico de índices dos pontos contra o valor da diagonal da matriz H correspondente, podemos ver que existem dois grupos de pontos. A faixa superior mostra que existe um número grande de observações remotas, porém não é algo focado em um grupo de pontos pequeno.
+
+\begin{center}\includegraphics{lista3_files/figure-latex/unnamed-chunk-6-1} \end{center}
+
+\begin{center}\includegraphics{lista3_files/figure-latex/unnamed-chunk-6-2} \end{center}
+
+A influência dos pontos será medida através da distância de Cook. Utilizando uma regra de média + 3 vezes o desvio padrão das distâncias de cook das observações, podemos ver que temos um total de 77 indivíduos-ano que podem ser considerados influentes. Ao ajustarmos o modelo sem esses pontos, podemos ver que as conclusões inferenciais mudam pois a significância do fator \texttt{inptmhv3\textgreater{}=1} mudou, fazendo com que essa variável não seja mais significante ao nível de 10\%. O ajuste dos modelos com a amostra inteira e sem os pontos influentes removendo essa variável não apresentam uma alteração relevante nas conclusões inferenciais do modelo.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{di =}\StringTok{ }\NormalTok{diag_values}\OperatorTok{$}\NormalTok{DistCook}
+\NormalTok{cut =}\StringTok{ }\KeywordTok{mean}\NormalTok{(di) }\OperatorTok{+}\StringTok{ }\DecValTok{3}\OperatorTok{*}\KeywordTok{sd}\NormalTok{(di)}
+
+\NormalTok{fitgee_cook_cut =}\StringTok{ }\KeywordTok{gee}\NormalTok{(resp }\OperatorTok{~}\StringTok{ }\NormalTok{mhv4 }\OperatorTok{+}\StringTok{ }\NormalTok{inptmhv3 }\OperatorTok{+}\StringTok{ }\NormalTok{gender }\OperatorTok{+}\StringTok{ }\KeywordTok{log}\NormalTok{(age}\OperatorTok{/}\DecValTok{100}\NormalTok{), }
+                \DataTypeTok{id =}\NormalTok{ id, }\DataTypeTok{family =} \KeywordTok{binomial}\NormalTok{(}\DataTypeTok{link =} \StringTok{"logit"}\NormalTok{),}
+                \DataTypeTok{corstr =} \StringTok{"AR-M"}\NormalTok{, }\DataTypeTok{Mv =} \DecValTok{1}\NormalTok{, }\DataTypeTok{data=}\NormalTok{df2[di }\OperatorTok{<}\StringTok{ }\NormalTok{cut,])}
+
+\NormalTok{fitgee2 =}\StringTok{ }\KeywordTok{gee}\NormalTok{(resp }\OperatorTok{~}\StringTok{ }\NormalTok{mhv4 }\OperatorTok{+}\StringTok{ }\NormalTok{gender }\OperatorTok{+}\StringTok{ }\KeywordTok{log}\NormalTok{(age}\OperatorTok{/}\DecValTok{100}\NormalTok{), }
+                \DataTypeTok{id =}\NormalTok{ id, }\DataTypeTok{family =} \KeywordTok{binomial}\NormalTok{(}\DataTypeTok{link =} \StringTok{"logit"}\NormalTok{),}
+                \DataTypeTok{corstr =} \StringTok{"AR-M"}\NormalTok{, }\DataTypeTok{Mv =} \DecValTok{1}\NormalTok{, }\DataTypeTok{data=}\NormalTok{df2 }\OperatorTok{%>%}\StringTok{ }\KeywordTok{filter}\NormalTok{(id}\OperatorTok{!=}\DecValTok{237}\NormalTok{))}
+
+\NormalTok{fitgee_cook_cut2 =}\StringTok{ }\KeywordTok{gee}\NormalTok{(resp }\OperatorTok{~}\StringTok{ }\NormalTok{mhv4 }\OperatorTok{+}\StringTok{ }\NormalTok{gender }\OperatorTok{+}\StringTok{ }\KeywordTok{log}\NormalTok{(age}\OperatorTok{/}\DecValTok{100}\NormalTok{), }
+                \DataTypeTok{id =}\NormalTok{ id, }\DataTypeTok{family =} \KeywordTok{binomial}\NormalTok{(}\DataTypeTok{link =} \StringTok{"logit"}\NormalTok{),}
+                \DataTypeTok{corstr =} \StringTok{"AR-M"}\NormalTok{, }\DataTypeTok{Mv =} \DecValTok{1}\NormalTok{, }\DataTypeTok{data=}\NormalTok{df2[di }\OperatorTok{<}\StringTok{ }\NormalTok{cut,])}
+
+\NormalTok{gee_cook_list <-}\StringTok{ }\KeywordTok{list}\NormalTok{(}\StringTok{'toda amostra'}\NormalTok{ =}\StringTok{ }\NormalTok{fitgee, }
+                      \StringTok{'s/ 77 pontos influentes'}\NormalTok{ =}\StringTok{ }\NormalTok{fitgee_cook_cut,}
+                      \StringTok{'toda amostra -inptmhv3'}\NormalTok{ =}\StringTok{ }\NormalTok{fitgee2,}
+                      \StringTok{'s/ 77 pontos influentes -inptmhv3'}\NormalTok{ =}\StringTok{ }\NormalTok{fitgee_cook_cut2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}
+
+\caption{(\#tab:unnamed-chunk-8)Análise de influência}
+\centering
+\fontsize{12}{14}\selectfont
+\begin{tabu} to \linewidth {>{}l>{\raggedright}X>{\raggedright}X>{\raggedright}X>{\raggedright}X}
+\toprule
+Variável & toda amostra & s/ 77 pontos influentes & toda amostra -inptmhv3 & s/ 77 pontos influentes -inptmhv3\\
+\midrule
+\textbf{(Intercept)} & 0.73 (1.51) & 1.03 (2.11)* & 0.72 (1.5) & 1.03 (2.13)*\\
+\textbf{genderMale} & 0.46 (2.37)* & 0.64 (2.94)* & 0.46 (2.36)* & 0.64 (2.94)*\\
+\textbf{inptmhv3>=1} & 0.35 (1.82)* & 0.17 (1.02) & - & -\\
+\textbf{log(age/100)} & 1.29 (6.02)* & 1.5 (7.02)* & 1.28 (6.02)* & 1.5 (7.05)*\\
+\textbf{mhv4> 14} & 0.78 (6.62)* & 0.73 (6.73)* & 0.81 (7.06)* & 0.74 (6.82)*\\
+\addlinespace
+\textbf{mhv46-14} & 0.47 (4.73)* & 0.36 (3.98)* & 0.48 (4.83)* & 0.36 (3.99)*\\
+\textbf{escala} & 0.98 & 0.99 & 0.98 & 0.99\\
+\textbf{rho} & 0.58 & 0.65 & 0.58 & 0.65\\
+\bottomrule
+\multicolumn{5}{l}{\textsuperscript{} Cada entrada consiste em estimativa (valor z robusto)}\\
+\multicolumn{5}{l}{\textsuperscript{} *: indica significância à 10\% num teste de Wald com distribuição Chi-Quadrado}\\
+\end{tabu}
+\end{table}
+
+O modelo que iremos finalizar então consiste na amostra interira sem a variável \texttt{inptmhv3} uma vez que ela não se mostrou estável com relação à influência da amostra. Abaixo temos a análise de resíduos deste novo modelo. A análise do gráfico de envelope mostra que o ajuste está satisfatório com relação à normalidade dos resíduos padronizados de Pearson.
+
+\begin{center}\includegraphics{lista3_files/figure-latex/unnamed-chunk-9-1} \end{center}
+
+\begin{center}\includegraphics{lista3_files/figure-latex/unnamed-chunk-9-2} \end{center}
+
+Um ponto importante sobre o programa que gerou o gráfico de envelope para o resíduo de Pearson foi necessário retirar o grupo de id=237 pois o cálculo do envelope sempre travava neste grupo. Além disso, o tempo para gerar o envelope foi muito alto, algo em torno de 2H, por isso não foi prático gerar uma visualização mais nítida do gráfico de probabilidades.
+
+\begin{center}\includegraphics[width=6.67in]{envelope_bernoulli} \end{center}
+
+\hypertarget{interpretauxe7uxe3o-de-paruxe2metros-e-estimativas-intervalares}{%
+\paragraph{Interpretação de parâmetros e estimativas intervalares}\label{interpretauxe7uxe3o-de-paruxe2metros-e-estimativas-intervalares}}
+
+Na tabela a seguir mostramos as estimativas intervalares para as razões de chance estimadas pelo modelo resultante das análise nas sessões anteriores.
+
+\begin{table}
+
+\caption{(\#tab:unnamed-chunk-11)Estimativas intervalares para o modelo de EEG final}
+\centering
+\fontsize{12}{14}\selectfont
+\begin{tabu} to \linewidth {>{}l>{\raggedright}X>{\raggedright}X>{\raggedright}X>{\raggedright}X>{\raggedright}X}
+\toprule
+variável & estimativa & e.p. robusto & exp(estimativa) & lim. inf. p/ exp(estimativa) & lim. sup. p/ exp(estimativa)\\
+\midrule
+\textbf{(Intercept)} & 0.72 & 0.48 & 2.06 & 0.80 & 5.33\\
+\textbf{mhv46-14} & 0.48 & 0.10 & 1.61 & 1.33 & 1.96\\
+\textbf{mhv4> 14} & 0.81 & 0.11 & 2.25 & 1.80 & 2.82\\
+\textbf{genderMale} & 0.46 & 0.20 & 1.59 & 1.08 & 2.34\\
+\textbf{log(age/100)} & 1.28 & 0.21 & 3.59 & 2.37 & 5.44\\
+\bottomrule
+\end{tabu}
+\end{table}
+
+Eles têm as seguintes interpretações:
+
+\begin{itemize}
+\item
+  \texttt{(Intercept)}: no caso o intercepto representa o caso de referência sob o qual todos os outros fatores serão comparados. Estes são um paciente do sexo feminino, com idade 0 (não realista) e que teve de 0 a 5 de consultas ambulatoriais relacionadas à saúde mental.
+\item
+  \texttt{mhv46-14}: a razão de chances de polifarmácia entre um indivíduo que teve 6 a 14 consultas ambulatoriais com relação à um indivíduo que teve 0 a 5 de consultas é 1.61, ou seja a chance é de se usar 3 medicamentos ou mais é 60\% maior no grupo que teve 6 a 14 consultas ambulatoriais.
+\item
+  \texttt{mhv4\textgreater{}\ 14}: a razão de chances de seu usar 3 medicamentos ou mais do grupo que foi mais do que 14 vezes em consultas ambulatoriais no ano é 2.25, ou seja, 125\% maior que o grupo com 0 a 5 consultas ambulatoriais no ano.
+\item
+  \texttt{genderMale}: indivíduos do sexo masculino têm uma de chance de polifarmácia 59\% maior que os do sexo feminino, indicato pela estimativa de razão de chances de 1.59.
+\item
+  \texttt{log(age/100)}: para idade podemos chegar que o impacto do aumento em 1\% da idade na razão de chances de polifarmácia de um indivíduo é 1.01\^{}0.21 - 1=
+  0.209\%.
+\end{itemize}
+
+\hypertarget{modelo-misto}{%
+\subsubsection{Modelo Misto}\label{modelo-misto}}
+
+\hypertarget{seleuxe7uxe3o-de-modelo-1}{%
+\paragraph{Seleção de modelo}\label{seleuxe7uxe3o-de-modelo-1}}
+
+O processo de seleção do modelo misto seguiu de maneira similar ao modelo de equações de estimação generalizadas. A diferença está na possibilidade de testar a remoção de 2 ou mais parâmetros e testar sua auseência através de um teste de razão de verossimilhança. Abaixo mostro o código que utilizei para ajustar esses modelos e uma tabela mostrando as estimativas de cada modelo e testes revelevantes.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fit_mixed_}\DecValTok{1}\NormalTok{ =}\StringTok{ }\KeywordTok{gamlss}\NormalTok{(resp }\OperatorTok{~}\StringTok{ }\NormalTok{mhv4 }\OperatorTok{+}\StringTok{ }\NormalTok{inptmhv3 }\OperatorTok{+}\StringTok{ }\NormalTok{gender }\OperatorTok{+}\StringTok{ }\NormalTok{urban }\OperatorTok{+}\StringTok{ }\NormalTok{comorbid }\OperatorTok{+}\StringTok{ }
+\StringTok{                       }\KeywordTok{log}\NormalTok{(age}\OperatorTok{/}\DecValTok{100}\NormalTok{) }\OperatorTok{+}\StringTok{ }\KeywordTok{random}\NormalTok{(}\KeywordTok{as.factor}\NormalTok{(id)),}
+                     \DataTypeTok{family =}\NormalTok{ BI, }\DataTypeTok{data =}\NormalTok{ df, }
+                     \DataTypeTok{control =} \KeywordTok{gamlss.control}\NormalTok{(}\DataTypeTok{trace =}\NormalTok{ F))}
+
+\NormalTok{fit_mixed_}\DecValTok{2}\NormalTok{ =}\StringTok{ }\KeywordTok{gamlss}\NormalTok{(resp }\OperatorTok{~}\StringTok{ }\NormalTok{mhv4 }\OperatorTok{+}\StringTok{ }\NormalTok{inptmhv3 }\OperatorTok{+}\StringTok{ }\NormalTok{gender }\OperatorTok{+}\StringTok{ }
+\StringTok{                       }\KeywordTok{log}\NormalTok{(age}\OperatorTok{/}\DecValTok{100}\NormalTok{) }\OperatorTok{+}\StringTok{ }\KeywordTok{random}\NormalTok{(}\KeywordTok{as.factor}\NormalTok{(id)),}
+                     \DataTypeTok{family =}\NormalTok{ BI, }\DataTypeTok{data =}\NormalTok{ df, }
+                     \DataTypeTok{control =} \KeywordTok{gamlss.control}\NormalTok{(}\DataTypeTok{trace =}\NormalTok{ F))}
+
+\NormalTok{fit_mixed_}\DecValTok{3}\NormalTok{ =}\StringTok{ }\KeywordTok{gamlss}\NormalTok{(resp }\OperatorTok{~}\StringTok{ }\NormalTok{mhv4 }\OperatorTok{+}\StringTok{ }\NormalTok{inptmhv3 }\OperatorTok{+}\StringTok{ }\NormalTok{gender }\OperatorTok{+}\StringTok{ }
+\StringTok{                       }\KeywordTok{log}\NormalTok{(age}\OperatorTok{/}\DecValTok{100}\NormalTok{) }\OperatorTok{+}\StringTok{ }\KeywordTok{random}\NormalTok{(}\KeywordTok{as.factor}\NormalTok{(id)),}
+                     \DataTypeTok{family =}\NormalTok{ BI, }\DataTypeTok{data =}\NormalTok{ df2,}
+                     \DataTypeTok{control =} \KeywordTok{gamlss.control}\NormalTok{(}\DataTypeTok{trace =}\NormalTok{ F))}
+
+
+\NormalTok{lr_}\DecValTok{2}\NormalTok{_v_}\DecValTok{1}\NormalTok{ <-}\StringTok{ }\KeywordTok{LR.test}\NormalTok{(fit_mixed_}\DecValTok{2}\NormalTok{, fit_mixed_}\DecValTok{1}\NormalTok{, }\DataTypeTok{print =}\NormalTok{ F)}
+\NormalTok{lr_}\DecValTok{3}\NormalTok{_v_}\DecValTok{2}\NormalTok{ <-}\StringTok{ }\KeywordTok{LR.test}\NormalTok{(fit_mixed_}\DecValTok{3}\NormalTok{, fit_mixed_}\DecValTok{2}\NormalTok{, }\DataTypeTok{print =}\NormalTok{ F)}
+
+\NormalTok{md_list <-}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{fit1 =}\NormalTok{ fit_mixed_}\DecValTok{1}\NormalTok{, }\DataTypeTok{fit2 =}\NormalTok{ fit_mixed_}\DecValTok{2}\NormalTok{, }\DataTypeTok{fit3 =}\NormalTok{ fit_mixed_}\DecValTok{3}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}
+\begin{center}
+\begin{tabular}{l c c c}
+\hline
+ & fit1 & fit2 & fit3 \\
+\hline
+$\mu$ (Intercept)  & $2.285^{*}$ & $2.284^{*}$ & $2.387^{*}$ \\
+                   & $(0.517)$   & $(0.516)$   & $(0.484)$   \\
+$\mu$ mhv41-5      & $0.162$     & $0.154$     &             \\
+                   & $(0.240)$   & $(0.238)$   &             \\
+$\mu$ mhv46-14     & $0.850^{*}$ & $0.842^{*}$ & $0.721^{*}$ \\
+                   & $(0.226)$   & $(0.222)$   & $(0.147)$   \\
+$\mu$ mhv4> 14     & $1.260^{*}$ & $1.254^{*}$ & $1.125^{*}$ \\
+                   & $(0.221)$   & $(0.217)$   & $(0.140)$   \\
+$\mu$ inptmhv31    & $0.857^{*}$ & $0.855^{*}$ &             \\
+                   & $(0.245)$   & $(0.245)$   &             \\
+$\mu$ inptmhv3> 1  & $0.349$     & $0.348$     &             \\
+                   & $(0.392)$   & $(0.392)$   &             \\
+$\mu$ genderMale   & $0.624^{*}$ & $0.612^{*}$ & $0.626^{*}$ \\
+                   & $(0.142)$   & $(0.141)$   & $(0.141)$   \\
+$\mu$ urbanRural   & $0.026$     &             &             \\
+                   & $(0.122)$   &             &             \\
+$\mu$ comorbidYes  & $0.091$     &             &             \\
+                   & $(0.171)$   &             &             \\
+$\mu$ log(age/100) & $2.555^{*}$ & $2.536^{*}$ & $2.537^{*}$ \\
+                   & $(0.219)$   & $(0.218)$   & $(0.218)$   \\
+$\mu$ inptmhv3>=1  &             &             & $0.729^{*}$ \\
+                   &             &             & $(0.213)$   \\
+\hline
+Desvio             & 1751.66     & 1753.26     & 1753.48     \\
+AIC                & 2512.69     & 2509.37     & 2506.81     \\
+Teste RV*          & -           & 1.598       & 0.226       \\
+Valor p            & -           & 0.553       & 0.77        \\
+gl                 & -           & 2.461       & 1.394       \\
+Num. obs.          & $3500$      & $3500$      & $3500$      \\
+\hline
+\multicolumn{4}{l}{\scriptsize{*: Teste de RV se refere ao modelo em questão contra o modelo anterior.}}
+\end{tabular}
+\caption{}
+\label{table:coefficients}
+\end{center}
+\end{table}
+
+Como podemos ver, o modelo 3 é o que tem menor AIC e por isso vamos avançar com ele.
+
+\hypertarget{anuxe1lise-de-resuxedduos}{%
+\paragraph{Análise de resíduos}\label{anuxe1lise-de-resuxedduos}}
+
+A seguir podemos checar a análise de resíduos para o modelo misto estimado via o \texttt{gamlss}. Alguns comentários sobre ele:
+
+\begin{itemize}
+\item
+  o gráfico de valores ajustados contra os resíduos quantílicos indica que a variabilidade foi controlada, uma vez que não notamos padrões na dispersão e duas retar paralelas parecem colocar os pontos numa faixa uniforme.
+\item
+  a inspeção do gráfico normal de probabilidades e da densidade estimada dos resíduso quantílicos indica que a normalidade parece ter sido alançada pelo ajuste.
+\item
+  as réplicas do gráfico de wormplot indicam um ajuste insatisfatório, uma vez que há a sobreposição dos pontos com o exterior da região de confiança do gráfico.
+\end{itemize}
+
+\begin{center}\includegraphics{lista3_files/figure-latex/unnamed-chunk-13-1} \end{center}
+
+\begin{center}\includegraphics{lista3_files/figure-latex/unnamed-chunk-14-1} \end{center}
+
+\hypertarget{interpretauxe7uxe3o-de-paruxe2metros-e-estimativas-intervalares-1}{%
+\paragraph{Interpretação de parâmetros e estimativas intervalares}\label{interpretauxe7uxe3o-de-paruxe2metros-e-estimativas-intervalares-1}}
+
+Abaixo temos as estimativas intervalares para o modelo misto e a interpretação dos parâmetros estimados.
+
+\begin{table}
+
+\caption{(\#tab:unnamed-chunk-16)Estimativas intervalares para o modelo misto final}
+\centering
+\fontsize{12}{14}\selectfont
+\begin{tabu} to \linewidth {>{}l>{\raggedright}X>{\raggedright}X>{\raggedright}X>{\raggedright}X>{\raggedright}X}
+\toprule
+variável & estimativa & e.p. & exp(estimativa) & lim. inf. p/ exp(estimativa) & lim. sup. p/ exp(estimativa)\\
+\midrule
+\textbf{(Intercept)} & 2.39 & 0.48 & 10.88 & 4.22 & 28.07\\
+\textbf{mhv46-14} & 0.72 & 0.15 & 2.06 & 1.54 & 2.74\\
+\textbf{mhv4> 14} & 1.12 & 0.14 & 3.08 & 2.34 & 4.05\\
+\textbf{inptmhv3>=1} & 0.73 & 0.21 & 2.07 & 1.37 & 3.15\\
+\textbf{genderMale} & 0.63 & 0.14 & 1.87 & 1.42 & 2.46\\
+\addlinespace
+\textbf{log(age/100)} & 2.54 & 0.22 & 12.64 & 8.25 & 19.37\\
+\bottomrule
+\end{tabu}
+\end{table}
+
+Eles têm as seguintes interpretações:
+
+\begin{itemize}
+\item
+  \texttt{(Intercept)}: no caso o intercepto representa o caso de referência sob o qual todos os outros fatores serão comparados. Estes são um paciente do sexo feminino, com idade 0 (não realista) e que teve de 0 a 5 de consultas ambulatoriais relacionadas à saúde mental sem nenhuma internação hospitalar no período.
+\item
+  \texttt{mhv46-14}: a razão de chances de polifarmácia entre um indivíduo que teve 6 a 14 consultas ambulatoriais com relação à um indivíduo que teve 0 a 5 de consultas é 2.06, ou seja a chance é de se usar 3 medicamentos ou mais é 106\% maior no grupo que teve 6 a 14 consultas ambulatoriais para o mesmo indivíduo.
+\item
+  \texttt{mhv4\textgreater{}\ 14}: considerando o indivíduo fixo, a razão de chances de seu usar 3 medicamentos ou mais do grupo que foi mais do que 14 vezes em consultas ambulatoriais no ano é 3.08, ou seja, 208\% maior que o grupo com 0 a 5 consultas ambulatoriais no ano.
+\item
+  \texttt{inptmhv3\textgreater{}=1}: ao comparar um mesmo indíviduo que tenha tido 1 ou mais internações com o mesmo indivíduo no caso não tivesse internações, a razão de chances de polifarmácia é 2.07, ou seja 107\% maior para esse indivíduo quando ele teve uma ou mais internações.
+\item
+  \texttt{genderMale}: supondo que um indivíduo fixo possa trocar de sexo, indivíduos do sexo masculino têm uma de chance de polifarmácia 87\% maior que os do sexo feminino, indicato pela estimativa de razão de chances de 1.87.
+\item
+  \texttt{log(age/100)}: para idade podemos chegar que o impacto do aumento em 1\% da idade na razão de chances de polifarmácia de um indivíduo (fixo) é 1.01\^{}2.54 - 1=
+  2.56\%.
+\end{itemize}
+
+\hypertarget{qual-o-papel-do-efeito-aleatuxf3rio-neste-tipo-de-modelo}{%
+\paragraph{Qual o papel do efeito aleatório neste tipo de modelo?}\label{qual-o-papel-do-efeito-aleatuxf3rio-neste-tipo-de-modelo}}
+
+O papel do efeito aleatório é, quando contrastado com a abordagem via as equações de estimação generalizadas, é propor uma estimativa condicional ao grupo de medidas repetidas em questão. A estimativa via EEG estima parâmetros à nivel populacional, tentando controlar a variabilidade por meio da estrutura de correlação intra grupo.
+Já a modelagem mista permite a possibilidade de inserir as características do grupo como co variáveis que estimam um efeito aleatório. Isso permite extrair a variação desses efeitos para o nível do grupo (id no caso deste exercício) e avaliar essas diferenças entre os grupos.
+
+Neste exercício, a distribuição de efeitos aleatórios resultou no seguinte histograma:
+
+\begin{center}\includegraphics{lista3_files/figure-latex/unnamed-chunk-17-1} \end{center}
+
+Isto indica que alguns indivíduos tem uma probabilidade de polifarmácia naturalmente maior quando em comparação com outros, implicando que o resultado da associação entre as variáveis para um determinado indivíduo pode diferir para outro. Abaixo mostro, para dois indivívidos, supondo as covariáveis identicas (6 a 14 visitas ao ambulatorio, sexo masculino, 10 anos de idade e nenhuma internação), os parâmetros, a chance e probabilidade de polifarmácia. Entre esses dois indívidos, as chance são bem diferentes e estudar as associações pode mudar as conclusões de um estudo com base em qual individuo (e suas características) estamos focando.
+
+\begin{table}
+
+\caption{(\#tab:unnamed-chunk-18)Comparação de chances entre 2 indíviduos com covaríaveis hipotéticamente idênticas}
+\centering
+\fontsize{12}{14}\selectfont
+\begin{tabular}[t]{>{}llllllll}
+\toprule
+id & intercepto aleatório & intercepto & mhv46-14 & log(age/100) & genderMale & chance & probabilidade\\
+\midrule
+\textbf{18} & -1.94 & 2.39 & 0.72 & 2.54 & 0.63 & 0.64 & 0.39\\
+\textbf{217} & 3.14 & 2.39 & 0.72 & 2.54 & 0.63 & 2.12 & 0.68\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\hypertarget{exercuxedcio-2}{%
+\section{Exercício 2}\label{exercuxedcio-2}}
+
+A base de dados deste exercício consiste em um experimento longitudinal desenvolvido na Austrália com 79 vacas que foram aleatorizadas segundo três dietas e foi observado semanalmente a quantidade de proteína no leite de cada animal. O objetivo é verificar as diferenças entre o conteúdo proteico semanal sob as três dietas. As variáveis presentes na base são:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{protein}: quantidade de proteínas
+\item
+  \texttt{time}: semana
+\item
+  \texttt{Cow}: identificação do animal
+\item
+  \texttt{Diet}: dieta utilizada sendo cevada (\emph{barley}), cevada+tremoços (\emph{barley+lupins}) e tremços (\emph{lupins})
+\end{itemize}
+
+Abaixo mostramos as 10 primeiras linhas do conjunto de dados:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{cccc}
+\toprule
+protein & Time & Cow & Diet\\
+\midrule
+3.63 & 1 & B01 & barley\\
+3.57 & 2 & B01 & barley\\
+3.47 & 3 & B01 & barley\\
+3.65 & 4 & B01 & barley\\
+3.89 & 5 & B01 & barley\\
+\addlinespace
+3.73 & 6 & B01 & barley\\
+3.77 & 7 & B01 & barley\\
+3.90 & 8 & B01 & barley\\
+3.78 & 9 & B01 & barley\\
+3.82 & 10 & B01 & barley\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\hypertarget{anuxe1lise-descritiva-1}{%
+\subsection{Análise descritiva}\label{anuxe1lise-descritiva-1}}
+
+O primeiro passo para esta análise é a inspeção da variável resposta protein. Abaixo temos algumas estatísticas descritivas para a amostra em nosso poder. Para todas as dietas e para a amostra inteira, podemos ver que a média e a mediana de proteínas é bem parecida, indicando que pode não haver uma assimentria acentuada neste conjunto de dados. A comparação entre os quartis 1 e 3 junto com os desvios padrões indica que não há uma diferença entre a variação entre esses grupos.
+
+\begin{table}
+
+\caption{(\#tab:unnamed-chunk-20)Estatísticas descritivas estratificadas por dieta}
+\centering
+\fontsize{12}{14}\selectfont
+\begin{tabu} to \linewidth {>{}l>{\raggedright}X>{\raggedright}X>{\raggedright}X>{\raggedright}X>{\raggedright}X>{\raggedright}X}
+\toprule
+Diet & média & mediana & Quartil 1 & Quartil 3 & Desv. Pad. & Coef. Var.\\
+\midrule
+\textbf{barley} & 3.53 & 3.53 & 3.32 & 3.74 & 0.32 & 0.09\\
+\textbf{barley+lupins} & 3.43 & 3.42 & 3.21 & 3.60 & 0.30 & 0.09\\
+\textbf{lupins} & 3.31 & 3.29 & 3.08 & 3.51 & 0.34 & 0.10\\
+\textbf{toda amostra} & 3.42 & 3.41 & 3.20 & 3.63 & 0.33 & 0.10\\
+\bottomrule
+\end{tabu}
+\end{table}
+
+Outro ponto importante de se observar é que a análise das estatísticas descritivas mostra que o conjunto de dados com a diaeta de cevada (\emph{barley}) parece ter a maior quantidade de proteínas, seguido por cevada+tremoços (\emph{barley+lupins}) e por último tremoços (\emph{lupins}), tanto em média quanto em mediana. {[}
+
+O gráfico de histograma abaixo e as densidades confirmam algumas das sugestões provindas das análises descritivas. A variável resposta parece não ser muito assimétrica e a as densidades parecem indicar a mesma ordem de localização dietas com relação à quantidade proteica no leite. Curiosamente, a densidade da estratificação da dieta por cevada+tremoços (\emph{barley+lupins}) parece ter uma ligeira bimodalidade.
+
+\begin{center}\includegraphics{lista3_files/figure-latex/unnamed-chunk-21-1} \end{center}
+
+\begin{center}\includegraphics{lista3_files/figure-latex/unnamed-chunk-22-1} \end{center}
+
+Quando analisamos as medidas semanais por cada vaca por meio de um boxplot comum, podemos ver que existe uma variação relevante entre as vacas. Por isso as recomendações de estimar o efeito da dieta levando em conta a vaca em questão, via EEG ou modelo misto faz muito sentido para esse conjunto de dados. Algumas vacas tem medidas atípicas tanto inferiores quanto superiores em relação ao intervalo interquartil do boxplot comum. Todavia, o grupo da dieta de cevada+tremoços (\emph{barley+lupins}) parece ter mais pontos atípicos que as outra dietas. A dieta de tremoços (\emph{lupins}) só tem observações atípicamente mais altas.
+
+\begin{center}\includegraphics{lista3_files/figure-latex/unnamed-chunk-23-1} \end{center}
+
+Analisando os perfis semanais da quantidade proteíca no leite, podemos ver, com o auxílio da estimativa loess e pelos boxplots semanais, que no começo do estudo a quantidade de proteina parecia ser consistentemente maior. Isso parece indicar a necessidade de uma modelagem não linear para a variável tempo.
+
+\begin{center}\includegraphics{lista3_files/figure-latex/unnamed-chunk-24-1} \end{center}
+
+Abaixo temos a estratificação do gráfico de perfis e boxplots semanais pela dieta da vaca. A ideia dessa visualização é tentar identidicar padrões diferentes na evolução das semanas do experimento e tentar checar se existe alguma diferença importante entre as dietas na evolução semanal. Talvez a maior diferença que é possível notar, tirando os níveis de localização já evidenciados nas outras análises, seja uma leve tendência crescente na evolução semanal das vacas que receberam cevada (\emph{barley}) como dieta no fim do experimento. Isso pode indicar uma possível interação essencial entre as variáveis dieta e tempo.
+
+\begin{center}\includegraphics{lista3_files/figure-latex/unnamed-chunk-25-1} \end{center}
+
+\hypertarget{modelagem-dos-dados---comparauxe7uxe3o-de-modelagem-mista-e-de-equauxe7uxe3o-de-estimauxe7uxe3o-generalizadas}{%
+\subsection{Modelagem dos dados - comparação de modelagem mista e de equação de estimação generalizadas}\label{modelagem-dos-dados---comparauxe7uxe3o-de-modelagem-mista-e-de-equauxe7uxe3o-de-estimauxe7uxe3o-generalizadas}}
+
+Nesta fase da análise iremos ajustar dois modelos, um de equação de estimação generalizada e outro misto para comparar os ajustes e testar a interação entre as semanas do estudo e a e a dieta da vaca.
+
+\begin{itemize}
+\tightlist
+\item
+  modelo de equações de estimação generalizado
+\end{itemize}
+
+\begin{align*}
+&Y_{ijk}|\text{Semana=j, Dieta=k}, \sim Q(\pi_{ijk}; y_{ijk}),\;\; 0 < \pi_{ijk} < 1,  \;\;Var(Y_{ijk}) = \sigma^2 \pi_{ijk}(1-\pi_{ijk}) \\
+\\
+&Cor(Y_{ijk}, Y{ij'k}) = \rho^{\mid j-j' \mid} \;\;\ \text{ou} \;\;\ 0 \;\;\ \text{c.c.} \\
+\\
+&\log\left( \frac{\pi_{ijk}}{1 - \pi_{ijk}}  \right) = \alpha + \delta_{k}  + \beta_2\cdot j + \beta_3 \cdot j^2   + \Delta_k \cdot j
+\end{align*}
+
+Onde \(Y_{ijk}\) representa a quantidade de proteína no leite da vaca \(i\), na semana do estudo \(j\) e que recebeu a ração \(k\). \$i = 1, \ldots{} ,79 \$ representam as vaca, \(j = 1, ..., 19\) as semanas, \(k = 1, 2, 3\) as dietas sendo 1 a dieta de cevada (\emph{barley}) a referência que será incorporada no intercepto, ou seja \(\delta_1 = 0\), k=2 é a dieta cevada+tremoços (\emph{barley+lupins}) e k=3 a dieta de tremoços (\emph{lupins}). Por fim \(\Delta_k\) representa a interação entre a dieta da vaca e a semana do estudo.
+
+\begin{itemize}
+\tightlist
+\item
+  modelo misto
+\end{itemize}
+
+\begin{align*}
+&Y_{ijk}|b_i, \text{Semana=j, Dieta=k}, \stackrel{ind}{\sim} \text{Bernoulli}(\pi_{ij}) \\
+&\log\left( \frac{\pi_{ijk}}{1 - \pi_{ijk}}  \right) = \alpha + b_i+ \delta_{k}  + \beta_2\cdot j + \beta_3 \cdot j^2 + \Delta_k \cdot j \\
+&b_i \stackrel{iid}{\sim} \text{Normal}(0, \sigma_b^2)
+\end{align*}
+
+Onde \(Y_{ijk}\) representa a quantidade de proteína no leite da vaca \(i\), na semana do estudo \(j\) e que recebeu a ração \(k\). Os \$i = 1, \ldots{} ,79 \$ representam as vaca, \(j = 1, ..., 19\) as semanas, \(k = 1, 2, 3\) as dietas sendo 1 a dieta de cevada (\emph{barley}) a referência que será incorporada no intercepto, ou seja \(\delta_1 = 0\), k=2 é a dieta cevada+tremoços (\emph{barley+lupins}) e k=3 a dieta de tremoços (\emph{lupins}). Está presente no modele também um efeito aleatório \(b_i\) para cada vaca. Por fim \(\Delta_k\) representa a interação entre a dieta da vaca e a semana do estudo.
+
+Para o ajuste dos modelos, devido às dificuldades no uso dos procedimentos de diagnóstico providos no enunciado para as EEG, partimos para o uso do pacote \texttt{geepack} que possui algumas funcionalidades que usaremos, nomeadamente procedimento ANOVA e geração de resíduos. Abaixo estão os código de ajuste desses modelos.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(geepack)}
+
+\NormalTok{df <-}\StringTok{ }\NormalTok{df }\OperatorTok{%>%}
+\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{Cow =} \KeywordTok{as.character}\NormalTok{(Cow) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(.)) }
+
+
+\NormalTok{fit_milk_gee1 =}\StringTok{ }\KeywordTok{geeglm}\NormalTok{(protein }\OperatorTok{~}\StringTok{ }\NormalTok{Diet }\OperatorTok{+}\StringTok{ }\NormalTok{Time }\OperatorTok{+}\StringTok{ }\KeywordTok{I}\NormalTok{(Time}\OperatorTok{^}\DecValTok{2}\NormalTok{), }
+                      \DataTypeTok{id =}\NormalTok{ Cow, }
+                      \DataTypeTok{family =} \KeywordTok{Gamma}\NormalTok{(}\DataTypeTok{link =} \StringTok{"log"}\NormalTok{), }
+                      \DataTypeTok{corstr =} \StringTok{"ar1"}\NormalTok{, }\DataTypeTok{data=}\NormalTok{df)}
+                      
+\NormalTok{fit_milk_gee2 =}\StringTok{ }\KeywordTok{geeglm}\NormalTok{(protein }\OperatorTok{~}\StringTok{ }\NormalTok{Diet }\OperatorTok{+}\StringTok{ }\NormalTok{Time }\OperatorTok{+}\StringTok{ }\KeywordTok{I}\NormalTok{(Time}\OperatorTok{^}\DecValTok{2}\NormalTok{) }\OperatorTok{+}\StringTok{  }\NormalTok{Time}\OperatorTok{:}\NormalTok{Diet, }
+                       \DataTypeTok{id =}\NormalTok{ Cow, }
+                       \DataTypeTok{family =} \KeywordTok{Gamma}\NormalTok{(}\DataTypeTok{link =} \StringTok{"log"}\NormalTok{),}
+                       \DataTypeTok{corstr =} \StringTok{"ar1"}\NormalTok{,}
+                       \DataTypeTok{data=}\NormalTok{df)}
+
+
+\NormalTok{fit_milk_mix1 =}\StringTok{ }\KeywordTok{gamlss}\NormalTok{(}\DataTypeTok{formula =}\NormalTok{ protein }\OperatorTok{~}\StringTok{ }\NormalTok{Diet }\OperatorTok{+}\StringTok{ }\NormalTok{Time }\OperatorTok{+}\StringTok{ }\KeywordTok{I}\NormalTok{(Time}\OperatorTok{^}\DecValTok{2}\NormalTok{) }\OperatorTok{+}\StringTok{ }\KeywordTok{random}\NormalTok{(}\KeywordTok{as.factor}\NormalTok{(Cow)), }
+                       \DataTypeTok{family =}\NormalTok{ GA,}
+                       \DataTypeTok{data=}\NormalTok{df, }
+                       \DataTypeTok{control =} \KeywordTok{gamlss.control}\NormalTok{(}\DataTypeTok{trace =}\NormalTok{ F))}
+
+\NormalTok{fit_milk_mix2 =}\StringTok{ }\KeywordTok{gamlss}\NormalTok{(}\DataTypeTok{formula =}\NormalTok{ protein }\OperatorTok{~}\StringTok{ }\NormalTok{Diet }\OperatorTok{+}\StringTok{ }\NormalTok{Time }\OperatorTok{+}\StringTok{ }\KeywordTok{I}\NormalTok{(Time}\OperatorTok{^}\DecValTok{2}\NormalTok{) }\OperatorTok{+}\StringTok{ }\NormalTok{Time}\OperatorTok{:}\NormalTok{Diet }
+                       \OperatorTok{+}\StringTok{ }\KeywordTok{random}\NormalTok{(}\KeywordTok{as.factor}\NormalTok{(Cow)),}
+                       \DataTypeTok{family =}\NormalTok{ GA, }
+                       \DataTypeTok{data=}\NormalTok{df, }
+                       \DataTypeTok{control =} \KeywordTok{gamlss.control}\NormalTok{(}\DataTypeTok{trace =}\NormalTok{ F))}
+\end{Highlighting}
+\end{Shaded}
+
+A tabela abaixo mostra o resultado dos ajustes. A conclusão sobre inclusão da interação é diferente para cada modelo. No modelo misto, quase todos os efeitos principais continuam com conclusões inferenciais similares, mas um dos novos parâmetros não é siginificante. Para o modelo de EEG temos que dois dos efeitos principais de dieta se tornaram não siginificantes com a inclusão das interações, porém só um dos parâmetros de interação é siginificante à um nível de 10\%. Para fazer uma análise mais precisa vamos fazer um teste de modelo encaixado para cada um dos tipos de modelo. No caso do modelo misto será um teste de razão de verossimilhança e no caso do GEE será um teste de Wald.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{l c c c c}
+\hline
+ & ef. princ. EEG &  + int EEG & ef. princ. misto &  + int misto \\
+\hline
+(Intercept)                  & $1.3728^{**}$  & $1.3560^{**}$  &                &                \\
+                             & $(0.0152)$     & $(0.0169)$     &                &                \\
+Dietbarley+lupins            & $-0.0283^{*}$  & $-0.0124$      &                &                \\
+                             & $(0.0142)$     & $(0.0205)$     &                &                \\
+Dietlupins                   & $-0.0624^{**}$ & $-0.0307$      &                &                \\
+                             & $(0.0160)$     & $(0.0240)$     &                &                \\
+Time                         & $-0.0237^{**}$ & $-0.0218^{**}$ &                &                \\
+                             & $(0.0026)$     & $(0.0028)$     &                &                \\
+Time$^2$                     & $0.0009^{**}$  & $0.0009^{**}$  &                &                \\
+                             & $(0.0001)$     & $(0.0001)$     &                &                \\
+Dietbarley+lupins:Time       &                & $-0.0017$      &                &                \\
+                             &                & $(0.0018)$     &                &                \\
+Dietlupins:Time              &                & $-0.0035$      &                &                \\
+                             &                & $(0.0021)$     &                &                \\
+$\mu$ (Intercept)            &                &                & $1.3266^{**}$  & $1.3180^{**}$  \\
+                             &                &                & $(0.0084)$     & $(0.0099)$     \\
+$\mu$ Dietbarley+lupins      &                &                & $-0.0269^{**}$ & $-0.0241^{*}$  \\
+                             &                &                & $(0.0050)$     & $(0.0102)$     \\
+$\mu$ Dietlupins             &                &                & $-0.0604^{**}$ & $-0.0385^{**}$ \\
+                             &                &                & $(0.0050)$     & $(0.0102)$     \\
+$\mu$ Time                   &                &                & $-0.0174^{**}$ & $-0.0164^{**}$ \\
+                             &                &                & $(0.0020)$     & $(0.0021)$     \\
+$\mu$ Time$^2$                 &                &                & $0.0008^{**}$  & $0.0008^{**}$  \\
+                             &                &                & $(0.0001)$     & $(0.0001)$     \\
+$\sigma$ (Intercept)         &                &                & $-2.5977^{**}$ & $-2.5999^{**}$ \\
+                             &                &                & $(0.0260)$     & $(0.0261)$     \\
+$\mu$ Dietbarley+lupins:Time &                &                &                & $-0.0003$      \\
+                             &                &                &                & $(0.0010)$     \\
+$\mu$ Dietlupins:Time        &                &                &                & $-0.0024^{*}$  \\
+                             &                &                &                & $(0.0010)$     \\
+\hline
+Scale parameter: gamma       & $0.0086$       & $0.0086$       & $$             & $$             \\
+Scale parameter: SE          & $0.0005$       & $0.0004$       & $$             & $$             \\
+Correlation parameter: alpha & $0.7279$       & $0.7252$       & $$             & $$             \\
+Correlation parameter: SE    & $0.0312$       & $0.0309$       & $$             & $$             \\
+Num. obs.                    & $1337$         & $1337$         & $1337$         & $1337$         \\
+Num. clust.                  & $79$           & $79$           & $$             & $$             \\
+\hline
+\multicolumn{5}{l}{\scriptsize{$^{**}p<0.01$; $^{*}p<0.05$}}
+\end{tabular}
+\caption{Statistical models}
+\label{table:coefficients}
+\end{center}
+\end{table}
+
+As conclusões para os testes são diferentes em cada modelo. No modelo misto, se estivermos dispostos à um nível de significância de 5\%, a inclusão da interação parece ser corroborada pelo ajuste. Já no caso do modelo de EEG não é possível rejeitar a hipótese nula que corresponde ao modelo sem interação.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{LR.test}\NormalTok{(fit_milk_mix1,fit_milk_mix2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  Likelihood Ratio Test for nested GAMLSS models. 
+##  (No check whether the models are nested is performed). 
+##  
+##        Null model: deviance= 127.9979 with  74.80504 deg. of freedom 
+##  Altenative model: deviance= 121.9624 with  76.72389 deg. of freedom 
+##  
+##  LRT = 6.035428 with 1.918848 deg. of freedom and p-value= 0.04514493
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(fit_milk_gee1,fit_milk_gee2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{r|r|r}
+\hline
+Df & X2 & P(>|Chi|)\\
+\hline
+2 & 2.84493 & 0.241119\\
+\hline
+\end{tabular}
+
+\hypertarget{comparauxe7uxe3o-de-ajustes}{%
+\subsection{Comparação de ajustes}\label{comparauxe7uxe3o-de-ajustes}}
+
+Vamos então comparar os modelos que culminaram da análise anterior, isto é o modelo misto com interação e o modelo de EEG sem a interação. Para possibilitar a comparação dos resíduos na mesma escala, vamos utilizar em ambos o resíduo de pearson para inspecioná-los.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{md_mix <-}\StringTok{ }\NormalTok{fit_milk_mix2}
+\NormalTok{md_gee <-}\StringTok{ }\NormalTok{fit_milk_gee1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{md_res <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}
+  \DataTypeTok{fitted__misto =} \KeywordTok{fitted}\NormalTok{(md_mix),}
+  \DataTypeTok{fitted__eeg =} \KeywordTok{fitted}\NormalTok{(md_gee),}
+  \CommentTok{#resid__misto = resid(md_mix),}
+  \DataTypeTok{resid__misto =}\NormalTok{ (md_mix}\OperatorTok{$}\NormalTok{y}\OperatorTok{-}\KeywordTok{fitted}\NormalTok{(md_mix) )}\OperatorTok{*}\NormalTok{(}\DecValTok{1}\OperatorTok{/}\KeywordTok{sqrt}\NormalTok{(}\KeywordTok{fitted}\NormalTok{(md_mix)}\OperatorTok{^}\DecValTok{2}\NormalTok{)),}
+  \DataTypeTok{resid__eeg =}\NormalTok{ (md_gee}\OperatorTok{$}\NormalTok{y}\OperatorTok{-}\KeywordTok{fitted}\NormalTok{(md_gee) )}\OperatorTok{*}\NormalTok{(}\DecValTok{1}\OperatorTok{/}\KeywordTok{sqrt}\NormalTok{(}\KeywordTok{fitted}\NormalTok{(md_gee)}\OperatorTok{^}\DecValTok{2}\NormalTok{))}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Os gráficos a seguir apresentam uma análise de resíduos para ambos os modelos. Alguns comentários sobre eles:
+
+\begin{itemize}
+\item
+  devido às diferenças estruturais entre os modelos, a escala dos resíduos parecem ser bem diferentes.
+\item
+  pela EEG se caracterizar por um modelo marginal, seus valores ajustados correspondem à uma ``média'' sobre todas os grupos levando em consideração uma estrutura de correlação interna e dividindo a variabilidade entre o parâmetro de escala e os parâmtros da matriz trabalho, fazendo com que suas estimativas sejam à nível médio, desconsiderando grupos não idênticos. Isto parece fazer com que haja menos variabilidade das estimativas.
+\item
+  o ajuste do modelo misto parece ser apropriado, porêm com uma leve tendência de heterocedasticidade no início superior do gráfico.
+\item
+  o wormplot do modelo misto, este sendo o sobre o resíduo quantílico, também indica um bom ajuste uma vez que não há sobreposição com a região externa das extremidades de confianca.
+\item
+  as densidades dos resíduos parecem sugerir que os resíduos dos modelo de EEG é mais concentrado que os do modelo misto.
+\end{itemize}
+
+\begin{center}\includegraphics{lista3_files/figure-latex/unnamed-chunk-32-1} \end{center}
+
+\begin{center}\includegraphics{lista3_files/figure-latex/unnamed-chunk-33-1} \end{center}
+
+\hypertarget{wormplot-para-o-modelo-misto}{%
+\paragraph{Wormplot para o modelo Misto}\label{wormplot-para-o-modelo-misto}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{gamlss}\OperatorTok{::}\KeywordTok{rqres.plot}\NormalTok{(md_mix, }\DataTypeTok{howmany =} \DecValTok{6}\NormalTok{, }\DataTypeTok{main =} \StringTok{'skjkfdsdkjf'}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{lista3_files/figure-latex/unnamed-chunk-34-1} \end{center}
+
+\hypertarget{comentuxe1rios-sobre-os-resultados}{%
+\subsection{Comentários sobre os resultados}\label{comentuxe1rios-sobre-os-resultados}}
+
+A diferença na construção teórica de ambos os modelos parece estar presente na análise dos resíduos. Como os modelos EEG têm a proposta de ser um modelo marginal, sendo, informalmente, uma média ao longo de grupo potencialmente heterogêneos, isso aparentemente se traduz na inspreção dos resíduos.
+
+Já o modelo misto propõe inserir certo protagonismo aos grupos da análise ao inserir efeitos aleatórios que variam entre eles por meio de uma estrutura probabilística condicional à esses efeitos. Um ponto relevante consiste no fato de que esses efeitos aleatórios induzem necessariamente correlações positivas no nível do grupo. Neste sentido, o modelo condicional misto permite a individualização das estimativas de efeitos, uma vez que a estrutura probabilistica permite isso.
+
+Existem então vantagens e desvantagens à cada um desses modelos. Como vantagens podemos elencar que a abordagem via EEG marginal parece ser mais direta quanto à investigação de associações populacionais e a abordagem mista condicional permite a avaliação para grupos específicos destas associações. A imposição de estruturas de correlação positivas pode ser uma limitação aos modelos mistos. No caso de EEG por serem baseados em abordagens de quasi-verossimelhanças, ferramentas baseadas em verossimilhança tradicional precisam ser adaptadas para o seu uso. Uma outra vantagem para os modelos EEG é presença natural de um parâmetro de disperção que pode possibilitar sobre ou sub dispersão, isso também devido à sua construção via quasi-verossimilhança.
+
+\hypertarget{exercuxedcio-3}{%
+\section{Exercício 3}\label{exercuxedcio-3}}
+
+\hypertarget{cuxe1lculo-da-variuxe2ncia}{%
+\subsection{Cálculo da Variância}\label{cuxe1lculo-da-variuxe2ncia}}
+
+O primeiro passo para entender a relação entre o poder de se testar \(H_0: \mu_1 - \mu_2 = 0\) contra \(H_1: \mu_1 - \mu_2 \ne 0\) através da estatística de Wald \(\xi_W\) proposta é o cálculo da variância da diferença entra \(\bar Y_1 - \bar Y_2\):
+
+\[
+\text{Var}(\bar Y_1 - \bar Y_2) =  \text{Var}(\bar Y_1) +  \text{Var}(\bar Y_2) - 2\text{Cov}(\bar Y_1 , \bar Y_2)
+\]
+
+A variância da média amostral do grupo \(j=1,2\) é:
+
+\[
+\text{Var}(\bar Y_j) \stackrel{ind}{=} \frac{1}{n^2} \sum^{n}_{i=1}{\text{Var}(Y_{ij})} = \frac{n\phi^{-1}V_j}{n^2} = \frac{\phi^{-1}V_j}{n}
+\]
+
+Onde \(V_j\) é a função de variância da família exponencial sob a qual \(Y_{ij}\) pertence.
+
+A covariância entre as médias amostrais pode ser simplificada com as seguintes manipulações:
+
+\begin{align*}
+\text{Cov}(\bar Y_1 , \bar Y_2) 
+&=   \text{Cov} \left( \frac{1}{n} \sum^{n}_{i=1}{y_{i1}} , \frac{1}{n} \sum^{n}_{k=1}{y_{k2}} \right) \\
+&=   \frac{1}{n^2} \text{Cov} \left(  \sum^{n}_{i=1}{y_{i1}} , \sum^{n}_{k=1}{y_{k2}} \right) \\
+&=   \frac{1}{n^2}  \sum^{n}_{i=1} \sum^{n}_{k=1} \text{Cov} \left(  y_{i1} , y_{k2} \right) \\
+&=   \frac{1}{n^2}  \sum^{n}_{i=1} \text{Cov} \left(  y_{i1} , y_{i2} \right) \\
+\end{align*}
+
+Onde a última igualdade parte do fato de que a correlação é nula quando \(i \ne k\) para \(i,k = 1, ..., n\), conforme a construção no enunciado do exercício. Note que existe uma relação entre covariância e correlação:
+
+\[
+\text{Corr} \left(  y_{i1} , y_{i2} \right) = \rho= \frac{\text{Cov} \left(  y_{i1} , y_{i2} \right)}{\sqrt{\text{Var}(\bar y_{i1})\text{Var}(\bar y_{i2})}}
+\]
+
+E então, \(\text{Cov} \left( y_{i1} , y_{i2} \right) = \rho\sqrt{\text{Var}(\bar y_{i1})\text{Var}(\bar y_{i2})} = \rho\phi^{-1}\sqrt{V_1V_2}\). Concluindo então que
+
+\begin{align*}
+\text{Cov}(\bar Y_1 , \bar Y_2) 
+&=   \frac{1}{n^2}  \sum^{n}_{i=1} \text{Cov} \left(  y_{i1} , y_{i2} \right) \\
+&=   \frac{1}{n^2}  n \rho\phi^{-1}\sqrt{V_1V_2} \\
+&=  \rho n^{-1}\phi^{-1}\sqrt{V_1V_2} \\
+\end{align*}
+
+Em conclusão, temos que
+
+\begin{align*}
+\text{Var}(\bar Y_1 - \bar Y_2) 
+&= \frac{\phi^{-1}V_1}{n} + \frac{\phi^{-1}V_2}{n} - 2\rho n^{-1}\phi^{-1}\sqrt{V_1V_2} \\
+&= n^{-1}\phi^{-1} \left( V_1 + V_2 - 2 \rho \sqrt{V_1 V_2} \right)
+\end{align*}
+
+\hypertarget{estudo-do-poder-com-relauxe7uxe3o-uxe0-rho}{%
+\subsection{\texorpdfstring{Estudo do poder com relação à \(\rho\)}{Estudo do poder com relação à \textbackslash rho}}\label{estudo-do-poder-com-relauxe7uxe3o-uxe0-rho}}
+
+Utilizando o resultado da seção anterior, o parâmetro de não centralidade da distribuição de \(\xi_W\) sob \(H_1: \mu_1 - \mu_2 \ne 0\) é:
+
+\[
+\lambda = \frac{n \phi (\mu_1 - \mu_2 )^2}{2 \left(   V_1 + V_2 - 2 \rho \sqrt{V_1 V_2}  \right)}
+\]
+
+Como \(\lambda\) representa o parâmetro de não centralidade, valores maiores de \(\lambda\) implicam uma maior probabilididade de rejeitar a hipótese nula quando esta é falsa. Na notação do exercício, e definindo \(\lambda_1 > \lambda_2\), temos que \(P_n(\lambda_1, \rho) > P_n(\lambda_2, \rho)\). Vamos agora estudar como \(\lambda\) muda com \(\rho\).
+
+Definindo \(\rho_1\) e \(\rho_2\) tal que \(\rho_1 > \rho_2\) e respeitando \(-1 \leq \rho_l \leq 1\) para \(l=1,2\), temos que \(\lambda_{\rho_1} > \lambda_{\rho_1}\) uma vez que \(\rho\) se encontra no denominador de \(\lambda\). Assim para \(n\), \(\mu_1 - \mu_2\) e \(\phi\) fixos, temos:
+
+\[
+P_n(\lambda, \rho_1) > P_n(\lambda, \rho_2)
+\]
+
+Por fim, não é difícil encontrar \(n_2 > n_1\) de tal forma que:
+
+\[
+P_{n_1}(\lambda, \rho_1) \leq P_{n_2}(\lambda, \rho_2)
+\]
+
+Intuitivamente, o que esses resultados mostram é que, quanto maior a correlação de um par de amostras \(i\), mais fácil é detectar uma diferença, uma vez que há mais informação transferida pela dependência entre o par de amostras. Se eu não tenho muita informação, ou seja, a correlação é baixa ou até negativa, o aumento causado na variação das estimativas deverá ser sopesado por uma amostra maior.
+
+\end{document}

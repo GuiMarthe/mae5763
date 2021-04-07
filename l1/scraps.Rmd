@@ -1,0 +1,27 @@
+---
+title: "scraps"
+author: "Guilherme Marthe"
+date: "9/24/2020"
+output: html_document
+---
+
+Sendo um pouco mais cuidadoso com a inspeção dos gráficos de dispersão com a variável resposta no eixo-y, mostro os abaixo adicionando 3 modelos: em azul uma regressão linear simples, em preto uma regressão linear com a variável x quadrática, e em vermelho a regressão não-paramétrica local *loess*. Esta última facilita a inspeção para tendências não lineares e comparamos as duas formas paramétricas quadrática e linear com a forma do loess. 
+
+```{r echo=FALSE, fig.height=9, fig.width=9}
+mdata %>% 
+  gather(var, value, -fuel) %>% 
+  ggplot(aes(value, fuel)) + 
+  geom_point(size = 0.9) + 
+  facet_wrap(~var, scales = 'free') + 
+  geom_smooth(se = F, color = 'black', formula = y ~ poly(x, 2), method='lm', size = 0.5) + 
+  geom_smooth(method = 'lm', se = F, color = 'blue', formula = y ~ x, size = 0.5) + 
+  geom_smooth(method = 'loess', se = F, color = 'red', formula = y ~ x, size = 0.5) + 
+  theme_minimal() + 
+  labs(title = 'Gráficos de dispersão e transformação de variáves', 
+       subtitle = 'Em azul temos o regressão com termo linear,\nem preto a regressão com o termo quadrático e em vermelho o loess')
+  
+```
+
+Assim, em comparação com o loess, as variáveis *dlic* e *lmiles* parecem, pelo menos marginalmente, se benficiar de parametrizações quadráticas.
+
+

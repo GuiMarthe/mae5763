@@ -3,16 +3,32 @@ title: "MAE5763 - Modelos Lineares Generalizados - Resolução da Lista 1"
 author: "Guilherme Marthe - 8661962"
 date: "9/21/2020"
 output:
-  pdf_document:
+  bookdown::pdf_document2:
     df_print: kable
+    toc: false
+header-includes:
+    - \usepackage{caption}
+    - \usepackage{amsmath}
 fontsize: 11pt
 geometry: margin=1.5cm
 ---
+
+\captionsetup[table]{labelformat=empty}
+\counterwithin*{equation}{section}
+
+
 
 ```{r setup,  include=FALSE}
 knitr::opts_chunk$set(fig.align = 'center')
 
 suppressPackageStartupMessages({
+  library(modelsummary)
+  library(ROCR)
+  library(pROC)
+  library(Hmisc)
+  library(gamlss)
+  library(MASS)
+  library(equatiomatic)
   library(tidyverse)
   library(kableExtra)
   library(janitor)
@@ -22,29 +38,820 @@ suppressPackageStartupMessages({
 })
 
 ```
+# Exercício 1
+
+## Forma matricial do modelo
+
+O modelo na sua forma matricial $y = X\beta + \epsilon$ depende de subcomponentes para cada $i = 1, 2, 3$.
+A da parametrizaçao sugeredida é a seguinte:
+
+\begin{align*}
+& y_{1,j} = \alpha + \epsilon_{1,j} \\
+& y_{2,j} = \alpha + \Delta + \epsilon_{2,j} \\
+& y_{3,j} = \alpha - \Delta + \epsilon_{3,j} \\
+\end{align*}
+
+Com $j = 1, ... , r$ e $\epsilon_{i,j} \sim N(0, \sigma^2)$. 
+Assim, a matriz modelo, vetor de resposta e o componente de erro de cada $i = 1,2,3$ é:
+
+$$
+X_1 =  
+\begin{bmatrix}
+1 & 0 \\
+1 & 0 \\
+\vdots & \vdots \\
+1 & 0 \\
+\end{bmatrix}_{r \times 2} 
+y_1 =
+\begin{bmatrix}
+y_{1, 1} \\
+y_{1, 2} \\
+\vdots \\
+y_{1, r} 
+\end{bmatrix}_{r \times 1} 
+\epsilon_1 =
+\begin{bmatrix}
+\epsilon_{1, 1} \\
+\epsilon_{1, 2} \\
+\vdots \\
+\epsilon_{1, r} 
+\end{bmatrix}_{r \times 1} 
+$$
+
+$$
+X_2 =  
+\begin{bmatrix}
+1 & 1 \\
+1 & 1 \\
+\vdots & \vdots \\
+1 & 1 \\
+\end{bmatrix}_{r \times 2} 
+y_2 =
+\begin{bmatrix}
+y_{2, 1} \\
+y_{2, 2} \\
+\vdots \\
+y_{2, r} 
+\end{bmatrix}_{r \times 1} 
+\epsilon_2 =
+\begin{bmatrix}
+\epsilon_{2, 1} \\
+\epsilon_{2, 2} \\
+\vdots \\
+\epsilon_{2, r} 
+\end{bmatrix}_{r \times 1} 
+$$
+
+$$
+X_3 =  
+\begin{bmatrix}
+1 & -1 \\
+1 & -1 \\
+\vdots & \vdots \\
+1 & -1 \\
+\end{bmatrix}_{r \times 2} 
+y_3 =
+\begin{bmatrix}
+y_{3, 1} \\
+y_{3, 2} \\
+\vdots \\
+y_{3, r} 
+\end{bmatrix}_{r \times 1} 
+\epsilon_3 =
+\begin{bmatrix}
+\epsilon_{3, 1} \\
+\epsilon_{3, 2} \\
+\vdots \\
+\epsilon_{3, r} 
+\end{bmatrix}_{r \times 1} 
+$$
+
+Utilzando os subcomponentes apresentados em $(1)$, $(2)$ e $(3)$, podemos construir $X$, $y$ e $\epsilon$ da seguinte maneira:
+
+$$
+X = \begin{bmatrix} X_1 \\ X_2 \\ X_3 \end{bmatrix}_{3r \times 2}
+y = \begin{bmatrix} y_1 \\ y_2 \\ y_3 \end{bmatrix}_{3r \times 1}
+\epsilon = \begin{bmatrix} \epsilon_1 \\ \epsilon_2 \\ \epsilon_3 \end{bmatrix}_{3r \times 1}
+$$
+
+E por fim o vetor de parâmetros $\beta$ é fica com a seguinte forma:
+
+$$
+\beta = \begin{bmatrix} \alpha \\ \Delta \end{bmatrix}_{2 \times 1}
+$$
+
+## Estimativa de parâmetros
+
+Como a estimativa de modelos lineares por MQO tem solução analítica $\hat\beta = (X^TX)^{-1}X^Ty$, A estimativa de MQO para o vetor coluna $\beta = [\alpha, \Delta]^T$ é desenvolvida nos a partir dos componentes contruídos anteriormente:
+
+$$
+X^TX = 
+\begin{bmatrix} 
+1 & 1 & \dots & 1 & 1  & \dots & 1 & 1  \\
+0 & 0 & \dots & 1 & 1  & \dots & -1 & -1  
+\end{bmatrix}_{2\times3r}
+\begin{bmatrix} 
+1 & 0 \\ 1 & 0 \\ \vdots & \vdots \\
+1 & 1 \\ 1 & 1 \\ \vdots & \vdots \\
+1 & -1 \\ 1 & -1 
+\end{bmatrix}_{3r \times 2} =
+\begin{bmatrix} 
+3r & 0 \\ 0 & 2r
+\end{bmatrix}_{2 \times 2} 
+$$
+
+Como $det(X^TX) = 6r^2$ podemos calcular $(X^TX)^{-1}$
+
+$$
+(X^TX)^{-1} = \frac{1}{6r^2}
+\begin{bmatrix} 
+2r & 0 \\ 0 & 3r
+\end{bmatrix}_{2 \times 2} =
+\begin{bmatrix} 
+\frac{1}{3r} & 0 \\ 0 & \frac{1}{2r}
+\end{bmatrix}_{2 \times 2}
+$$
+
+O próximo fator da estimativa é dado por:
+$$
+X^Ty = 
+\begin{bmatrix} 
+1 & 1 & \dots & 1 & 1  & \dots & 1 & 1  \\
+0 & 0 & \dots & 1 & 1  & \dots & -1 & -1  
+\end{bmatrix}_{2\times3r}
+\begin{bmatrix} y_{1,1} \\ y_{2,1} \\ \vdots \\ y_{3,r} \end{bmatrix}_{3r \times 1}
+= 
+\begin{bmatrix}
+\sum_{i=1}^{3}\sum_{j=1}^{r} y_{i,j} \\
+\sum_{j=1}^{r}y_{2,j}  \; - \sum_{j=1}^{r}y_{3,j}
+\end{bmatrix}_{2 \times 1}
+$$
+
+Por fim, chegamos nas estimativas requisitadas:
+
+$$
+\begin{aligned} 
+\hat\beta &={}
+\begin{bmatrix}
+  \hat\alpha \\
+  \hat\Delta
+\end{bmatrix}_{2 \times 1} \\ &= 
+(X^TX)^{-1}X^Ty \\ &= 
+\begin{bmatrix} 
+\frac{1}{3r} & 0 \\ 0 & \frac{1}{2r}
+\end{bmatrix}_{2\times2}
+\begin{bmatrix}
+\sum_{i=1}^{3}\sum_{j=1}^{r} y_{i,j} \\
+\sum_{j=1}^{r}y_{2,j}  \; - \sum_{j=1}^{r}y_{3,j}
+\end{bmatrix}_{2 \times 1} \\
+&= 
+\begin{bmatrix}
+\frac{1}{3r}\sum_{i=1}^{3}\sum_{j=1}^{r} y_{i,j} \\
+\frac{1}{2r}(\sum_{j=1}^{r}y_{2,j}  \; - \sum_{j=1}^{r}y_{3,j})
+\end{bmatrix}_{2 \times 1} 
+\\ &= 
+\begin{bmatrix}
+\bar y \\
+\frac{\bar y_2 - \bar y_3}{2}
+\end{bmatrix}_{2 \times 1}
+\end{aligned}
+$$
+
+Onde $\bar y$ é a média amostral de todos os $y_{i,j}$ e $\bar y_i$ é a média amostral das $r$ observações do grupo $i=1,2,3$.
+
+## Variância e covariância das estimativas
+
+As variâncias e covariância das estimativas $\hat\alpha$ e $\hat\Delta$ são obtidas por meio do seguinte resultado:
+
+$$
+Var(\hat\beta) = \sigma^2(X^TX)^{-1}
+$$
+
+Consequentemente, temos:
+
+\begin{align*}
+& Var(\hat\alpha) = \frac{\sigma^2}{3r} \\
+& Var(\hat\Delta) = \frac{\sigma^2}{2r} \\
+& Cov(\hat\alpha, \hat\Delta) = 0
+\end{align*}
+
+## Estatística F para $H_0: \Delta = 0$ contra $H_1: \Delta \ne 0$
 
 
-## Exercício 1
+Para mostrar que a estatística F para testar $H_0: \Delta = 0$ contra $H_1: \Delta \ne 0$ pode ser expressa como no enunciado, o utilizaremos o teste geral de hipóteses lineares. Neste procedimento, o test $H_0: \Delta = 0$ contra $H_1: \Delta \ne 0$ pode ser escrito como:
 
-*em progresso*
+\begin{align*}
+& H_0: R\beta = 0 \\
+& H_1: R\beta \ne 0
+\end{align*}
 
-## Exercício 2
+Onde $\beta = [\alpha \; \Delta]^T$ e $R=[0 \; 1]$.
+O acréssimo à soma dos quadrados dos resíduos devido à $H_0$ é escrito como:
 
-*em progresso*
+$$
+ASQ(R\beta = 0) =  (R\hat\beta)^T[R(X^TX)^{-1}R^T]^{-1}R\hat\beta
+$$
 
-## Exercício 3
+Calculando os componentes temos:
 
-*em progresso*
+$$
+R\hat\beta = \begin{bmatrix} 0 & 1 \end{bmatrix} \begin{bmatrix} \hat\alpha \\ \hat\Delta \end{bmatrix} = 
+\hat\Delta
+$$
 
-## Exercício 4
+$$
+\begin{aligned}
+R(X^TX)^{-1}R^T &={} \begin{bmatrix} 0 & 1 \end{bmatrix}  \begin{bmatrix} \frac{1}{3r} & 0 \\ 0 & \frac{1}{2r} \end{bmatrix}  \begin{bmatrix} 0 \\ 1 \end{bmatrix}  \\
+&= \begin{bmatrix} 0 & \frac{1}{2r} \end{bmatrix} 
+\begin{bmatrix} 0 \\ 1 \end{bmatrix} \\
+&= \frac{1}{2r}
+\end{aligned}
+$$
 
-*em progresso*
+E, então, $ASQ(R\beta = 0) = \hat\Delta(\frac{1}{2r})^{-1}\hat\Delta = 2r(\hat\Delta)^2$. 
+A estatística F para o teste geral de hipóteses lineares é:
 
-## Exercício 5
+$$
+F = \frac{ASQ(R\beta = 0) / k}{SQRes/(n-p)}
+$$
 
-*em progresso*
+Onde $k$ é o número de linhas de R, p é o número de parâmetros do modelo não restrito pelas hipóteses testadas e n é o tamanho da amostra. No nosso exercício, $k=1$, $p = 2$ ($\alpha$ e $\Delta$) e $n=3r$.
+Com as seguintes manipulações algébricas, conseguimos chegar à forma apresentada no enunciado.
 
-## Exercício 6
+$$
+\begin{aligned}
+ F &={} \frac{2r(\hat\Delta)^2/1}{[\sum_{i=1}^3\sum_{j=1}^r(y_{i,j} - \hat y_{i,j})^2]/(3r-2)} \\
+&= \frac{2r(3r-2)\frac{(\bar y_2 - \bar y_3)^2}{4}}{\sum_{i=1}^3\sum_{j=1}^r(y_{i,j} - \hat y_{i,j})^2} \;\;\;\;\;\;\; \quad (\text{pois} \;\;\ \hat\Delta = \frac{\bar y_2 - \bar y_3}{2}) \\
+&= \frac{r(3r - 2)}{2}\cdot\frac{(\bar y_2 - \bar y_3)^2}{\sum_{i=1}^3\sum_{j=1}^r(y_{i,j} - \hat y_{i,j})^2}
+\end{aligned} 
+$$
+
+# Exercício 2
+
+## Família exponencial
+
+As distribuições pertencentes à família exponencial podem ter sua função de densidade de probabilidade, no caso contínuo, ou sua função de massa de probabilidade, no caso discreto, escritas na seguinte forma:
+
+$$
+f_Y(y; \theta, \phi) = exp\{\phi[y\theta - b(\theta)] \: + \: c(y;\phi)\}
+$$
+
+Onde $\theta$ é o parâmetro de localidade, $\phi$ é o parâmetro de precisão. Se for possível expressar a função de densidade (ou de massa) de uma variável aleatória $Y$ em termos de $\theta$, $\phi$, definindo $b(\theta)$ e $c(y, \phi)$ então Y pertence à família exponencial.
+
+Mostramos com a densidade a seguir, com algumas manipulações algébricas, que ela de fato pertence à família exponencial:
+
+
+$$
+\begin{aligned}
+f(y; \theta, \phi) &={} \frac{\phi a(y;\phi)}{\pi(1+y^2)^{1/2}}exp[\phi(y\theta + (1-\theta^2)^{1/2})] 
+\\ &=  exp[\phi(y\theta + (1-\theta^2)^{1/2})]\cdot exp[log(\frac{\phi a(y;\phi)}{\pi(1+y^2)^{1/2}})] 
+\\ &= exp[\phi(y\theta + (1-\theta^2)^{1/2})\; +  log(\phi) + log(a(y;\phi)) - log(\pi) - \frac{1}{2}log(1+y^2)]
+\end{aligned}
+$$
+
+Onde os componentes são:
+
+- $\theta = \theta$
+- $\phi = \phi$
+- $b(\theta) = - (1 - \theta^2)^{1/2}$ 
+- $c(y;\phi) = log(\phi) + log(a(y;\phi)) - log(\pi) - \frac{1}{2}log(1+y^2)$. 
+
+
+## Função de variância
+
+
+Para encontrarmos a função de variância, é necessário manipular a função $b(\theta)$. A teoria da família exponencial nos indica que a função de variância $V(\mu)$ é aquela tal que $V(\mu) = \frac{d\mu}{d\theta}$ onde $\mu=b'(\theta)=\frac{db}{d\theta}$. Realizando essas manipulações temos:
+
+\begin{align}
+\mu &={} \frac{d}{d\theta}b(\theta) \nonumber \\
+& = \frac{d}{d\theta} - (1 - \theta^2)^{1/2} \nonumber \\ 
+&=  -\frac{1}{2}(1-\theta^2)^{-1/2}(-1)2\theta \nonumber \\
+&= \frac{\theta}{(1-\theta^2)^{1/2}} \label{eq1}
+\end{align}
+
+
+E para achar a função de variância em termos de $\theta$, basta derivar $b'(\theta) = \mu$ com relação à $\theta$ mais uma vez:
+
+
+\begin{align}
+b''(\theta) &={} \frac{d}{d\theta} \mu = \frac{d}{d\theta} \frac{\theta}{(1-\theta^2)^{1/2}}  \nonumber \\ &= 
+[(1-\theta^2) - \theta\frac{1}{2} (1-\theta^2)^{-1/2} (-1)2\theta] \cdot \frac{1}{(1-\theta^2)} \nonumber \\ &=
+\frac{(1-\theta^2)^{1/2}}{(1-\theta^2)} \; + \; \frac{\theta^2}{(1-\theta^2)^{1/2}(1-\theta^2)} \nonumber \\ &= 
+\frac{1}{(1-\theta^2)^{1/2}} \; + \; \frac{1}{(1-\theta^2)^{1/2}} \cdot \frac{\theta^2}{1-\theta^2} \nonumber \\ &= 
+\frac{1}{(1-\theta^2)^{1/2}}[ 1 \; + \; \frac{\theta^2}{1-\theta^2}] \label{eq2}
+\end{align}
+
+
+Para expressar \eqref{eq2} em termos de $\mu$, precisamos identificar duas relações. Partindo de \eqref{eq1} e elevando ao quadrado ambos os lados da igualdade, chegamos em:
+
+$$
+\mu^2 = \frac{\theta^2}{(1-\theta^2)} \label{eq:5}
+$$
+
+
+
+Em seguida, partindo da mesma equação \eqref{eq1}, vamos isolar o $\theta$, deixando-o em função de $\mu$:
+
+\begin{align}
+\mu &= \frac{\theta}{(1-\theta^2)^{1/2}} \nonumber \\
+\left(\frac{\mu}{\theta} \right)^2 &=  \left(\frac{1}{(1-\theta^2)^{1/2}}\right)^2 \nonumber \\
+\frac{\theta^2}{\mu^2} &= (1-\theta^2) \nonumber \\
+0 &= \mu^2 - \theta^2\mu^2 - \theta^2 \nonumber \\
+0 &= \theta^2 + \theta^2\mu^2  - \mu^2 \nonumber \\
+0 &=(\mu^2 + 1)(\theta^2) -\mu^2 \nonumber \\
+\theta^2 &= \frac{\mu^2}{\mu^2 + 1} \label{eq3} \\
+\theta &= \frac{\mu}{(\mu^2 + 1)^{1/2}} \label{eq4}
+\end{align}
+
+
+E por fim, usando a equação \eqref{eq3} e o primeiro fator na equação \eqref{eq2} a última manipulação necessária é para se chegar na função de variância em termos de $\mu$:
+
+\begin{equation}
+(1-\theta^2)^{-1/2} = \left(1- \frac{\mu^2}{\mu^2+1}\right)^{-1/2} = \left(\frac{1}{\mu^2+1}\right)^{-1/2} = \left(\mu^2+1\right)^{1/2} \label{eq5}
+\end{equation}
+
+Usando, \eqref{eq5} e \eqref{eq4} em \eqref{eq2}, temos:
+
+
+$$
+\begin{aligned}
+V(\mu) &= \frac{1}{(1-\theta^2)^{1/2}} \left[ 1 \; + \; \frac{\theta^2}{1-\theta^2} \right] \\
+&= (\mu^2 + 1)^{1/2}(\mu^2 + 1) \\ 
+&= (\mu^2 + 1)^{3/2}
+\end{aligned}
+$$
+
+## Função desvio
+
+A função desvio para um MLG em sua forma escalonada é definida por:
+
+
+$$
+D^*(y, \hat\mu) = \phi D(y, \hat\mu)= 2\{L(y, y) -L(y, \hat \mu)\}
+$$
+
+Onde $L(y, y)$ é o log da verossimilhança é dada pelo modelo saturado (estimado com n parâmetros, um para cada observação).
+É conveniente também trabalhar com o desvio em sua forma de somatória, que nos permite para cada obervação calcular um componente de desvio não escalonado $d^2(y_i;\hat\mu_i)$:
+
+
+$$
+D(y, \hat\mu) = 2\sum^n_{i=1}d^2(y_i,\hat\mu_i)
+$$
+
+Com sua versão escalonada $d^{*2}(y_i,\hat\mu_i) = \phi d^2(y_i,\hat\mu_i)$. 
+Na família exponencial, $d^2(y_i,\hat\mu_i)$ pode ser escrito por meio dos parâmetros que definem a família:
+
+$$
+d^2(y_i,\hat\mu_i) = y_i(\tilde \theta_i - \hat \theta_i) + (b(\hat \theta_i) - b(\tilde \theta_i))
+$$
+
+Onde $\theta_i = \theta(\mu_i)$. Outro resultado importante é, para a família exponencial, sob o modelo saturado $\tilde \mu_i = y_i$. Em outras palavras, na família exponencial, a estimativa do modelo saturado para a observação $i$ é próprio valor da variável resposta para aquela observação.No caso da distribuição que estamos estudando, temos que $\theta(\mu)=\frac{\mu}{(\mu^2 + 1)^{1/2}}$. Assim, as funções necessárias para calcular o componente do desvio são, para o modelo saturado:
+
+$$
+\tilde \theta_i = \frac{y_i}{(y_i^2 + 1)^{1/2}} \;\;\;\; \;\text{e} \;\;\;\;\
+b(\tilde \theta_i) = -\frac{1}{(y_i^2 + 1)^{1/2}}
+$$
+E para o modelo estimado:
+
+$$
+\hat \theta_i = \frac{\hat \mu}{(\hat \mu^2 + 1)^{1/2}} \;\;\;\; \;\text{e} \;\;\;\;\
+b(\hat \theta_i) = -\frac{1}{(\hat \mu^2 + 1)^{1/2}}
+$$
+A seguir segue o cálculo do componente do desvio não escalonado:
+
+$$
+\begin{aligned}
+d^2(y_i,\hat\mu_i) &= y_i(\tilde \theta_i - \hat \theta_i) + (b(\hat \theta_i) - b(\tilde \theta_i)) \\
+&= y_i \left( \frac{y_i}{(y_i^2 + 1)^{1/2}} - \frac{\hat \mu}{(\hat \mu^2 + 1)^{1/2}}\right) + \left(-\frac{1}{(\hat \mu^2 + 1)^{1/2}} +\frac{1}{(y_i^2 + 1)^{1/2}}\right) \\
+&= \frac{y_i^2}{(y_i^2 + 1)^{1/2}} - \frac{y_i \hat \mu_i}{(\hat\mu_i^2 + 1)^{1/2}} - \frac{1}{(\hat\mu^2 + 1)^{1/2}} -\frac{1}{(y_i^2 + 1)^{1/2}} \\
+&=\frac{y_i^2 + 1}{(y_i^2 + 1)^{1/2}} - \frac{y_i \hat \mu_i + 1}{(\hat\mu_i^2 + 1)^{1/2}} \\
+&=(y_i^2 + 1)^{1/2} - \frac{y_i \hat \mu_i + 1}{(\hat\mu_i^2 + 1)^{1/2}}
+\end{aligned}
+$$
+
+Assim, para se chegar ao componente escalonado $d^{*2}(y_i,\hat\mu_i)$ do desvio, basta multiplicar $d^2(y_i,\hat\mu_i)$ por $\phi$:
+
+$$
+d^{*2}(y_i,\hat\mu_i) = \phi\left((y_i^2 + 1)^{1/2} - 
+\frac{y_i \hat \mu_i + 1}{(\hat\mu_i^2 + 1)^{1/2}}\right)
+$$
+
+# Exercício 3
+
+## Pertencimento à família exponencial
+
+Se uma variável aleatória $Y$ é modelada por uma distribuição de Pascal, ela possui a seguinte função de massa de probabilidades:
+
+$$
+Y \sim Pascal(r,\pi) \\
+f(y; r, \pi) = \binom{y-1}{r-1}\pi^r(1-\pi)^{(y-r)}
+$$
+
+Com $y = r, r+1, r+2, \dots$. 
+
+É pedido então mostrar que a variável $Y^* = \frac{Y}{r}$ pertence à família exponencial. 
+Em primeiro lugar, note que se $y = r,\; r+1, \;r+2,\; \dots$ então $\frac{y}{r} = 1, \;1 + \frac{1}{r}, \;1 + \frac{2}{r}, \;\dots$. A função de massa de probabilidade será modificada então para a seguinte forma:
+
+$$
+f(y^*; r, \pi) = \binom{ry^*-1}{r-1}\pi^r(1-\pi)^{(ry^*-r)}
+$$
+
+A forma da função de massa de probabilidade de é a seguinte:
+
+$$
+f_Y(y; \theta, \phi) = exp\{\phi[y\theta - b(\theta)] \: + \: c(y;\phi)\}
+$$
+
+No caso de $Y^*$, a função de massa de probabilidade é manipulada conforme os seguintes passos:
+
+$$
+\begin{aligned}
+f(y^*; r, \pi) &= \binom{ry^*-1}{r-1}\pi^r(1-\pi)^{(ry^*-r)} \\
+&= \exp\left[{\log\left( \binom{ry^*-1}{r-1}\pi^r(1-\pi)^{(ry^*-r)} \right)}\right] \\
+&= \exp\left[\log\binom{ry^*-1}{r-1} + r\log\pi + (ry^*-r)\log(1-\pi) \right] \\
+&= \exp\left[r\log\pi + r(y^*-1)\log(1-\pi) + \log\binom{ry^*-1}{r-1}\right] \\
+&= \exp\left[r(\log\pi + (y^*-1)\log(1-\pi)) + \log\binom{ry^*-1}{r-1}\right] \\
+&= \exp\left[r\left[y^*\log(1-\pi) + \log{\frac{\pi}{1-\pi}}\right] + \log\binom{ry^*-1}{r-1}\right] \\
+\end{aligned}
+$$
+
+Logo, se tormarmos as definições as seguir:
+
+- $\phi=r$
+- $\theta=\log{(1-\pi)}$ 
+- $b(\theta) = -\log(\frac{\pi}{1-\pi}) = \theta - \log(1-e^{\theta})$
+- $c(y^*, \phi) = \log\binom{\phi y^*-1}{\phi-1}$
+
+é possível ver que $Y^*$ pertence à família exponencial.
+
+## Função de variância
+
+Para chegarmos na função de variância, é necessário antes encontrar sua média. Na família exponencial, vale o procedimento à seguir:
+
+$$
+\begin{aligned}
+E(Y^*) &= \mu \\ 
+&= b'(\theta) \\
+&= \frac{d}{d \theta} (\theta - \log(1-e^{\theta})) \\
+&= 1 - \frac{1}{1-e^{\theta}}(-1)e^{\theta} \\
+&= 1 + \frac{e^{\theta}}{1-e^{\theta}} \\
+&= \frac{1}{1-e^{\theta}} \\
+&= \frac{1}{\pi}
+\end{aligned}
+$$
+Então a função de variâcia $V(\mu)$ é:
+
+$$
+\begin{aligned}
+V(\mu) &= b''(\theta) \\
+&= \frac{d}{d \theta} \frac{1}{1-e^{\theta}} \\
+&= \frac{d}{d \theta} (1-e^{\theta})^{-1} \\
+&= -(1-e^{\theta})^{-2}(-1)e^{\theta} \\
+&= \frac{e^{\theta}}{(1-e^{\theta})^2}
+\end{aligned}
+$$
+
+Em termos de $\mu$, expressamos a função de variância como:
+
+$$ 
+\begin{aligned}
+V(\mu) &= \frac{e^{\theta}}{(1-e^{\theta})^2} = \frac{e^{\theta}}{(1-e^{\theta})}\frac{1}{(1-e^{\theta})^2} \\
+&=\left( \frac{\mu -1}{\mu}\right)\mu^2 \\
+&=(\mu -1)\mu
+\end{aligned}
+$$
+
+## Componente da função desvio
+
+A função desvio de um MLG é escrita desta forma:
+
+$$
+D^*(y, \hat\mu) = \phi D(y, \hat\mu) = \sum^n_{i=1}d^{*2}(y_i,\hat\mu_i) = \sum^n_{i=1}\phi d^2(y_i,\hat\mu_i)
+$$
+
+
+O componente do desvio requisitado pelo enunciado $d^{*2}(y_i; \hat \pi_i)$ tem duas particularidades. Primeiro é o componente escalonado, tal que $d^{*2}(y_i; \hat \pi_i) = \phi d^2(y_i; \hat \pi_i)$. Segundo, ele é pedido em função da estimativa do parâmetro $\pi_i$ pelo modelo ajustado (isto é $\hat \pi_i$) no lugar do usual $\mu_i$. Isso é importante pois, na família exponencial, o modelo saturado tem o seguinte resultado conhecido $\tilde \mu_i= y_i$. Na família exponencial, como no caso de $Y^*$, pode ser decomposto como:
+
+\begin{equation}
+d^2(y_i,\hat\pi_i) = 2\left[y_i^*(\tilde \theta_i - \hat \theta_i) + (b(\hat \theta_i) - b(\tilde \theta_i))\right] \label{desvio}
+\end{equation}
+
+Tomemos as seguintes funções que partem das partes anteriores dessa resolução:
+
+- $\theta(\pi) = \log(1-\pi)$
+- $\theta(\mu) = \log(\frac{\mu -1}{\mu})$, uma vez que $\mu = \frac{1}{\pi}$
+- $b(\pi) = -\log(\frac{\pi}{1-\pi}) = \log(\frac{1-\pi}{\pi})$
+
+E por último $b(\mu)$:
+
+$$
+\begin{aligned}
+b(\mu) &= b(\theta(\mu)) \\
+&= \theta - \log(1-e^{\theta}) \\
+&= \log\left(\frac{\mu -1}{\mu}\right) - \log\left( 1 - \frac{\mu-1}{\mu}\right) \\
+&= \log\left(\frac{\mu -1}{\mu}\right) - \log\left(\frac{1}{\mu}\right) \\
+&= \log(\mu - 1) - \log(\mu) - \log(1) + \log(\mu)\\
+&= \log(\mu -1)
+\end{aligned}
+$$
+
+Agora, munidos dessas quatro funções, e dos fatos que $y_i^* = \frac{y_i}{r}$ e, sob modelo saturado, $\tilde \mu_i = y_i^*$, podemos calcular o componente da função desvio conforme descrito em \eqref{desvio}. 
+
+$$
+\tilde \theta_i (\tilde \mu_i) = \log\left(\frac{\tilde \mu_i-1}{\tilde \mu_i}\right) = 
+\log\left(\frac{y_i^*-1}{y_i^*}\right) = \log\left(\frac{y_i/r-1}{y_i/r}\right) = \log\left(\frac{y_i-r}{y_i}\right)
+$$
+$$
+\hat \theta_i (\hat\pi_i) = \log(1 - \hat \pi_i)
+$$
+$$
+b(\tilde \theta_i(\tilde \mu_i)) = \log(\tilde \mu_i - 1) = \log(y_i^* - 1) = \log\left(\frac{y_i}{r} - 1\right) = \log\left(\frac{y_i-r}{r}\right)
+$$
+$$
+b(\hat \theta_i(\hat \pi_i)) = \log \left( \frac{1- \hat\pi_i}{\hat\pi_i}\right)
+$$
+
+E finalmente, temos o componente não escalonado do desvio:
+
+$$
+\begin{aligned}
+d^2(y_i,\hat\pi_i) &= 2\left[y_i^*(\tilde \theta_i - \hat \theta_i) + (b(\hat \theta_i) - b(\tilde \theta_i))\right] \\
+&= 2\left[\frac{y_i}{r}\left(\log\left(\frac{y_i-r}{y_i}\right) -  \log(1 - \hat \pi_i) \right) + 
+\log \left( \frac{1- \hat\pi_i}{\hat\pi_i}\right) - \log\left(\frac{y_i-r}{r}\right)\right]
+\end{aligned}
+$$
+Que para chegar na sua versão escalonada, basta multiplicar por $\phi = r$:
+
+$$
+d^{*2}(y_i,\hat\pi_i) = \phi d^2(y_i,\hat\pi_i) = 2r\left[\frac{y_i}{r}\left(\log\left(\frac{y_i-r}{y_i}\right) -  \log(1 - \hat \pi_i) \right) + 
+\log \left( \frac{1- \hat\pi_i}{\hat\pi_i}\right) - \log\left(\frac{y_i-r}{r}\right) \right]
+$$
+
+Esta expressão, todavia, não está definida caso $y_i = r$ (ou $y_i^* = 1$), uma quantidade com probabilidade não nula de ocorrência. Neste caso temos:
+
+$$
+\begin{aligned}
+f(y_i = r\,; r, \pi_i) &= \pi_i^r = \left(\frac{1}{\mu_i}\right)^r \\
+\log(f(y_i = r\,; r, \pi_i)) &= r\log\pi_i = r\log1 - r\log\mu
+\end{aligned}
+$$
+
+Com o resultado da verossimilhança deste caso de fronteira da variável $Y$, podemos calcular o componente do desvio pela definição:
+
+$$
+D^*(y, \hat\mu) = \phi D(y, \hat\mu)= 2\{L(y, y) -L(y, \hat \mu)\}
+$$
+Onde $L(y, y)$ é a verossimilhança do modelo saturado e $L(y, \hat \mu)$ do modelo ajustado. Lembrando que se $y_i = r$, então $y_i^* = 1$ temos:
+
+$$
+d^{*2}(y_i,\hat\pi_i) = 2\left(-r\log y_i^*  - r \log \hat \pi_i \right) =  -2r \log \hat \pi_i
+$$
+
+Por fim, o componente de desvio escalonado fica dado por:
+
+$$
+d^{*2}(y_i,\hat\pi_i) = 
+\begin{cases} 
+2r\left[\frac{y_i}{r}\left(\log\left(\frac{y_i-r}{y_i}\right) -  \log(1 - \hat \pi_i) \right) + 
+\log \left( \frac{1- \hat\pi_i}{\hat\pi_i}\right) - \log\left(\frac{y_i-r}{r}\right) \right] & \text{se } y_i > r \\
+-2r \log \hat \pi_i  & \text{se } y_i = r
+\end{cases}
+$$
+para $i = 1, 2, \dots , n$
+
+# Exercício 4 
+
+## Matriz $X$ e variâncias assintóticas
+
+A matriz $X$ para o modelo proposto no enunciado é:
+
+$$
+X =
+\begin{bmatrix}
+x_1 - \bar x & z_1 - \bar z \\
+x_2 - \bar x & z_2 - \bar z \\
+\vdots & \vdots \\
+x_n - \bar x & z_n - \bar z \\
+\end{bmatrix}
+$$
+As variâncias assintóticas são obtidas por meio da matriz de informação de Fisher esperada, uma vez que:
+
+$$
+\begin{bmatrix}
+\hat\beta \\ \hat \gamma
+\end{bmatrix}
+\sim N\left( 
+\begin{bmatrix}
+\beta \\ \gamma
+\end{bmatrix}, 
+K_{\theta\theta}^{-1}
+\right)
+$$
+
+Onde $\theta = [\beta, \gamma]^T$. Num MLG, a matriz de informação de Fisher esperada é dada por:
+
+$$
+K_{\theta\theta} = \phi X^TWX
+$$
+
+
+No nosso exemplo, $\phi = 1$ pois se $Bernoulli(\mu_i) = Binomial(\mu_i, n_i=1)$ e num modelo binomial, $\phi = n$.
+A matriz $W$ é uma matriz diagonal de pesos $diag\{\omega_1, \dots,\omega_n\}$ e $\omega_i = \left(\frac{d\mu_i}{d\eta_i} \right)^2\cdot\frac{1}{V_i}$ onde $V_i$ é a função de variância $V_i = V(\mu_i)$. No nosso exercício:
+
+
+$$
+\begin{aligned}
+\frac{d\mu_i}{d\eta_i} =\\
+\frac{d\eta_i}{d\mu_i}^{-1} &= \left[\frac{d}{d\mu_i} arcsen(\sqrt \mu_i)\right]^{-1} \\
+&= \left[\frac{1}{\sqrt{ 1 - \mu_i^{\frac{1}{2}\cdot2}}} \cdot\frac{1}{2\mu_i^{1/2}}\right]^{-1} \\
+&= \left[\frac{1}{2\sqrt{\mu_i(1-\mu_i)}}\right]^{-1} \\
+&= 2\sqrt{\mu_i(1-\mu_i)}
+\end{aligned}
+$$
+
+
+
+Assim, como para uma variável aleatória Bernoulli $V(\mu) = \mu(1-\mu)$
+
+
+$$
+\begin{aligned}
+\omega_i &= \left(\frac{d\mu_i}{d\eta_i} \right)^2\cdot\frac{1}{V_i} \\
+&= \frac{4\mu_i(1-\mu_i)}{\mu_i(1-\mu_i)} \\
+&= 4 
+\end{aligned}
+$$
+
+
+E assim, a matriz $W = diag\{4,\dots, 4\} = 4\cdot I_n$ onde $I_n$ é a matriz identidade $n$-dimensional. Então:
+
+
+$$
+K_{\theta\theta} = \phi X^TWX = 4 X^TX
+$$
+
+Calculando o último componente de $K_{\theta\theta}$:
+
+$$
+\begin{aligned}
+X^TX &= 
+\begin{bmatrix}
+x_1 - \bar x  & \dots & x_n - \bar x \\
+z_1 - \bar z  & \dots & z_n - \bar z \\
+\end{bmatrix}
+\begin{bmatrix}
+x_1 - \bar x & z_1 - \bar z \\
+x_2 - \bar x & z_2 - \bar z \\
+\vdots & \vdots \\
+x_n - \bar x & z_n - \bar z \\
+\end{bmatrix} \\
+&= 
+\begin{bmatrix}
+\sum^{n}_{i=1}(x_i - \bar x)^2 & \sum^{n}_{i=1}(x_i - \bar x)(z_i - \bar z) \\
+\sum^{n}_{i=1}(x_i - \bar x)(z_i - \bar z) & \sum^{n}_{i=1}(z_i - \bar z)^2
+\end{bmatrix} \\
+&=
+\begin{bmatrix}
+S_{xx} & S_{xz} \\
+S_{xz} & S_{zz}
+\end{bmatrix} \\
+\end{aligned}
+$$
+
+Assim colocando todos os componentes calculados até então, 
+
+$$
+K_{\theta\theta} = 4 
+\begin{bmatrix}
+S_{xx} & S_{xz} \\
+S_{xz} & S_{zz}
+\end{bmatrix} \\
+$$
+Então, para obter as variâncias assintóticas, basta calcular $K_{\theta\theta}^{-1}$:
+
+$$
+K_{\theta\theta}^{-1} = \frac{1}{4det(X^TX)} 
+\begin{bmatrix}
+S_{zz} & -S_{xz} \\
+-S_{xz} & S_{xx}
+\end{bmatrix} \\
+$$
+
+Calculando o determinante temos $det(X^TX) = S_{xx}S_{zz} - S_{xz}^2$. Multiplicando o determinante por $1 = \frac{S_{xx}S_{zz}}{S_{xx}S_{zz}}$, $det(X^TX) = S_{xx}S_{zz} - S_{xz}^2 = (1 - r_{xz}^2)S_{xx}S_{zz}$.
+Então podemos terminar o cálculo do inverso da informação de Fisher esperada:
+
+$$
+K_{\theta\theta}^{-1} = 
+\begin{bmatrix}
+\frac{1}{(1 - r_{xz}^2)S_{xx}} & -\frac{S_{xz}}{(1 - r_{xz}^2)S_{xx}S_{zz}} \\
+-\frac{S_{xz}}{(1 - r_{xz}^2)S_{xx}S_{zz}} & \frac{1}{(1 - r_{xz}^2)S_{zz}}
+\end{bmatrix} \\
+$$
+
+
+
+Por fim, as variâncias e convariância assintóticas de $\hat \theta = [\hat \beta , \hat \gamma ]^T$ são:
+
+
+$$
+Var(\hat\beta) = \frac{1}{(1 - r_{xz}^2)S_{xx}} \\
+$$
+
+$$
+Var(\hat\gamma) = \frac{1}{(1 - r_{xz}^2)S_{zz}} \\
+$$
+
+$$
+Cov(\hat\beta, \hat\gamma) =-\frac{S_{xz}}{(1 - r_{xz}^2)S_{xx}S_{zz}}
+$$
+
+## Comparação entre correlações lineares
+
+O cálculo da correlação linear $\rho(\hat \beta, \hat \gamma)$, e por consequência, sua relação com a correlação amostral $r_{xz} = S_{xz}(S_{xx}S_{zz})^{-1/2}$ é a seguinte:
+
+$$
+\begin{aligned}
+\rho(\hat \beta, \hat \gamma) &= \frac{Cov(\hat\beta, \hat\gamma)}{\sqrt{Var(\hat\beta)Var(\hat\gamma)}} \\
+&= -\frac{S_{xz}}{(1 - r_{xz}^2)S_{xx}S_{zz}} \cdot(1 - r_{xz}^2)^{1/2}S_{zz}^{1/2}(1 - r_{xz}^2)^{1/2}S_{xx}^{1/2} \\
+&= -\frac{S_{xz}}{S_{xx}^{1/2}S_{zz}^{1/2}} \\
+&= -r_{xz}
+\end{aligned}
+$$
+
+Alguns comentários sobre a igualdade $\rho(\hat \beta, \hat \gamma) = -r_{xz}$ :
+
+- Se a correlação linear entre $x$ e $z$ for nula, $r_{xz}=0$, as estimativas $\hat\beta$ e $\hat \gamma$ são ortogonais.
+
+- Quanto mais positiva é $r_{xz}$ mais negativa será a correlação entre $\hat\beta$ e $\hat \gamma$.
+
+
+# Exercício 5
+
+Quando uma variável aleatória é dita distribuída por uma distribuição binomial negativa ajustada para os zeros, ela possui a seguinte função de massa de probabilidade:
+
+
+$$
+f_Z(z_i; \mu, \nu, \pi) = 
+\begin{cases} 
+\pi & \text{se } z_i = 0 \\
+(1-\pi)\frac{f_Y(z_i; \mu, \nu)}{1 - f_Y(0; \mu, \nu)}  & \text{se } z_i >  0
+\end{cases}
+$$
+
+onde $z_i = 0, 1, 2, ...$, $i=1,2,...,n$ e $f_y$ é:
+
+$$
+f_Y(y; \mu, \nu) = \frac{\Gamma(\nu + y)}{\Gamma(y+1)\Gamma(\nu)}\cdot
+\left(\frac{\mu}{\mu+\nu}\right)^{y}
+\left(\frac{\nu}{\mu+\nu}\right)^{\nu}
+$$
+
+A estatística do teste de razão de verissimilhança para testar $H_0: \mu=1$ contra $H_1: \mu\ne1$ é:
+
+$$
+\xi_{RV}= 2[L(z_i; \hat\mu, \nu, \hat\pi) - L(z_i; 1, \nu, \hat\pi)]
+$$
+No caso de $Z \sim ZANBI(\mu, \nu, \pi)$ o logarítimo da sua função de massa de probabilidade é:
+
+
+$$
+log(f_Z(z_i; \mu, \nu, \pi)) = 
+\begin{cases} 
+log(\pi) & \text{se } z_i = 0 \\
+log(1-\pi) + log(f_Y(z_i; \mu, \nu)) - log(1 - f_Y(0; \mu, \nu))  & \text{se } z_i >  0
+\end{cases}
+$$
+
+Definindo $k$ como o número de observações dentre as $n$ que são zero, isto é os $i$ que $z_i = 0$, ao somarmaos as log verossimilhanças temos:
+
+$$
+L(z_i; \mu, \nu, \pi) = \sum^n_{i=1}f_Z(z_i; \mu, \nu, \pi) = 
+$$
+
+$$
+\begin{aligned}
+k\cdot log(\pi) + (n-k) \cdot log(1-\pi) - (n-k) \cdot log(1-\left(\frac{\nu}{\nu+\mu}\right)^{\nu}) + \\
+(n-k)log(\delta(\nu, y)) + log(\mu) \sum^{n-k}_{i=1}z_i + (n-k)\nu log(\nu) - (n-k)\nu log(\nu + \mu)
+\end{aligned}
+$$
+
+Onde definimos $\delta(\nu, y)= \frac{\Gamma(\nu+y)}{\Gamma(y+1) \Gamma(\nu)}$, e $f_Y(0; \mu, \nu) = \left(\frac{\nu}{\nu + \mu} \right)^{\nu}$.
+
+Com o objetivo de calcular $\xi_{RV}$ realizamos a diferença $2\{L(z_i; \hat\mu, \nu, \hat\pi) - L(z_i; 1, \nu, \hat\pi)\}$. Nesta conta, todos os termos que não dependem de $\mu$ são cancelados. Além disso, os termos restantes tem como um de seus fatores o tamanho da amostra não nula $(n - k)$ que é deixado em evidência. Outro aspecto importante é a definição da média amostra não nula $\bar z_{z_ >0} = \frac{1}{(n-k)}\sum^{n-k}_{i=1}z_i$ com $z_i \ne 0$. Então:
+
+$$
+\begin{aligned}
+\xi_{RV} &= 2\{L(z_i; \hat\mu, \nu, \hat\pi) - L(z_i; 1, \nu, \hat\pi)\} \\
+&= 2(n-k)\left[log\left(\frac{1 - \left(\frac{\nu}{1+\nu}\right)^{\nu}}{1 - \left(\frac{\nu}{\hat \mu + \nu}\right)^{\nu}} \right)  
++ \bar z_{z_ >0} \cdot log(\hat \mu) + \nu \cdot log\left( \frac{1 + \nu}{\hat \mu + \nu} \right)
+\right]
+\end{aligned}
+$$
+
+Que é a estatística do teste de razão de verossimilhança proposto para testar $H_0: \mu=1$ contra $H_1: \mu\ne1$.
+
+
+# Exercício 6
 
 
 A seguir iremos analisar a base **fuel2001.txt**. Conforme o enunciado, são descritas as seguintes variáveis referentes aos 50 estados norte-americanos mais o Distrito de Columbia no ano de 2001: 
@@ -59,14 +866,14 @@ vii) Pop, população >= 16 anos
 viii) Tax, taxa da gasolina (em cents por galão)
 
 
-Abaixo mostro as 6 primeiras linhas da base.
+Abaixo mostro as 5 primeiras linhas da base.
 
 &nbsp;
 
 ```{r echo=FALSE}
-fuel2001 = read.table('fuel2001.txt', header=TRUE)
+fuel2001 <-  read.table('fuel2001.txt', header=TRUE)
 
-fuel2001 %>% head(6) %>% 
+fuel2001 %>% head(5) %>% 
   kbl(booktabs = T) %>% 
   kable_styling(full_width = T)
 ```
@@ -76,7 +883,8 @@ fuel2001 %>% head(6) %>%
 Conforme sugerido, realizaremos as transformações Fuel = 1000*FuelC/Pop e Dlic = 1000*Drivers/Pop para possibilitar a comparação entre estados com diferentes populações. Em seguida criamos a variável lMiles = log(Miles).
 
 
-```{r include=FALSE}
+```{r, include=FALSE}
+
 mdata <- 
 fuel2001 %>% 
   mutate(Fuel = 1000*FuelC/Pop, 
@@ -90,7 +898,7 @@ fuel2001 %>%
 Com essas transformações, partimos para uma análise descritiva da base, antes de partirmos para a modelagem. 
 
 
-### Análise univariada
+## Análise univariada
 
 Primeiramente, a partir de algumas estatísticas descritivas de cada uma das variáveis estudadas que mostro abaixo, podemos postular algumas carcterísticas das variáveis:
 
@@ -119,17 +927,16 @@ mdata %>%
 
 Neste exercício, a variável *fuel* é a variável resposta. Por isso à inspecionaremos primeiro. o gráfico abaixo mostra a densidade estimada dela. Podemos ver que ela possui uma tendência gaussiana, apesar de possuir caudas ligeiramente pesadas.
 
-```{r fig.height=3.7, fig.width=7}
+```{r fig.height=3.5, fig.width=6}
 plot(density(mdata$fuel), xlab="Fuel", ylab="Densidade", main="Densidade estimada de Fuel")
 ```
 
-&nbsp;
 
 Abaixo mostramos os boxplots comum (criado através das estatísticas usuais como mediana e quartis) e robusto para a variável *fuel*. No boxplot comum estão 3 pontos que poderiam ser considerados extremos á esquerda, sendo mais baixo que o esperado para essa variável, e a extremo à direita. Com o boxplot robusto os pontos extremos à esquerda não são tão evidenciados, porém à direita um ponto novo aparece. 
 
-```{r fig.height=6, fig.width=10}
+```{r fig.height=3, fig.width=8}
 
-par(mfrow=c(2, 1))
+par(mfrow=c(2, 1), mar=c(2, 2, 2, 2))
 boxplot(mdata$fuel, horizontal = T, main='Fuel - boxplot comum')
 adjbox(mdata$fuel, horizontal = T, main='Fuel - boxplot robusto')
 ```
@@ -137,8 +944,8 @@ adjbox(mdata$fuel, horizontal = T, main='Fuel - boxplot robusto')
 Por completude, mostro as densidades empiricas das variáveis explicativas do estudo. Como sob a construção de modelos elas são consideradas fixas, suas distribuições não são importantes para o ajuste de modelos de regressão linear múltipla.
 
 
-```{r}
-par(mfrow=c(2,2))
+```{r fig.height=4, fig.width=8}
+par(mfrow=c(2,2), mar=c(2, 2, 2, 2))
 plot(density(mdata$dlic), xlab="motoristas/pop", ylab="Densidade", main='Motoristas/pop')
 plot(density(mdata$lmiles), xlab="milhas (log)", ylab="Densidade", main='Milhas de estradas')
 plot(density(mdata$income), xlab="Renda (1000 usd)", ylab="Densidade", main='Renda per capita')
@@ -146,11 +953,12 @@ plot(density(mdata$tax), xlab="imposto (centavos/galão) ", ylab="Densidade",
      main='Imposto na Gasolina')
 ```
 
-### Análise bivariada
+## Análise bivariada
+
+Como ponto de partida para análise bivariada, apresentamos uma matriz de paineis de gráficos de dispersão para as variáveis que estamos estudando junto com o índice de correlação linear entre as variáveis em questão. 
 
 
-```{r}
-
+```{r fig.height=6, fig.width=9}
 panel.cor <- function(x, y, ...)
 {
 par(usr = c(0, 1, 0, 1))
@@ -162,11 +970,589 @@ pairs(mdata, pch=16,cex=0.6, lower.panel = panel.cor)
 ```
 
 
+A inspeção dessa matriz levanta alguns pontos:
+
+- 3 variáveis expicativas (*dlic*, *lmiles*, *income*) apresentam uma correlação linear relativamente forte com a variável resposta *fuel*.
+
+- em geral a correlação entre as variáveis explicativas não é grande, com excessão do par *lmiles* e *income*. É importante notar isso para que não haja problemas de multicolinearidade.
+
+
+## Ajuste de modelos
+### Seleção de variáveis 
+
+Devido à tendência gaussiana da variável resposta *fuel* iremos trabalhar com regressões lineares. A primeira etapa será aplicar o procedimento de seleção de variáveis stepwise avaliando o critério de Akaike do modelo resultante de cada iteração. 
+
+O método stepwise consiste em, partindo do modelo nulo (somente com o intercepto) adicionar variáveis a partir do critério de entrada avaliando todas as possíveis candidatas. Assim que houver ao menos duas variáveis inseridas no modelo, avaliar a partir de um critério de saída a exclusão de alguma delas do modelo. Nesse estudo, o critério de entrada e saída é a minimização o critério de informação de Akaike. 
+
+A seguir está a tabela que resultou da aplicação do método setpwise usando o AIC para o modelo apenas com os efeitos principais.
+
+
+```{r}
+modelo_nulo = lm(fuel ~ 1 , data = mdata)
+
+aic <- stepAIC(modelo_nulo,
+               scope=list(lower= ~ 1, 
+                          upper= ~ dlic + income + lmiles + tax),
+               direction = 'both', trace = F)
+
+interactions <- combn(
+  names(aic$coefficients)[-1], m = 2,
+  function(x) paste0(x[1], '*', x[2])
+)
+
+```
+
+No caso das variáveis e amostra em questão o método stepwise inseriu todoas as variáveis no modelo. Como vemos na tabela a seguir, a inclusão de cada um dos efeitos principais culminou em uma redução do AIC. 
+
+```{r echo=FALSE}
+
+aic$anova %>% as.data.frame() %>% 
+  kbl(booktabs = T, 
+      format = 'latex', 
+      caption='Seleção de variáveis via stepwise com critério de AIC', 
+      align = 'c', 
+      centering = T
+      ) %>% 
+  kable_styling(full_width = F, 
+                position = 'center', latex_options = "HOLD_position")
+
+```
+
+
+Por enquanto não tentaremos incluir ajustes polinomiais dos efeitos principais, somente após uma análise de inclusão de interações e análise de pontos aberrantes e influentes, pois sua inclusão pode mehorar o modelo nesses aspectos.
+
+
+### Inclusão de interações
+
+
+Iremos realizar o teste de interações entre cada uma das variáveis 2 a 2. 
+O modelo com efeitos principais resultante do procedimento de seleção de variáveis tem a seguinte forma. Nos refereremos à esse modelo como "modelo cheio" daqui em diante.
+
+```{r, results = "asis", echo=F}
+equatiomatic::extract_eq(aic)
+```
+
+
+Iremos então realizar testes de hipóteses para a inclusão das seguintes interações `r paste0(interactions, collapse=', ')`. Conforme mostra a tabela abaixo. Note que as interações foram ordenadas de maneira decrescente com base no valor da estatística F.
+
+
+```{r}
+
+modelo_cheio <- lm(fuel ~ ., data=mdata)
+
+int1 <- update(modelo_cheio, ~ . + dlic*lmiles)
+int2 <- update(modelo_cheio, ~ . + dlic*income)
+int3 <- update(modelo_cheio, ~ . + dlic*tax)
+int4 <- update(modelo_cheio, ~ . + lmiles*income)
+int5 <- update(modelo_cheio, ~ . + lmiles*tax)
+int6 <- update(modelo_cheio, ~ . + income*tax)
+
+int_models <- list(
+  'dlic*lmiles' = int1,
+  'dlic*income' = int2,
+  'dlic*tax' = int3,
+  'lmiles*income' = int4,
+  'lmiles*tax' = int5,
+  'income*tax' = int6
+)
+
+do_f_test <- function(int_model) {
+  teste <- anova(modelo_cheio, int_model)
+  f <- teste[['F']][2]
+  pvalor <- teste[['Pr(>F)']][[2]]
+  c('F' = f, 'pvalor' = pvalor)
+  
+}
+
+sapply(int_models, do_f_test, simplify = T) %>% 
+  t %>% 
+  as.data.frame() %>%
+  rename('Valor F' = 'F', 'Valor P'= 'pvalor') %>% 
+  arrange(-`Valor F`) %>% 
+  rownames_to_column('interação testada') %>% 
+  janitor::adorn_rounding(digits = 2) %>% 
+  kbl(booktabs = T, 
+      format = 'latex', 
+      caption='Testes F de inclusão de interação no modelo cheio', 
+      align = 'c', 
+      centering = T
+      ) %>% 
+  kable_styling(full_width = F, 
+                position = 'center', latex_options = "HOLD_position")
+
+
+```
+
+Assim decidimos adicionar a interação `lmiles*tax` por ser a única que proveu um teste F com nível descritivo menor que 5%. Devido à pequena amostra, ou à natureza do estuto, poderíamos aceitar níveis de significância mais permissivos (10% por exemplo), mas nos reservaremos de tomar essa decisão no presente exercício. Por fim, o modelo final nesta etapa é possui a seguinte fórmua:
+
+```{r echo=F, results='asis'}
+equatiomatic::extract_eq(int5)
+```
 
 
 
 
-## Exercício 7
 
-*em progresso*
+
+## Interpretação de parâmetros estimados
+
+
+Na tabela abaixo, apresentamos as estimativas do modelo de efeitos principais e do modelo incluindo a interação.
+
+```{r echo=F, message=FALSE, warning=FALSE}
+
+modelsummary(list('efeitos principais' = aic, ' + interação' = int5), 
+             gof_omit='AIC|BIC', 
+             title = 'Modelos construídos',
+             stars=T, 
+             add_rows = data.frame('AIC', extractAIC(aic)[2], extractAIC(int5)[2]),
+             output = 'kableExtra'
+             ) %>% 
+  kable_styling(latex_options = "HOLD_position")
+
+```
+
+Para apresentar a interpretação dos parâmetros estimados, vamos focar apenas no modelo com interação + efeitos principais, uma vez que esse é o melhor modelo em termos de R2 Ajustado e AIC. As interpretações são:
+
+- **intercepto**: neste modelo o intercepto não tem uma interpretação direta, uma vez que possuir as outras covariáveis nulas não faz muito sentido (o que seria um estado com 0 milhas de estradas? ou um estado que não tem renda per capita?).
+
+- **dlic**: aqui vemos que para cada unidade a mais de 1000 motoristas per capita é esperado que o valor de vendas de combustível per capita aumente em 530 dólares per capita em média em um determinado estado.
+
+- **income**: um aumento de mil dólares na renda per capita de um determinado estado é esperado uma diminuição de `r 0.006*1000` dólares na venda de combustíveis de um determinado estado. Este efeito parece praticamente pequeno.
+
+- **lmiles**: esta variável tem duas peculiaridades. Primeiro, passou por uma transformação em log. Sua interpretação, então, é baseada em mudanças percentuais no total de milhas de estradas em estradas federais no estado e seu efeito na variável respota. Segundo, ela está no modelo em interação com a variável *tax*, ou seja seu efeito depende do nível da variável que interage. No caso, quanto mais alto é nível de taxação da gasolina (a variável *tax*) menor é o efeito de um aumento percentual em *lmiles*. 
+Assim, todo o resto constante, um aumento de 1% de malha rodoviária federal no estado leva a um aumento de 119 - 4.61\*tax dólares no valor de vendas de combustível per capita. A taxa média de imposto sob a gasolina dentre os 51 estados é 20 centavos de dolar por galão. Nesse caso o efeito de 1% a mais de malha rodoviária federal na venda média de gasolina é 119 - 4.61*20 = 26.8 mil dólares per capita.
+
+- **tax**: o efeito do aumento dessa variável é similar ao da variável *lmiles*, porém sem a interpretação em aumento percentual, uma vez que a variável *tax* não foi transformada em log. O seu efeito nas vendas de combustível médio depende da variáve *lmiles* devido à interação incluída no modelo. Um aumento de um centavo na taxação de gasolina num estado que tem $e^{10.91} = 54885$ milhas de malha rodoviária associa-se com uma diminuição na média de galões de gasolina vendidos per capita em 5116 dólares.
+
+
+## Diagnósticos de modelo 
+
+### Análise de resíduos 
+
+O gráfico abaixo contrasta os percentis do resíduo studantizado com os da distribuição normal com uma banda empírica de confiança. Nas extremidades podemos ver pontos que caem fora da banda de confiânça, indicando que esse modelo não atende a suposição de normalidade dos erros. Isso pode melhorar se detectarmos pontos aberrantes e com alta influência posteriormente. 
+
+```{r}
+set.seed(410)
+fit.model <- int5
+title <- 'Modelo com efeitos principais + interação'
+source('../envel_norm.R')
+```
+
+Na inspeção do valor ajustado contra o resíduo, não encontramos padrões de variância heterocedástica. Apenas um ponto parece ter o seu valor ajustado muito menor que os outros, mas nada que indique uma variância não constante.
+
+
+```{r}
+title <- 'Valor ajustado e resíduos para o modelo com interação'
+source('../diag_resid_norm.R')
+```
+
+### Análise de influência
+
+Em seguida, faremos uma análise de obervações influentes para identificar quais pontos têm um grande impacto nas estimativas dos parâmetros. Como só estamos aqui preocupados com os coeficientes da regressão, e não com a estimativa do erro sigma, vamos nos basear na distância de cook para avaliar a influência das obervações. 
+Para avaliação da distância de Cook, vamos compará-las com um fator k do erro padrão das distâncias calculadas. No nosso caso, como a amostra é pequena, iremos comparar as distâncias de Cook adotando k = 2.5. Assim se a distância $D_i \geq 2.5\hat{ep}(D_i)$. Esse fator de comparação está apontado em linha pontilhada no gráfico abaixo.
+
+```{r}
+title <- 'Distâncias de Cook e linha de comparação para o\nmodelo com interação'
+source('../diag_cook_norm.R')
+```
+
+
+Existe então uma observação influente ao utilizarmos o critério proposto acima. Esta observação corresponde ao estado do Alasca (AK), que possui um nível de taxação da gasolina baixo, para a quantidade de gasolina vendida.
+
+
+```{r message=FALSE, warning=FALSE, echo=F}
+mdata %>% 
+  mutate(alasca = di > cut) %>% 
+  mutate(name = if_else(alasca, fuel2001$State, NA_character_)) %>% 
+  gather(var, value, -fuel, -name, -alasca) %>% 
+ggplot(aes(value, fuel, fill = !alasca)) +
+  geom_point(pch = 21, show.legend = F) + 
+  geom_text(aes(label=name), nudge_y = 50) + 
+  facet_wrap(~var, scales = 'free_x') + 
+  theme_minimal() + 
+  labs(title = 'Posição do estado de Arkansas nos relacionamentos marginais no modelo')
+```
+
+Para avaliar o impacto da exclusão da observação correspondente ao estado do Alasca nas estimativas e inferências resultantes da modelagem iremos apresentar 2 ajustes com formas funcionais diferentes, e cada um com as duas amostras. 
+
+
+```{r}
+full_data_int_md <- lm(formula = fuel ~ dlic + lmiles + income + tax + lmiles:tax, 
+                data = mdata)
+
+full_data_ep_md <- lm(formula = fuel ~ dlic + lmiles + income + tax, 
+                data = mdata)
+
+
+excl_ak_int_md <- lm(formula = fuel ~ dlic + lmiles + income + tax + lmiles:tax, 
+                data = mdata[di < cut, ])
+
+excl_ak_ep_md <- lm(formula = fuel ~ dlic + lmiles + income + tax, 
+                data = mdata[di < cut, ])
+
+
+
+```
+
+
+
+```{r echo=FALSE}
+
+modelsummary(list('Amostra completa (I)' = full_data_int_md, 
+                  ' S/ Alasca (II)' = excl_ak_int_md,
+                  'Amostra completa (III)' = full_data_ep_md,
+                  ' S/ Alasca (IV)' = excl_ak_ep_md
+                  ), 
+             gof_omit='AIC|BIC', 
+             title = 'Modelos construídos',
+             stars=T, 
+             add_rows = data.frame('AIC', 
+                                   extractAIC(full_data_int_md)[2], 
+                                   extractAIC(excl_ak_int_md)[2],
+                                   extractAIC(full_data_ep_md)[2], 
+                                   extractAIC(excl_ak_ep_md)[2]
+                                   ),
+             output = 'kableExtra'
+             ) %>% 
+  kable_styling(latex_options = "HOLD_position") %>% 
+  add_header_above(c(" " = 1, "Efeitos principais + interação" = 2, "Apenas Efeitos principais" = 2))
+
+  
+```
+
+
+
+O modelo com interação e sem a obervação do Alasca (II) tem as estimativas muito similares ao modelo I, porém os parâmetros de interação deixaram de ser significantes à 5%. Junto com isso, o tamanho da estimativa to coeficiente *lmiles* diminuiu bastante e ficou insignificante à 5%. Conjuntamente com esse apontamento, é possível ver que nos modelos sem a interação, a exclusão da observação do Alasca não troca os sinais das estimativas, não muda bruscamente suas magnitudes ou altera a significância dos parâmetros. Assim, concluímos que a observação do Alasca, por suas características relativamente atípicas, induz a aparição da interação entre *lmiles* e *tax*. Nesse sentido, o modelo preferível é o modelo apenas com os efeitos principais. 
+
+Vamos realizar uma curta análise de diagnóstico para checar se o modelo apenas com os efeitos principais é apropriado.
+
+
+
+```{r fig.height=5, fig.width=10}
+fit.model <- full_data_ep_md 
+title1 = ''
+title2 = ''
+set.seed(4155)
+source('../diag_resid_envel.R')
+title("Análise de resíduos para o modelo com efeitos principais",  line = -1, outer = TRUE)
+```
+
+Como podemos checar, o ajuste desse modelo é melhor, uma vez que todos os pontos estão dentro do envelope, dando indícios de que a normalidade dos resíduos é atendida. Além disso, inspecionando o gráfico de valor ajustado contra o resíduo studentzado, nenhum padrão na dispersão é observado indicando uma variância constante.
+
+
+
+## Ajuste por gamlss
+
+Por fim, de maneira ilustrativa, ajustamos o modelo de efeitos principais com o gamlss, usando a família normal.
+Os gráficos de análise de resíduos apresentados a seguir sugerem um bom ajuste do modelo. A dispersão de resíduos quantílicos contra os valores ajustados está relativamente uniforme no intervalo, sugerindo uma variância constante. O gráfico de probabilidades dos quantis do resíduo versus os da normal mostram que, tirando uma observação extrema a direita, os ponto se alinharam à reta y = x, indicando uma possível normalidade dos resíduos.
+
+
+```{r}
+ajuste = gamlss(fuel ~ dlic + lmiles + income + tax, family=NO(), data = mdata)
+summary(ajuste)
+```
+
+```{r}
+plot(ajuste, summaries=F)
+```
+
+A visualização do *worm plot* também indica um bom ajuste, uma vez que os resíduos não sobrepõe as bandas de confiança geradas.
+
+
+
+```{r}
+wp(ajuste)
+```
+
+
+
+# Exercício 7
+
+
+A base de dados *heart.txt* contém 100 observações de paciêntes que foram diagnosticados com doença arterial coronariana. As variáveis dessa base são:
+
+- HD: ausência de doença (0), evidência de doença (1)
+- Age: idade do paciente
+- FE: faixa etária do paciente
+
+Abaixo mostro as 5 primeiras linhas dessa base de dados.
+
+```{r dados, echo=F}
+heart = read.table('heart.txt', header=TRUE) %>% clean_names() %>% rename(idade = age)
+
+head(heart, 5) %>% 
+  kbl(booktabs = T, 
+      format = 'latex', 
+      align = 'c', 
+      centering = T
+      ) %>% 
+  kable_styling(full_width = F, 
+                position = 'center', latex_options = "HOLD_position")
+```
+
+## Análise descritiva
+
+Primeiro mostraremos dois conjutos de boxplots, o comum e o robusto para os grupos da variável resposta *hd* junto com as estimativas de densidade de da variável idade para cada um desses grupos.
+
+
+```{r graficos, fig.height=4, fig.width=11}
+par(mfrow = c(1, 3))
+boxplot(idade ~ hd, data = heart, main='comum')
+adjbox(idade ~ hd, data = heart, main='robusto')
+plot(density(heart[heart$hd == 1, 'idade']), col = 'black', main='Estimativas de densidade')
+lines(density(heart[heart$hd == 0, 'idade']), col = 'red')
+legend('topleft', inset = 0.02, legend=c("hd = 0","hd = 1"), col=c("red","black"), lty=c(1, 1))
+
+```
+
+Aguns pontos de discussão surgem da inspeção desses boxpots:
+
+- os pacientes que possuem evidências de doença (*hd* = 1) são  mais velhos em geral, possuindo um intervalo interquartil acima paciêntes que têm ausência de doença.
+
+- utilizando-se do boxplot comum, aparentemente não há paciêntes com idades extremas. Porém, tulizando o boxplot robusto, 3 pacientes que possuem evidências da doença atipicamente mais velhos, quando um paciênte dos que não possuem doença é atipicamente mais novo. 
+
+- parece existir uma certa tendência de assimetria à direita nas idades do grupo *hd* = 0 e assimetria à esquerda para o *hd* = 1.
+
+## Tabelas de contingência
+
+A tabela de contingência a seguir mostra as proporoções de eventos *hd* = 1 e *hd* = 0 para cada faixa etária presente nos dados.
+
+
+```{r tabela, echo=F}
+heart %>% count(fe, hd)  %>% 
+  mutate(hd = if_else(hd == 1, 'presente', 'ausente')) %>% 
+  spread(hd, n) %>% 
+  mutate(total = ausente + presente) %>%  
+  mutate(ausente = glue::glue('{t}  ({prop})', t = ausente, prop = scales::percent(ausente/total, accuracy = 2))) %>% 
+  mutate(presente = glue::glue('{t}  ({prop})', t = presente, prop = scales::percent(presente/total, accuracy = 2))) %>% 
+  rename(`faixa etária` = fe, `hd = 0` = ausente, `hd = 1` = presente) %>% 
+  kbl(booktabs = T, 
+      format = 'latex', 
+      align = 'c', 
+      centering = T, 
+      caption = 'Tabela de contingência para faixa etária e diagnóstico de doença arterial coronariana'
+      ) %>% 
+  kable_styling(full_width = F, 
+                position = 'center', latex_options = "HOLD_position") 
+
+  
+```
+
+É possível observar a tendência crescente de da proporção de evidência de doença coronariana. O gráfico abaixo confirma essa afirmação de maneira mais visual.
+
+
+```{r grafico, echo=F, fig.height=3, fig.width=6}
+
+heart  %>% 
+  group_by(fe) %>% 
+  summarise(prop = mean(hd), 
+            idade = mean(idade),
+            .groups = 'drop'
+            ) %>%
+  ungroup() %>% 
+  ggplot(aes(idade, prop)) + 
+  geom_point() + 
+  labs(title = 'Proporção pacientes com evidência de doença coronariana por faixa etária', 
+       x = 'Idade média no grupo de faixa etária', 
+       y = 'Prop (hd = 1)') + 
+  theme_minimal() 
+```
+
+## Ajuste de modelo logístico
+
+Ajustaremos um modelo logístico com a ligação canônica $log(\frac{\mu}{1 - \mu})$.
+
+```{r modelo}
+md <- glm(hd ~ idade, data = heart, family = binomial(link = 'logit'))
+```
+
+```{r echo=F}
+modelsummary(list('Modelo proposto' = md), 
+             stars=T, 
+             output = 'kableExtra', 
+             exponentiate=TRUE, 
+             notes = c('Nota: Coeficientes exponenciados')
+             ) %>% 
+  kable_styling(latex_options = "HOLD_position")
+```
+
+O modelo tem algumas características em concordância com a análise descritiva já apresentada. 
+O intercepto não têm uma interpretação satisfatória. Poderia significar a estimativa do modelo quando a ideade = 0, mas não temos nenhuma observação com esse valor de idade. Tampouco me parece razoável pensar em doença cardícas como as estudadas num recém nascido. Poderíamos deslocar a variável idade com relação ao mínimo da amostra, e então o intercepto ficaria com uma interpretação mais apropriada. Outro ponto importante é o sinal da variável *idade* que está no mesmo sentido que o encontrado durante a análise descritiva.
+
+
+## Diagnósticos de modelo 
+
+Observando o gráfico de probabilidades do resíduo contra a distribuição normal padrão, com uma ênfase para as bandas empíricas calculadas, vemos que não há um desvio do resíduos para fora dessa banda, indicando um ajuste satisfatório.
+
+
+```{r fig.height=4.5, fig.width=5.5}
+fit.model <- md
+title <- 'Gráfico de envelope para os resíduos do ajuste'
+source('envel_gamma.R')
+```
+
+Para avaliação da distância de Cook, vamos compará-las com um fator k do erro padrão das distâncias calculadas. No nosso caso, escolhemos k = 4, de tal forma que se $D_i \geq 4\hat{ep}(D_i)$, a observação é considerafa influênte. Esse fator de comparação está apontado em linha pontilhada no gráfico abaixo.  
+
+
+```{r}
+
+title = 'Distância de Cook para o modelo ajustado'
+source('diag_cook_bino.R')
+
+```
+Como podemos ver, duas observações pode ser consideradas influentes. Iremos-re ajustar o modelo retirando essas observações e ver se a nossa inferência com relação aos parâmetros muda de maneira brusca (traca de sinais ou mudança forte na magnitude da estimativa. As duas observações, são os indivíduos 5, e 97, e abaixo podemos checar seus valores da variável resposta e explicativa:
+
+```{r}
+heart[di > mean(di) + 4*sd(di),]
+```
+O resultado dos modelos reajustados é promissor, pois não altera as estimativas, e nem os níveis de significância dos testes de Wald. Todos os parâmetros continuam sendo significativos à 1%.
+
+```{r modelo_re_ajuste}
+md_all_samples <- glm(hd ~ idade, data = heart, family = binomial(link = 'logit'))
+md_drop <- glm(hd ~ idade, data = heart[di < mean(di) + 4*sd(di),],
+               family = binomial(link = 'logit'))
+```
+
+```{r echo=F}
+modelsummary(list('todas as observações' = md_all_samples, 'excl. [5, 97]' = md_drop), 
+             stars=T, 
+             output = 'kableExtra', 
+             exponentiate=F, 
+             notes = c('Nota: Coeficientes exponenciados')
+             ) %>% 
+  kable_styling(latex_options = "HOLD_position")
+```
+
+
+
+## Interpretação de coeficientes bandas de confiança e estimativas intervalares
+
+
+
+Como já mencionado anteriormente, a interpretação do intercepto para o modelo ajustado é problemática, uma vez que não um paciente com zero anos de idade não é razoável. Todavia uma interpretação para o coeficiente da variável idade é possível:
+
+- interpretação da coeficiênte da idade: cada 1 ano a mais de idade, é esperado que sua chance de ter doença cardíaca em 11%, como podemos checar na comparação abaixo, conforme a tabelas de coeficientes do modelo que contém os parâmetros exponenciados abaixo.
+
+
+As estimativas intervalares de 95% para ambos os parâmetros estão na tabela a seguir:
+
+
+```{r}
+se <- sqrt(diag(vcov(md)))
+
+data.frame(coef = coef(md),
+           ep = se, 
+           inferior = coef(md) - 1.96*se, 
+           superior = coef(md) + 1.96*se, 
+           exp_coef = exp(coef(md)),
+           exp_inferior = exp(coef(md) - 1.96*se),
+           exp_superior = exp(coef(md) + 1.96*se)
+           ) %>% 
+  kbl(booktabs = T, format = 'latex') %>% 
+  kable_styling(full_width = F)
+```
+
+E por fim, apresentamos as bandas de confiança para a probabilidade ajusta pelo modelo de ser diagnosticado com a doença cardíaca ao longo da variável explicativa *idade*.
+
+
+```{r}
+
+  X=model.matrix(md)
+  w = md$weight
+  W = diag(w)
+  A = t(X)%*%W%*%X
+  A = solve(A)
+  z=seq(20, 70, 5)
+  vz = cbind(1,z)
+  erro = vz%*%A%*%t(vz)
+  erro = diag(erro)
+  erro = 1.96*sqrt(erro)
+  etaz = predict(md, data.frame(idade = z))
+  eta1 = etaz + erro
+  eta2 = etaz - erro
+  freqz= 1 - exp(-exp(etaz))
+  freq1= 1 - exp(-exp(eta1))
+  freq2= 1 - exp(-exp(eta2))
+  plot(z, freqz, type="n", ylim=c(0,1), xlab="idade", 
+       ylab="Probabilidade Ajustada", main='Banda de confiança para idade',
+  cex=2, cex.axis=1.3, cex.lab=1.3)
+  lines(z, freqz, lty=2,lwd=2)
+  lines(z, freq1,lwd=2)
+  lines(z, freq2,lwd=2)
+
+```
+
+## Curva ROC e capacidade discriminativa
+
+
+A curva ROC, apresentada abaixo, mostra a troca entra a taxa de verdadeiros positivos e a taxa de falsos positivos do modelo ajustado.
+A área sob essa curva nos da uma boa noção da discriminação que o modelo consegue fazer. Além disso pode nos ajudar a encontrar um ponto de corte da probabilidade ajustada pelo modelo que poderia ser utilizada para atribuir uma classificação à observação.
+
+
+Na curva mostramos o ponto que minimiza a distância entre o caso de perfeita discriminação, ou seja com 100% dos casos classificados como positivos de maneira correta e nenhum caso errado entre aqueles que fora classificados como positivo.
+
+```{r}
+pred = prediction(fitted(md), heart$hd)
+perf = performance(pred, "tpr", "fpr")
+x <- perf@x.values[[1]]
+y <- perf@y.values[[1]]
+
+dist <- sqrt((0 - x )^2 + (1 - y )^2) 
+
+which_min = min(dist) == dist
+
+min_dist_cut <- perf@alpha.values[[1]][which_min]
+plot(perf, print.cutoffs.at=min_dist_cut, main='Curva ROC e o ponto de corte escolhido')
+abline(0,1,lty=2)
+abline(0,1,lty=2)
+```
+Para esse ponto de corte, iremos mostrar a matriz de confusão associada à ele:
+
+```{r echo = F}
+heart %>% mutate(pred = if_else( fitted(md) > min_dist_cut, 'prev. modelo = 1', 'prev. modelo = 0')) %>% 
+  count(hd, pred) %>% 
+  rename(`Doença cardíaca` = hd) %>% 
+  spread(pred, n) %>% 
+  janitor::adorn_totals(where = c('row', 'col')) %>% as.data.frame() %>% 
+  kbl(booktabs = T, format = 'latex') %>% 
+  kable_styling(full_width = F)
+```
+
+Nessa matriz de confusão, essas são algumas métricas de interesse:
+
+- Acurácia: $\frac{41 + 32}{100}$ = `r (41 + 42)/100`
+- Sensibilidade (taxa de verdadeiros positivos): $\frac{32}{48}$ = `r (32)/48`
+- Especificidade: $\frac{41}{52}$ = `r (41)/52`
+
+## Ajuste por gamlss
+
+
+```{r eval=FALSE, include=T}
+ajuste = gamlss(cbind(hd, 1-hd) ~ idade, family=BI, data = heart)
+```
+Como podemos comparar, o ajuste do GAMLS resulta em estimativas muito próximas à aquelas geradas pelo `glm`.
+
+
+```{r}
+summary(ajuste)
+```
+
+Os gráficos de resíduos também indicam um bom ajuste, uma vez que não há padrões no gráfico de resíduos quantílicos X valores ajustados, nem um distanciamento da normalidade, como podemos ver no gráfico de probilidades normal dos mesmos resíduos.
+
+```{r message=FALSE, warning=FALSE}
+plot(ajuste, summaries=F)
+```
+
+
+Por fim, no gráfico de *worm plot*, como não há sobreposição com as regiões circulares superiores e inferiores do desvio, temos indicativos de um bom ajuste.
+
+```{r}
+wp(ajuste)
+```
+
+
+
+
+
 

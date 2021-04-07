@@ -1,0 +1,19 @@
+---
+title: "MAE5763 - Modelos Lineares Generalizados - Resolução da Lista 1"
+author: "Guilherme Marthe - 8661962"
+date: "9/21/2020"
+output:
+  bookdown::pdf_document2:
+    df_print: kable
+    toc: false
+header-includes:
+    - \usepackage{caption}
+    - \usepackage{amsmath}
+fontsize: 11pt
+geometry: margin=1.5cm
+---
+
+
+\begin{align*}
+LL(y_i; \hat\alpha) &= \sum^{n}_{i=1}{y_i \hat\alpha - y_i\log(1 + e^{\hat\alpha})} 
+\end{align*}
